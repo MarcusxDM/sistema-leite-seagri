@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from relatorios import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index, name='index'),
+    path('home/', views.login, name='home'),
+    path('logout', views.logout, name='logout'),
+    path('inserir-transacao-leite/', views.insert_transactions_coop_menu, name='inserir-transacao-leite'),
 ]
