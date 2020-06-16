@@ -50,32 +50,72 @@
 			</div>
 		  </nav>
 		<div class="container">
-			<form>
-				<div class="form-group">
-					<i class="fas fa-search" aria-hidden="true"></i>
-						<input class="form-control form-control-sm ml-3 w-75" type="text" placeholder="Search"
-							aria-label="Search">
-				  </div>
-				<div class="form-group">
-				  <label for="exampleFormControlInput1">Email address</label>
-				  <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-				</div>
+			
+
+			{% block footer %}
+			<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+
+			{{ form.media }}
+
+			<script>
+			(function($) {
+				$('#add-form').click(function() {
+					var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+					var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+					newTable.find(':input').each(function() {
+						for (attr of ['name', 'id'])
+							$(this).attr(
+								attr,
+								$(this).attr(attr).replace('__prefix__', index)
+							)
+					})
+					newTable.insertBefore($(this))
+					$('#id_inline_test_models-TOTAL_FORMS').val(
+						parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
+					)
+					newTable.slideDown()
+				})
+			})($)
+			</script>
+			{% endblock %}
+			<form action="{% url 'save-transacao' %}" method="post">
+				{% csrf_token %}
+				<div class="form-group ">
+					<label for="exampleFormControlSelect1">DAP | Produtor</label>
+					{{form.beneficiario}}
+					</div>
+
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Cooperativa</label>
-				  <select class="form-control" id="exampleFormControlSelect1">
+				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1">
 					{% for coop in coop_list %}
-					<option>{{coop.nome}}</option>
+					<option value={{coop.id}}>{{coop.nome}}</option>
 					{% endfor %}
 				  </select>
 				</div>
+
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Litros</label>
+					<input name=litros type=number step=0.5 /><br />
+				  </div>
+
+				  <div class="form-group">
+					<label for="exampleFormControlSelect1">Data</label>
+					<input name=data type=date /> <br />
+				  </div>
+
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Tipo de Leite</label>
-					<select class="form-control" id="exampleFormControlSelect1">
+					<select name=tipo class="form-control" id="exampleFormControlSelect3">
 					  <option>VACA</option>
 					  <option>CABRA</option>
 					</select>
 				  </div>
-				
+				  <div class="container-login100-form-btn">
+					<button class="login100-form-btn">
+						Login
+					</button>
+				</div>
 			  </form>
 		</div>
 	</div>
