@@ -1,23 +1,17 @@
 import calendar
 from datetime import datetime, timedelta
 
-if __name__ == "__main__":
-    calendar.setfirstweekday(6)
-    cal = calendar.monthcalendar(datetime.strptime("2020-05-31", '%Y-%m-%d').date().year, datetime.strptime("2020-05-31", '%Y-%m-%d').date().month)
-    cal2 = calendar.Calendar(6).monthdatescalendar(datetime.strptime("2020-05-31", '%Y-%m-%d').date().year, datetime.strptime("2020-05-31", '%Y-%m-%d').date().month)
-    week_list = (cal)
-
-    date_time           = datetime.strptime("2020-05-31", '%Y-%m-%d').date()
-    first_day_month     = date_time.replace(day=1)
-    last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
-    half_day_month      = first_day_month + timedelta(days=14)
-    afterhalf_day_month = half_day_month + timedelta(days=1)
-    # print(first_day_month, half_day_month, afterhalf_day_month, last_day_month)
-    
-    if (date_time >= first_day_month and date_time <= half_day_month):
-        print([first_day_month, half_day_month])
+def semestre_list(date_time):
+    if date_time >= datetime(date_time.year, 1, 1).date() and date_time < datetime(date_time.year, 7, 1).date():
+        first_day_semestre = datetime(date_time.year, 1, 1).date()
+        last_day_semestre  = (first_day_semestre.replace(month=7) - timedelta(days=1))
     else:
-        print([afterhalf_day_month, last_day_month])
+        first_day_semestre = datetime(date_time.year, 7, 1).date()
+        last_day_semestre  = (first_day_semestre.replace(month=1, year=date_time.year+1) - timedelta(days=1))
+    return[first_day_semestre, last_day_semestre]
 
-    # if datetime.strptime("2020-05-31", '%Y-%m-%d').date() in week_list[-1]:
-    #     print("caralho")
+if __name__ == "__main__":
+
+    date_time           = datetime.strptime("2020-12-30", '%Y-%m-%d').date()
+    print(semestre_list(date_time))
+

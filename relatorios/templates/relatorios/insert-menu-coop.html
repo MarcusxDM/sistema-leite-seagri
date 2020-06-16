@@ -96,12 +96,12 @@
 
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Litros</label>
-					<input name=litros type=number step=0.5 /><br />
+					<input name=litros type=number step=0.1 value=1.0 /><br />
 				  </div>
 
 				  <div class="form-group">
 					<label for="exampleFormControlSelect1">Data</label>
-					<input name=data type=date /> <br />
+					<input name=data type=date value="{{today}}" min="{{today30}}" max="{{today}}" /> <br />
 				  </div>
 
 				<div class="form-group">
