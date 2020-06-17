@@ -40,7 +40,7 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			  <ul class="navbar-nav mr-auto">
 				<li class="nav-item active">
-				  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
 			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
@@ -113,10 +113,20 @@
 				  </div>
 				  <div class="container-login100-form-btn">
 					<button class="login100-form-btn">
-						Login
+						Inserir
 					</button>
 				</div>
 			  </form>
+			  <div>
+				<b class="txt3" >
+					{% if request.session.insert_leite_error %}
+					<p style="color: red;">{{ request.session.insert_leite_error }}</p>
+					{% endif %}
+					{% if request.session.insert_leite_success %}
+					<p style="color: green;">{{ request.session.insert_leite_success }}</p>
+					{% endif %}
+				</b>
+			</div>
 		</div>
 	</div>
 	

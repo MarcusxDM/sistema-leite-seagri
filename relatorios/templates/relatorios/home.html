@@ -40,7 +40,7 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			  <ul class="navbar-nav mr-auto">
 				<li class="nav-item active">
-				  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
 			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
@@ -58,9 +58,9 @@
      						<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/leite.jpg" %}" />
   						</div>
 						<div class="card-body">
-						  <h5 class="card-title">Inserir Transações de Leite</h5>
-						  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-						  <a href="{% url 'inserir-transacao-leite' %}" class="btn btn-primary">Go somewhere</a>
+						  <h5 class="card-title">Inserir Transações de Leite - Produtores</h5>
+						  <p class="card-text"></p>
+						  <a href="{% url 'inserir-transacao-leite' %}" class="btn btn-primary">Entrar</a>
 						</div>
 					  </div>
 				</div>
@@ -71,9 +71,9 @@
 							<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/files2.jpg" %}" />
 						 </div>
 						<div class="card-body">
-						  <h5 class="card-title">Visualizar Transações de Leite</h5>
-						  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-						  <a href="#" class="btn btn-primary">Go somewhere</a>
+						  <h5 class="card-title">Visualizar Transações de Leite - Produtores</h5>
+						  <p class="card-text"></p>
+						  <a href="{% url 'visualizar-transacao-leite' %}" class="btn btn-primary">Entrar</a>
 						</div>
 					  </div>
 				</div>

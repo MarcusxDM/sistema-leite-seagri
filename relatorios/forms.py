@@ -10,7 +10,7 @@ class TransacaoProdutor(forms.Form):
     litros       = forms.FloatField()
     #cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = forms.DateField()
-    beneficiario = forms.ModelChoiceField(queryset=Beneficiario.objects.all(), widget=autocomplete.ModelSelect2(url='beneficiario-autocomplete'))
+    beneficiario = forms.ModelChoiceField(queryset=Beneficiario.objects.all(), widget=autocomplete.ModelSelect2(url='beneficiario-autocomplete', attrs={'style' : 'width: 100%'}))
 
 class TransacaoForm(forms.ModelForm):
     class Meta:
