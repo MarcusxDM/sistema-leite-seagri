@@ -1,0 +1,16 @@
+.insert-form{
+    background-color: whitesmoke; 
+    border-radius: 12px;
+    height: 100%;
+}
+
+.container-login100{
+    background-image: url("login-back.png") !important;
+    background-size:     cover !important;                      /* <------ */
+    background-repeat:   no-repeat !important;
+    background-position: center center !important;  
+}
+
+.back-orange{
+    background-color: orange;
+}
