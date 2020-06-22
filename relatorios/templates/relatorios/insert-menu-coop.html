@@ -78,7 +78,7 @@
 			})($)
 			</script>
 			{% endblock %}
-			<form action="{% url 'save-transacao' %}" method="post">
+			<form action="{% url 'save-transacao' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
 				<div class="form-group ">
 					<label for="exampleFormControlSelect1">DAP | Produtor</label>

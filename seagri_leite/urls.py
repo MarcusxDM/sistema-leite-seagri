@@ -26,6 +26,7 @@ urlpatterns = [
     path('inserir-transacao-leite/', views.insert_transactions_coop_menu, name='inserir-transacao-leite'),
     path('save-transacao/', views.save_transacao, name='save-transacao'),
     path('beneficiario-autocomplete/', views.BenefiarioAutocomplete.as_view(), name='beneficiario-autocomplete'),
-    path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite')
+    path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
+    path('download-produtores/', views.download_transactions_produtores, name='download-produtores')
     
 ]

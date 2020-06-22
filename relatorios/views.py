@@ -7,6 +7,8 @@ from django.utils import timezone
 from datetime import date, datetime, timedelta
 import calendar
 import csv
+import pandas as pd
+import numpy as np
 
 def quinzena_list(date_time):
     first_day_month     = date_time.replace(day=1)
@@ -152,7 +154,10 @@ def insert_transactions_coop_menu(request):
     try:
         request.session['user_id']
         user = Usuario.objects.get(id=request.session['user_id'])
-        coop_list = list(Cooperativa.objects.filter(membro=user))
+        if user.admin:
+            coop_list = list(Cooperativa.objects.all())
+        else:
+            coop_list = list(Cooperativa.objects.filter(membro=user))
         form = TransacaoProdutor()
         today = datetime.now().date().strftime('%Y-%m-%d')
         today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
@@ -203,12 +208,39 @@ def download_transactions_produtores(request):
 
     output = []
     response = HttpResponse (content_type='text/csv')
-    writer = csv.writer(response)
-    query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
+    response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
+    writer = csv.writer(response, delimiter=";")
     #Header
     writer.writerow(['DAP', 'Enquadramento', 'Categoria', 'Nome', 'UF', 'Munícipio', 'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
-    for user in query_set:
-        output.append([user.first_name, user.last_name, user.get_full_name, user.profile.short_name])
-    #CSV Data
-    writer.writerows(output)
-    return response
+
+    # Grouping by Produtor
+    query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
+    if query_set:
+        df = pd.DataFrame.from_records(query_set.values())
+        sf = df.groupby(['beneficiario_id', 'tipo'])['litros'].sum()
+        df = sf.to_frame().reset_index()
+
+        df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo'], fill_value=0)
+        df_dict = df.to_dict('index')
+
+        for key, value in df_dict.items():
+            produtor = Beneficiario.objects.get(pk=key)
+
+            try:
+                value['VACA']
+                litros_vaca = value['VACA']
+            except:
+                litros_vaca = 0
+            
+            try:
+                value['CABRA']
+                litros_cabra = value['CABRA']
+            except:
+                litros_cabra = 0
+                
+            output.append([produtor.dap, produtor.enquadramento, produtor.categoria, produtor.nome, produtor.UF, produtor.municipio, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
+        #CSV Data
+        writer.writerows(output)
+        return response
+    else:
+        return response
