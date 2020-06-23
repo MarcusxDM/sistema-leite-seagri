@@ -80,7 +80,7 @@
 			</script>
 			{% endblock %}
 			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
-			<form action="{% url 'save-transacao' %}" method="post" style="margin-top: 20vh;">
+			<form action="{% url 'save-transacao-ponto' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
 				<div class="form-group ">
 					<label for="exampleFormControlSelect1">DAP | Produtor</label>
@@ -88,10 +88,10 @@
 					</div>
 
 				<div class="form-group">
-				  <label for="exampleFormControlSelect1">Cooperativa</label>
+				  <label for="exampleFormControlSelect1">Ponto</label>
 				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1">
-					{% for coop in coop_list %}
-					<option value={{coop.id}}>{{coop.nome}}</option>
+					{% for ponto in ponto_list %}
+					<option value={{ponto.id}}>{{ponto.nome}}</option>
 					{% endfor %}
 				  </select>
 				</div>
@@ -122,11 +122,11 @@
 			</div>
 			  <div>
 				<b class="txt3" >
-					{% if request.session.insert_leite_final_error %}
-					<p style="color: red;">{{ request.session.insert_leite_final_error }}</p>
+					{% if request.session.insert_leite_error %}
+					<p style="color: red;">{{ request.session.insert_leite_error }}</p>
 					{% endif %}
-					{% if request.session.insert_leite_final_success %}
-					<p style="color: green;">{{ request.session.insert_leite_final_success }}</p>
+					{% if request.session.insert_leite_success %}
+					<p style="color: green;">{{ request.session.insert_leite_success }}</p>
 					{% endif %}
 				</b>
 			</div>

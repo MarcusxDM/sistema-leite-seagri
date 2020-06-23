@@ -1,14 +1,47 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal
 from dal import autocomplete
-from .forms import TransacaoProdutor
+from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
 from datetime import date, datetime, timedelta
 import calendar
 import csv
 import pandas as pd
 import numpy as np
+
+class BenefiarioAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # validar data_validade__gt=date.today()
+
+        qs = Beneficiario.objects.filter()
+
+        if self.q:
+            qs = qs.filter(dap__istartswith=self.q)
+
+        return qs
+
+class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # validar data_validade__gt=date.today()
+
+        qs = BeneficiarioFinal.objects.filter()
+
+        if self.q:
+            qs = qs.filter(nis__istartswith=self.q)
+
+        return qs
+
+def semana_list(date_time):
+    first_day_month     = date_time.replace(day=1)
+    last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
+    half_day_month      = first_day_month + timedelta(days=14)
+    afterhalf_day_month = half_day_month + timedelta(days=1)
+    
+    if (date_time >= first_day_month and date_time <= half_day_month):
+        return([first_day_month, half_day_month])
+    else:
+        return([afterhalf_day_month, last_day_month])
 
 def quinzena_list(date_time):
     first_day_month     = date_time.replace(day=1)
@@ -29,6 +62,21 @@ def semestre_list(date_time):
         first_day_semestre = datetime(date_time.year, 7, 1).date()
         last_day_semestre  = (first_day_semestre.replace(month=1, year=date_time.year+1) - timedelta(days=1))
     return[first_day_semestre, last_day_semestre]
+
+def validate_quinzena(request, date_transacao, beneficiario_final):
+    limit_semanal = 4
+
+    week = quinzena_list(date_transacao)
+    first_quinzena_day = week[0]
+    last_quinzena_day = week[-1]
+
+    produtor_transacoes_quinzena = Transacao.objects.filter(beneficiario=produtor, data__gte=first_quinzena_day, data__lte=last_quinzena_day, tipo=request.POST['tipo'])
+    
+    total_litros_quinzena = 0.0
+    for trans in produtor_transacoes_quinzena:
+        total_litros_quinzena = trans.litros + total_litros_quinzena
+    
+    litros_disponivel_quin = limit_quinzenal - total_litros_quinzena
 
 def validate_quinzena(request, date_transacao, produtor):
     if request.POST['tipo'] == "VACA":        
@@ -106,17 +154,6 @@ def transacao_succes(request):
         return redirect(reverse('inserir-transacao-leite'))
 
 
-class BenefiarioAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # validar data_validade__gt=date.today()
-
-        qs = Beneficiario.objects.filter()
-
-        if self.q:
-            qs = qs.filter(dap__istartswith=self.q)
-
-        return qs
-
 def index(request):
     request.session.flush()
     return render(request, 'relatorios/index.html', {})
@@ -169,6 +206,25 @@ def insert_transactions_coop_menu(request):
     except:
         return redirect(reverse('index'))
 
+def insert_transactions_ponto_menu(request):
+    try:
+        request.session['user_id']
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin:
+            ponto_list = list(Ponto.objects.all())
+        else:
+            ponto_list = list(Ponto.objects.filter(membro=user))
+        form = TransacaoBeneficiarioFinal()
+        today = datetime.now().date().strftime('%Y-%m-%d')
+        today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+        return render(request, 'relatorios/insert-menu-ponto.html', {'user'      : user,
+                                                                    'ponto_list' : ponto_list, 
+                                                                    'form'      : form, 
+                                                                    'today'     : today, 
+                                                                    'today30'   : today30})
+    except:
+        return redirect(reverse('index'))
+
 def save_transacao(request):
     if request.method == "POST":
         request.session['insert_leite_error'] = ""
@@ -184,6 +240,19 @@ def save_transacao(request):
             print(request.session['insert_leite_error'])
     return redirect(reverse('inserir-transacao-leite'))
 
+def save_transacao_ponto(request):
+    if request.method == "POST":
+        request.session['insert_leite_final_error'] = ""
+        date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
+        beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
+        if validate_quinzena(request, date_transacao, beneficiario):
+            if validate_semestre(request, date_transacao, beneficiario):
+                transacao_succes(request)
+        else:
+            request.session['insert_leite_final_success'] = ''
+            print(request.session['insert_leite_final_error'])
+    return redirect(reverse('inserir-transacaofinal-leite'))
+
 def view_transactions_coop_menu(request):
     if request.session['user_id']:
         user = Usuario.objects.get(id=request.session['user_id'])
@@ -193,6 +262,19 @@ def view_transactions_coop_menu(request):
             coop_list = list(Cooperativa.objects.filter(membro=user))
         today = datetime.now().date().strftime('%Y-%m-%d')
         return render(request, 'relatorios/view-menu-coop.html', {'coop_list' : coop_list, 
+                                                                    'today'     : today})
+    else:
+        return redirect(reverse('index'))
+
+def view_transactions_ponto_menu(request):
+    if request.session['user_id']:
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin:
+            ponto_list = list(Ponto.objects.all())
+        else:
+            ponto_list = list(Ponto.objects.filter(membro=user))
+        today = datetime.now().date().strftime('%Y-%m-%d')
+        return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                     'today'     : today})
     else:
         return redirect(reverse('index'))
