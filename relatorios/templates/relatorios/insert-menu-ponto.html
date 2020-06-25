@@ -89,7 +89,7 @@
 
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Ponto</label>
-				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1">
+				  <select name=ponto class="form-control" id="exampleFormControlSelect1">
 					{% for ponto in ponto_list %}
 					<option value={{ponto.id}}>{{ponto.nome}}</option>
 					{% endfor %}
@@ -122,11 +122,11 @@
 			</div>
 			  <div>
 				<b class="txt3" >
-					{% if request.session.insert_leite_error %}
-					<p style="color: red;">{{ request.session.insert_leite_error }}</p>
+					{% if request.session.insert_leite_final_error %}
+					<p style="color: red;">{{ request.session.insert_leite_final_error }}</p>
 					{% endif %}
-					{% if request.session.insert_leite_success %}
-					<p style="color: green;">{{ request.session.insert_leite_success }}</p>
+					{% if request.session.insert_leite_final_success %}
+					<p style="color: green;">{{ request.session.insert_leite_final_success }}</p>
 					{% endif %}
 				</b>
 			</div>

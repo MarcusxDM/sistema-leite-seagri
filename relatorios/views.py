@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -63,20 +63,39 @@ def semestre_list(date_time):
         last_day_semestre  = (first_day_semestre.replace(month=1, year=date_time.year+1) - timedelta(days=1))
     return[first_day_semestre, last_day_semestre]
 
-def validate_quinzena(request, date_transacao, beneficiario_final):
+def validate_semana(request, date_transacao, beneficiario_final):
     limit_semanal = 4
 
-    week = quinzena_list(date_transacao)
-    first_quinzena_day = week[0]
-    last_quinzena_day = week[-1]
+    n_dia = calendar.weekday(date_transacao.year, date_transacao.month, date_transacao.day)
+    
+    if n_dia is 0:
+        first_semana_day = date_transacao
+        last_semana_day  = date_transacao + timedelta(days=6)
 
-    produtor_transacoes_quinzena = Transacao.objects.filter(beneficiario=produtor, data__gte=first_quinzena_day, data__lte=last_quinzena_day, tipo=request.POST['tipo'])
+    elif n_dia is 6:
+        first_semana_day = date_transacao - timedelta(days=6)
+        last_semana_day = date_transacao
+    else:
+        first_semana_day = date_transacao - timedelta(days=n_dia)
+        last_semana_day = date_transacao + timedelta(days=(6 - n_dia))
+
+    consumidor_transacoes_semana = TransacaoFinal.objects.filter(beneficiario=beneficiario_final, data__gte=first_semana_day, data__lte=last_semana_day)
     
-    total_litros_quinzena = 0.0
-    for trans in produtor_transacoes_quinzena:
-        total_litros_quinzena = trans.litros + total_litros_quinzena
+    total_litros_semana = 0.0
+    for trans in consumidor_transacoes_semana:
+        total_litros_semana = trans.litros + total_litros_semana
     
-    litros_disponivel_quin = limit_quinzenal - total_litros_quinzena
+    litros_disponivel_sem = limit_semanal - total_litros_semana
+
+    if (litros_disponivel_sem > 0) and (float(request.POST['litros']) <= litros_disponivel_sem):
+        print("COTA QUINZENAL SEMANAL:", litros_disponivel_sem, " Litros")
+        return True
+        
+    else:
+        request.session['insert_leite_final_success'] = ''
+        request.session['insert_leite_final_error'] = ''.join(["COTA SEMANAL ATINGIDA: ", str(litros_disponivel_sem), " Litros disponíveis para ", str(beneficiario_final)])
+        print(request.session['insert_leite_final_error'])
+        return False
 
 def validate_quinzena(request, date_transacao, produtor):
     if request.POST['tipo'] == "VACA":        
@@ -153,6 +172,24 @@ def transacao_succes(request):
         print(request.session['insert_leite_error'])
         return redirect(reverse('inserir-transacao-leite'))
 
+def transacao_final_succes(request):
+    transacao              = TransacaoFinal()
+    transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
+    transacao.litros       = float(request.POST['litros'])
+    transacao.tipo         = request.POST['tipo']
+    transacao.ponto        = Ponto.objects.get(pk=request.POST['ponto'])
+    transacao.data         = request.POST['data']
+    try:
+        transacao.save()
+        request.session['insert_leite_final_error'] = ''
+        request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE DE ", str(transacao.tipo), " ENTREGUES para ", str(transacao.beneficiario)])
+        print(transacao.litros, " LITROS DE LEITE DE ", transacao.tipo, " ENTREGUES")
+        return redirect(reverse('inserir-transacaofinal-leite'))
+    except:
+        request.session['insert_leite_final_success'] = ''
+        request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
+        print(request.session['insert_leite_final_error'])
+        return redirect(reverse('inserir-transacaofinal-leite'))
 
 def index(request):
     request.session.flush()
@@ -245,9 +282,8 @@ def save_transacao_ponto(request):
         request.session['insert_leite_final_error'] = ""
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
         beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
-        if validate_quinzena(request, date_transacao, beneficiario):
-            if validate_semestre(request, date_transacao, beneficiario):
-                transacao_succes(request)
+        if validate_semana(request, date_transacao, beneficiario):
+            transacao_final_succes(request)
         else:
             request.session['insert_leite_final_success'] = ''
             print(request.session['insert_leite_final_error'])
