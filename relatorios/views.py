@@ -176,14 +176,13 @@ def transacao_final_succes(request):
     transacao              = TransacaoFinal()
     transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
     transacao.litros       = float(request.POST['litros'])
-    transacao.tipo         = request.POST['tipo']
     transacao.ponto        = Ponto.objects.get(pk=request.POST['ponto'])
     transacao.data         = request.POST['data']
     try:
         transacao.save()
         request.session['insert_leite_final_error'] = ''
-        request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE DE ", str(transacao.tipo), " ENTREGUES para ", str(transacao.beneficiario)])
-        print(transacao.litros, " LITROS DE LEITE DE ", transacao.tipo, " ENTREGUES")
+        request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES para ", str(transacao.beneficiario)])
+        print(transacao.litros, " LITROS DE LEITE ENTREGUES")
         return redirect(reverse('inserir-transacaofinal-leite'))
     except:
         request.session['insert_leite_final_success'] = ''
@@ -302,6 +301,7 @@ def view_transactions_coop_menu(request):
     else:
         return redirect(reverse('index'))
 
+
 def view_transactions_ponto_menu(request):
     if request.session['user_id']:
         user = Usuario.objects.get(id=request.session['user_id'])
@@ -357,6 +357,41 @@ def download_transactions_produtores(request):
                 litros_cabra = 0
                 
             output.append([produtor.dap, produtor.enquadramento, produtor.categoria, produtor.nome, produtor.UF, produtor.municipio, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
+        #CSV Data
+        writer.writerows(output)
+        return response
+    else:
+        return response
+
+def download_transactions_consumidores(request):
+    date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
+    date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
+
+    if date_inicio > date_fim:
+        d = date_inicio
+        date_inicio = date_fim
+        date_fim = date_inicio
+
+    output = []
+    response = HttpResponse (content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
+    writer = csv.writer(response, delimiter=";")
+    #Header
+    writer.writerow(['NIS', 'Nome', 'Código IBGE', 'Litros de Leite'])
+
+    # Grouping by Produtor
+    query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
+    if query_set:
+        df = pd.DataFrame.from_records(query_set.values())
+        sf = df.groupby(['beneficiario_id'])['litros'].sum()
+        df = sf.to_frame().reset_index()
+
+        df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
+        df_dict = df.to_dict('index')
+
+        for key, value in df_dict.items():
+            consumidor = BeneficiarioFinal.objects.get(pk=key)
+            output.append([consumidor.nis, consumidor.nome, consumidor.cod_ibge_munic_nasc, str(value['litros']).replace(".", ",")])
         #CSV Data
         writer.writerows(output)
         return response

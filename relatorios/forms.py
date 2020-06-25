@@ -18,10 +18,6 @@ class TransacaoForm(forms.ModelForm):
         fields = ['litros', 'tipo', 'data', 'beneficiario']
 
 class TransacaoBeneficiarioFinal(forms.Form):
-    tipo = forms.CharField(
-        max_length=10,
-        widget=forms.Select(choices=Leite.choices)
-    )
     litros       = forms.FloatField()
     #cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = forms.DateField()
@@ -30,4 +26,4 @@ class TransacaoBeneficiarioFinal(forms.Form):
 class TransacaoFinalForm(forms.ModelForm):
     class Meta:
         model = TransacaoFinal
-        fields = ['litros', 'tipo', 'data', 'beneficiario']
+        fields = ['litros', 'data', 'beneficiario']

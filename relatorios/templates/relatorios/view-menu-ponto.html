@@ -26,12 +26,11 @@
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/util.css" %} ">
 	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/main.css" %} ">
-	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/custom.css" %} ">
 <!--===============================================================================================-->
 </head>
 <body>
 	
-	<div class="limiter" style="min-height: 100%;">
+	<div class="limiter">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<a class="navbar-brand" href="#">Sistema Leite</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,49 +43,16 @@
 				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
 			  </ul>
-			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
+			  <form action="{% url 'logout' %}" method="post" class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
 				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>
 			  </form>
 			</div>
 		  </nav>
-		<div class="container ">
-			
-
-			{% block footer %}
-			<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
-
-			{{ form.media }}
-
-			<script>
-			(function($) {
-				$('#add-form').click(function() {
-					var index = $('#id_inline_test_models-TOTAL_FORMS').val()
-					var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
-					newTable.find(':input').each(function() {
-						for (attr of ['name', 'id'])
-							$(this).attr(
-								attr,
-								$(this).attr(attr).replace('__prefix__', index)
-							)
-					})
-					newTable.insertBefore($(this))
-					$('#id_inline_test_models-TOTAL_FORMS').val(
-						parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
-					)
-					newTable.slideDown()
-				})
-			})($)
-			</script>
-			{% endblock %}
-			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
-			<form action="{% url 'save-transacao-ponto' %}" method="post" style="margin-top: 20vh;">
+		<div class="container" >
+			<form action="{% url 'download-consumidores' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
-				<div class="form-group ">
-					<label for="exampleFormControlSelect1">NIS | Beneficiário</label>
-					{{form.beneficiario}}
-					</div>
-
+				
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Ponto</label>
 				  <select name=ponto class="form-control" id="exampleFormControlSelect1">
@@ -95,39 +61,25 @@
 					{% endfor %}
 				  </select>
 				</div>
+			
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data Inicio</label>
+					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
 
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Litros</label>
-					<input name=litros type=number step=0.1 value=1.0 /><br />
-				  </div>
+					<label for="exampleFormControlSelect1">Data Fim</label>
+					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
 
-				  <div class="form-group">
-					<label for="exampleFormControlSelect1">Data</label>
-					<input name=data type=date value="{{today}}" min="{{today30}}" max="{{today}}" /> <br />
-				  </div>
-
-				  <div class="container-login100-form-btn">
-					<button class="login100-form-btn">
-						Inserir
-					</button>
+				<div class="container-login100-form-btn">
+				<button class="login100-form-btn">
+					Baixar Relatório
+				</button>
 				</div>
 			  </form>
-			</div>
-			  <div>
-				<b class="txt3" >
-					{% if request.session.insert_leite_final_error %}
-					<p style="color: red;">{{ request.session.insert_leite_final_error }}</p>
-					{% endif %}
-					{% if request.session.insert_leite_final_success %}
-					<p style="color: green;">{{ request.session.insert_leite_final_success }}</p>
-					{% endif %}
-				</b>
-			</div>
-		</div>
-	</div>
-	
 
-	<div id="dropDownSelect1"></div>
+		</div>
 	
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/jquery/jquery-3.2.1.min.js" %} "></script>

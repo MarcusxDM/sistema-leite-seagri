@@ -61,7 +61,6 @@ class Transacao(models.Model):
 
 class TransacaoFinal(models.Model):
     litros       = models.FloatField()
-    tipo         = models.CharField(max_length=10, choices=Leite.choices, default=Leite.VACA)
     ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(BeneficiarioFinal, on_delete=models.CASCADE)

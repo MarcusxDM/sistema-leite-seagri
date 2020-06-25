@@ -28,8 +28,10 @@ urlpatterns = [
     path('save-transacao-ponto/', views.save_transacao_ponto, name='save-transacao-ponto'),
     path('beneficiario-autocomplete/', views.BenefiarioAutocomplete.as_view(), name='beneficiario-autocomplete'),
     path('beneficiario-final-autocomplete/', views.BenefiarioFinalAutocomplete.as_view(), name='beneficiario-final-autocomplete'),
-    path('visualizar-transacaofinal-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
+    path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
     path('inserir-transacaofinal-leite/', views.insert_transactions_ponto_menu, name='inserir-transacaofinal-leite'),
+    path('visualizar-transacaofinal-leite/', views.view_transactions_ponto_menu, name='visualizar-transacaofinal-leite'),
+    path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),
     path('download-produtores/', views.download_transactions_produtores, name='download-produtores')
     
 ]
