@@ -122,11 +122,11 @@
 			</div>
 			  <div>
 				<b class="txt3" >
-					{% if request.session.insert_leite_final_error %}
-					<p style="color: red;">{{ request.session.insert_leite_final_error }}</p>
+					{% if request.session.insert_leite_error %}
+					<p style="color: red;">{{ request.session.insert_leite_error }}</p>
 					{% endif %}
-					{% if request.session.insert_leite_final_success %}
-					<p style="color: green;">{{ request.session.insert_leite_final_success }}</p>
+					{% if request.session.insert_leite_success %}
+					<p style="color: green;">{{ request.session.insert_leite_success }}</p>
 					{% endif %}
 				</b>
 			</div>
