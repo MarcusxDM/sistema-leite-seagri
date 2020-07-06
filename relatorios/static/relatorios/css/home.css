@@ -1,0 +1,25 @@
+.container-login100{
+    background-image: url("../images/home.png") !important;
+    background-size:     cover !important;                      
+    background-repeat:   no-repeat !important;
+    background-position: center center !important;  
+}
+
+.btn-home{
+    background-color: #333333 !important;
+    border-radius: 27px !important;
+    border-color: white !important;
+}
+
+.btn-home:hover{
+    background-color: #57B846 !important;
+    border-radius: 27px !important;
+    border-color: white !important;
+}
+
+.back{
+    background-image: url("../images/home.png") !important;
+    background-size:     cover !important;                      /* <------ */
+    background-repeat:   no-repeat !important;
+    background-position: center center !important;  
+}

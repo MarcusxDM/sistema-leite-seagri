@@ -5,12 +5,20 @@
 }
 
 .container-login100{
-    background-image: url("login-back.png") !important;
+    background-image: url("../images/login-back2.png") !important;
     background-size:     cover !important;                      /* <------ */
     background-repeat:   no-repeat !important;
     background-position: center center !important;  
 }
 
+
 .back-orange{
     background-color: orange;
+}
+
+.back{
+    background-image: url("../images/home.png") !important;
+    background-size:     cover !important;                      /* <------ */
+    background-repeat:   no-repeat !important;
+    background-position: center center !important;  
 }
