@@ -126,4 +126,4 @@ dmypy.json
 
 # custom
 backup/
-/seagri_leite/settings.py
+./seagri_leite/settings.py
