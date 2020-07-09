@@ -87,7 +87,7 @@ def validate_semana(request, date_transacao, beneficiario_final):
     
     litros_disponivel_sem = limit_semanal - total_litros_semana
 
-    if (litros_disponivel_sem > 0) and (float(request.POST['litros']) <= litros_disponivel_sem):
+    if (litros_disponivel_sem > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_sem):
         print("COTA QUINZENAL SEMANAL:", litros_disponivel_sem, " Litros")
         return True
         
@@ -115,7 +115,7 @@ def validate_quinzena(request, date_transacao, produtor):
     
     litros_disponivel_quin = limit_quinzenal - total_litros_quinzena
 
-    if (litros_disponivel_quin > 0) and (float(request.POST['litros']) <= litros_disponivel_quin):
+    if (litros_disponivel_quin > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_quin):
         print("COTA QUINZENAL LIBERADA:", litros_disponivel_quin, " Litros")
         return True
         
@@ -143,7 +143,7 @@ def validate_semestre(request, date_transacao, produtor):
     
     litros_disponivel_semestre = limit_semestral - total_litros_semestre
 
-    if (litros_disponivel_semestre > 0) and (float(request.POST['litros']) <= litros_disponivel_semestre):
+    if (litros_disponivel_semestre > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_semestre):
         print("COTA SEMESTRAL LIBERADA:", litros_disponivel_semestre, " Litros")
         return True
         
@@ -156,7 +156,7 @@ def validate_semestre(request, date_transacao, produtor):
 def transacao_succes(request):
     transacao = Transacao()
     transacao.beneficiario = Beneficiario.objects.get(pk=request.POST['beneficiario'])
-    transacao.litros       = float(request.POST['litros'])
+    transacao.litros       = abs(float(request.POST['litros']))
     transacao.tipo         = request.POST['tipo']
     transacao.cooperativa  = Cooperativa.objects.get(pk=request.POST['cooperativa'])
     transacao.data         = request.POST['data']
@@ -175,7 +175,7 @@ def transacao_succes(request):
 def transacao_final_succes(request):
     transacao              = TransacaoFinal()
     transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
-    transacao.litros       = float(request.POST['litros'])
+    transacao.litros       = abs(float(request.POST['litros']))
     transacao.ponto        = Ponto.objects.get(pk=request.POST['ponto'])
     transacao.data         = request.POST['data']
     try:

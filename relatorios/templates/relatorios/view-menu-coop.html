@@ -50,11 +50,11 @@
 			  </form>
 			</div>
 		  </nav>
-		<div class="row w-100" style="margin-top: 17%">
+		<div class="row w-100" style="margin-top: 13%">
 		<div class="col align-self-center">
-		<div class="container" style="background-color: whitesmoke;" >
+		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form action="{% url 'download-produtores' %}" method="post">
+			<form action="{% url 'download-produtores' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 				
 				<div class="form-group">

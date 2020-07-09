@@ -98,7 +98,7 @@
 
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Litros</label>
-					<input name=litros type=number step=0.1 value=1.0 /><br />
+					<input name=litros type=number step=0.1 value=1.0 min=1.0/><br />
 				  </div>
 
 				  <div class="form-group">
@@ -119,16 +119,16 @@
 					</button>
 				</div>
 			  </form>
+			  <b class="txt3">
+				{% if request.session.insert_leite_error %}
+				<p style="color: red; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_error }}</p>
+				{% endif %}
+				{% if request.session.insert_leite_success %}
+				<p style="color: green; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_success }}</p>
+				{% endif %}
+			</b>
 			</div>
 			  <div>
-				<b class="txt3" >
-					{% if request.session.insert_leite_error %}
-					<p style="color: red;">{{ request.session.insert_leite_error }}</p>
-					{% endif %}
-					{% if request.session.insert_leite_success %}
-					<p style="color: green;">{{ request.session.insert_leite_success }}</p>
-					{% endif %}
-				</b>
 			</div>
 		</div>
 	</div>

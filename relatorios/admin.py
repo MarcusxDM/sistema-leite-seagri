@@ -1,3 +1,9 @@
 from django.contrib import admin
+from relatorios.models import *
 
-# Register your models here.
+admin.site.register(Usuario)
+admin.site.register(Cooperativa)
+admin.site.register(Entidade)
+admin.site.register(Ponto)
+admin.site.register(Transacao)
+admin.site.register(TransacaoFinal)
