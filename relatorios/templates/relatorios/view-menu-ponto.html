@@ -59,7 +59,7 @@
 				
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Ponto</label>
-				  <select name=ponto class="form-control" id="exampleFormControlSelect1">
+				  <select name=ponto class="form-control" id="exampleFormControlSelect1" required>
 					{% for ponto in ponto_list %}
 					<option value={{ponto.id}}>{{ponto.nome}}</option>
 					{% endfor %}

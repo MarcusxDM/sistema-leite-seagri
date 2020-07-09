@@ -201,6 +201,10 @@ def login(request):
             if user.senha == request.POST['pass']:
                 request.session['login_error'] = ""
                 request.session['user_id'] = user.id
+                request.session['coop_bool'] = user.coop_bool
+                request.session['ponto_bool'] = user.ponto_bool
+                request.session['admin'] = user.admin
+                request.session['seagri_bool'] = user.seagri_bool
                 return redirect('home')
             else:
                 request.session['login_error'] = 'Senha incorreta'
@@ -225,39 +229,43 @@ def logout(request):
 
 def insert_transactions_coop_menu(request):
     try:
-        request.session['user_id']
-        user = Usuario.objects.get(id=request.session['user_id'])
-        if user.admin:
-            coop_list = list(Cooperativa.objects.all())
+        if(request.session['coop_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin:
+                coop_list = list(Cooperativa.objects.all())
+            else:
+                coop_list = list(Cooperativa.objects.filter(membro=user))
+            form = TransacaoProdutor()
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            return render(request, 'relatorios/insert-menu-coop.html', {'user'      : user,
+                                                                        'coop_list' : coop_list, 
+                                                                        'form'      : form, 
+                                                                        'today'     : today, 
+                                                                        'today30'   : today30})
         else:
-            coop_list = list(Cooperativa.objects.filter(membro=user))
-        form = TransacaoProdutor()
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
-        return render(request, 'relatorios/insert-menu-coop.html', {'user'      : user,
-                                                                    'coop_list' : coop_list, 
-                                                                    'form'      : form, 
-                                                                    'today'     : today, 
-                                                                    'today30'   : today30})
+            return redirect(reverse('index'))
     except:
         return redirect(reverse('index'))
 
 def insert_transactions_ponto_menu(request):
     try:
-        request.session['user_id']
-        user = Usuario.objects.get(id=request.session['user_id'])
-        if user.admin:
-            ponto_list = list(Ponto.objects.all())
+        if(request.session['ponto_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin:
+                ponto_list = list(Ponto.objects.all())
+            else:
+                ponto_list = list(Ponto.objects.filter(membro=user))
+            form = TransacaoBeneficiarioFinal()
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            return render(request, 'relatorios/insert-menu-ponto.html', {'user'      : user,
+                                                                        'ponto_list' : ponto_list, 
+                                                                        'form'      : form, 
+                                                                        'today'     : today, 
+                                                                        'today30'   : today30})
         else:
-            ponto_list = list(Ponto.objects.filter(membro=user))
-        form = TransacaoBeneficiarioFinal()
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
-        return render(request, 'relatorios/insert-menu-ponto.html', {'user'      : user,
-                                                                    'ponto_list' : ponto_list, 
-                                                                    'form'      : form, 
-                                                                    'today'     : today, 
-                                                                    'today30'   : today30})
+            return redirect(reverse('index'))
     except:
         return redirect(reverse('index'))
 
@@ -289,111 +297,121 @@ def save_transacao_ponto(request):
     return redirect(reverse('inserir-transacaofinal-leite'))
 
 def view_transactions_coop_menu(request):
-    if request.session['user_id']:
-        user = Usuario.objects.get(id=request.session['user_id'])
-        if user.admin:
-            coop_list = list(Cooperativa.objects.all())
+    try:
+        if(request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                coop_list = list(Cooperativa.objects.all())
+            else:
+                coop_list = list(Cooperativa.objects.filter(membro=user))
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/view-menu-coop.html', {'coop_list' : coop_list, 
+                                                                        'today'     : today})
         else:
-            coop_list = list(Cooperativa.objects.filter(membro=user))
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        return render(request, 'relatorios/view-menu-coop.html', {'coop_list' : coop_list, 
-                                                                    'today'     : today})
-    else:
+            return redirect(reverse('index'))
+    except:
         return redirect(reverse('index'))
 
 
 def view_transactions_ponto_menu(request):
-    if request.session['user_id']:
-        user = Usuario.objects.get(id=request.session['user_id'])
-        if user.admin:
-            ponto_list = list(Ponto.objects.all())
+    try:
+        if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                ponto_list = list(Ponto.objects.all())
+            else:
+                ponto_list = list(Ponto.objects.filter(membro=user))
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                        'today'     : today})
         else:
-            ponto_list = list(Ponto.objects.filter(membro=user))
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                    'today'     : today})
-    else:
+            return redirect(reverse('index'))
+    except:
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
-    date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
-    date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
+    if request.method == "POST":
+        date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
+        date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
 
-    if date_inicio > date_fim:
-        d = date_inicio
-        date_inicio = date_fim
-        date_fim = date_inicio
+        if date_inicio > date_fim:
+            d = date_inicio
+            date_inicio = date_fim
+            date_fim = date_inicio
 
-    output = []
-    response = HttpResponse (content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
-    writer = csv.writer(response, delimiter=";")
-    #Header
-    writer.writerow(['DAP', 'Enquadramento', 'Categoria', 'Nome', 'UF', 'Munícipio', 'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
+        output = []
+        response = HttpResponse (content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
+        writer = csv.writer(response, delimiter=";")
+        #Header
+        writer.writerow(['DAP', 'Enquadramento', 'Categoria', 'Nome', 'UF', 'Munícipio', 'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
 
-    # Grouping by Produtor
-    query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
-    if query_set:
-        df = pd.DataFrame.from_records(query_set.values())
-        sf = df.groupby(['beneficiario_id', 'tipo'])['litros'].sum()
-        df = sf.to_frame().reset_index()
+        # Grouping by Produtor
+        query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
+        if query_set:
+            df = pd.DataFrame.from_records(query_set.values())
+            sf = df.groupby(['beneficiario_id', 'tipo'])['litros'].sum()
+            df = sf.to_frame().reset_index()
 
-        df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo'], fill_value=0)
-        df_dict = df.to_dict('index')
+            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo'], fill_value=0)
+            df_dict = df.to_dict('index')
 
-        for key, value in df_dict.items():
-            produtor = Beneficiario.objects.get(pk=key)
+            for key, value in df_dict.items():
+                produtor = Beneficiario.objects.get(pk=key)
 
-            try:
-                value['VACA']
-                litros_vaca = value['VACA']
-            except:
-                litros_vaca = 0
-            
-            try:
-                value['CABRA']
-                litros_cabra = value['CABRA']
-            except:
-                litros_cabra = 0
+                try:
+                    value['VACA']
+                    litros_vaca = value['VACA']
+                except:
+                    litros_vaca = 0
                 
-            output.append([produtor.dap, produtor.enquadramento, produtor.categoria, produtor.nome, produtor.UF, produtor.municipio, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
-        #CSV Data
-        writer.writerows(output)
-        return response
-    else:
-        return response
+                try:
+                    value['CABRA']
+                    litros_cabra = value['CABRA']
+                except:
+                    litros_cabra = 0
+                    
+                output.append([produtor.dap, produtor.enquadramento, produtor.categoria, produtor.nome, produtor.UF, produtor.municipio, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
+            #CSV Data
+            writer.writerows(output)
+            return response
+        else:
+            return response
+    return redirect(reverse('visualizar-transacao-leite'))
 
 def download_transactions_consumidores(request):
-    date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
-    date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
+    if request.method == "POST":
+        date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
+        date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
 
-    if date_inicio > date_fim:
-        d = date_inicio
-        date_inicio = date_fim
-        date_fim = date_inicio
+        if date_inicio > date_fim:
+            d = date_inicio
+            date_inicio = date_fim
+            date_fim = date_inicio
 
-    output = []
-    response = HttpResponse (content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
-    writer = csv.writer(response, delimiter=";")
-    #Header
-    writer.writerow(['NIS', 'Nome', 'Código IBGE', 'Litros de Leite'])
+        output = []
+        response = HttpResponse (content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
+        writer = csv.writer(response, delimiter=";")
+        #Header
+        writer.writerow(['NIS', 'Nome', 'Código IBGE', 'Litros de Leite'])
 
-    # Grouping by Produtor
-    query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
-    if query_set:
-        df = pd.DataFrame.from_records(query_set.values())
-        sf = df.groupby(['beneficiario_id'])['litros'].sum()
-        df = sf.to_frame().reset_index()
+        # Grouping by Produtor
+        query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
+        if query_set:
+            df = pd.DataFrame.from_records(query_set.values())
+            sf = df.groupby(['beneficiario_id'])['litros'].sum()
+            df = sf.to_frame().reset_index()
 
-        df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
-        df_dict = df.to_dict('index')
+            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
+            df_dict = df.to_dict('index')
 
-        for key, value in df_dict.items():
-            consumidor = BeneficiarioFinal.objects.get(pk=key)
-            output.append([consumidor.nis, consumidor.nome, consumidor.cod_ibge_munic_nasc, str(value['litros']).replace(".", ",")])
-        #CSV Data
-        writer.writerows(output)
-        return response
-    else:
-        return response
+            for key, value in df_dict.items():
+                consumidor = BeneficiarioFinal.objects.get(pk=key)
+                output.append([consumidor.nis, consumidor.nome, consumidor.cod_ibge_munic_nasc, str(value['litros']).replace(".", ",")])
+            #CSV Data
+            writer.writerows(output)
+            return response
+        else:
+            return response
+    return redirect(reverse('visualizar-transacaofinal-leite'))

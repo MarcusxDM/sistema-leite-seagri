@@ -89,7 +89,7 @@
 
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Cooperativa</label>
-				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1">
+				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1" required>
 					{% for coop in coop_list %}
 					<option value={{coop.id}}>{{coop.nome}}</option>
 					{% endfor %}

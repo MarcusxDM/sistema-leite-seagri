@@ -41,7 +41,7 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			  <ul class="navbar-nav mr-auto">
 				<li class="nav-item active">
-				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+				  <a class="nav-link" href="{% url 'home' %}">Home<span class="sr-only">(current)</span></a>
 				</li>
 			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
@@ -51,8 +51,8 @@
 			</div>
 		  </nav>
 		<div class="container">
+			{% if request.session.admin %}
 			<div class="row">
-				
 				<div class="col mt-5">
 					<div class="card mx-auto" style="width: 18rem;">
 						<div class="embed-responsive embed-responsive-4by3">
@@ -78,7 +78,9 @@
 						</div>
 					  </div>
 				</div>
+
 				<div class="w-100"></div>
+
 				<div class="col mt-5">
 					<div class="card mx-auto" style="width: 18rem;">
 						<div class="embed-responsive embed-responsive-4by3">
@@ -91,7 +93,36 @@
 						</div>
 					  </div>
 				</div>
-
+				<div class="col mt-5">
+					<div class="card mx-auto" style="width: 18rem;">
+						<div class="embed-responsive embed-responsive-4by3">
+							<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/view2.png" %}" />
+						 </div>
+						<div class="card-body">
+						  <h5 class="card-title">Visualizar Transações de Leite - Consumidores</h5>
+						  <p class="card-text"></p>
+						  <a href="{% url 'visualizar-transacaofinal-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+						</div>
+					  </div>
+				</div>				
+			  </div>
+			  {% else %}
+			  <div class="row" style="margin-top: 19%;">
+				{% if request.session.ponto_bool %}
+				<div class="col mt-5">
+					<div class="card mx-auto" style="width: 18rem;">
+						<div class="embed-responsive embed-responsive-4by3">
+							<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/beneficiarios.png" %}" />
+						 </div>
+						<div class="card-body">
+						  <h5 class="card-title">Inserir Transações de Leite - Consumidores</h5>
+						  <p class="card-text"></p>
+						  <a href="{% url 'inserir-transacaofinal-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+						</div>
+					  </div>
+				</div>
+				{% endif %}
+				{% if request.session.ponto_bool or request.session.seagri_bool %}
 				<div class="col mt-5">
 					<div class="card mx-auto" style="width: 18rem;">
 						<div class="embed-responsive embed-responsive-4by3">
@@ -104,7 +135,37 @@
 						</div>
 					  </div>
 				</div>
-			  </div>
+				{% endif %}
+				{% if request.session.coop_bool %}
+					<div class="col mt-5">
+						<div class="card mx-auto" style="width: 18rem;">
+							<div class="embed-responsive embed-responsive-4by3">
+								 <img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/leite.jpg" %}" />
+							  </div>
+							<div class="card-body">
+							  <h5 class="card-title">Inserir Transações de Leite - Produtores</h5>
+							  <p class="card-text"></p>
+							  <a href="{% url 'inserir-transacao-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+							</div>
+						  </div>
+					</div>
+				{% endif %}
+				{% if request.session.coop_bool or request.session.seagri_bool %}
+					<div class="col mt-5">
+						<div class="card mx-auto" style="width: 18rem;">
+							<div class="embed-responsive embed-responsive-4by3">
+								<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/view1.png" %}" />
+							 </div>
+							<div class="card-body">
+							  <h5 class="card-title">Visualizar Transações de Leite - Produtores</h5>
+							  <p class="card-text"></p>
+							  <a href="{% url 'visualizar-transacao-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+							</div>
+						  </div>
+					</div>
+				{% endif %}
+			</div>
+			{% endif %}
 		</div>
 	</div>
 	

@@ -8,15 +8,23 @@ class Leite(models.TextChoices):
         CABRA = 2, "CABRA"
 
 class Usuario(models.Model):
-    nome  = models.CharField(max_length=50)
-    email = models.CharField(max_length=100, unique=True)
-    senha = models.CharField(max_length=100)
-    admin = models.BooleanField(default=False)
-    
+    nome        = models.CharField(max_length=50)
+    email       = models.CharField(max_length=100, unique=True)
+    senha       = models.CharField(max_length=100)
+    admin       = models.BooleanField(default=False)
+    coop_bool   = models.BooleanField(default=False)
+    ponto_bool  = models.BooleanField(default=False)
+    seagri_bool = models.BooleanField(default=False)
+
+    def __str__(self):
+            return self.nome
 
 class Cooperativa(models.Model):
     nome   = models.CharField(max_length=50)
     membro = models.ManyToManyField(Usuario)
+
+    def __str__(self):
+            return self.nome
 
 class Beneficiario(models.Model):
     dap           = models.CharField(max_length=25)
@@ -46,10 +54,16 @@ class BeneficiarioFinal(models.Model):
 class Entidade(models.Model):
     nome   = models.CharField(max_length=50)
 
+    def __str__(self):
+            return self.nome
+
 class Ponto(models.Model):
     nome     = models.CharField(max_length=50)
     membro   = models.ManyToManyField(Usuario)
     entidade = models.ForeignKey(Entidade, on_delete=models.CASCADE)
+
+    def __str__(self):
+            return self.nome
 
 class Transacao(models.Model):
     litros       = models.FloatField()
@@ -58,9 +72,15 @@ class Transacao(models.Model):
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE)
 
+    def __str__(self):
+            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo
+
 
 class TransacaoFinal(models.Model):
     litros       = models.FloatField()
     ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(BeneficiarioFinal, on_delete=models.CASCADE)
+
+    def __str__(self):
+            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros)
