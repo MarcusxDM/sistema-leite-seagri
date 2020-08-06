@@ -14,10 +14,10 @@ class BenefiarioAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # validar data_validade__gt=date.today()
 
-        qs = Beneficiario.objects.filter()
+        # qs = Beneficiario.objects.filter()
 
-        if self.q:
-            qs = qs.filter(dap__istartswith=self.q)
+        # if self.q:
+        qs = Beneficiario.objects.filter(dap=self.q)
 
         return qs
 
@@ -25,10 +25,10 @@ class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # validar data_validade__gt=date.today()
 
-        qs = BeneficiarioFinal.objects.filter()
+        # qs = BeneficiarioFinal.objects.filter()
 
-        if self.q:
-            qs = qs.filter(nis__istartswith=self.q)
+        # if self.q:
+        qs = BeneficiarioFinal.objects.filter(nis=self.q)
 
         return qs
 
