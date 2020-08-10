@@ -44,6 +44,15 @@
 				  <a class="nav-link" href="{% url 'home' %}">Home<span class="sr-only">(current)</span></a>
 				</li>
 			  </ul>
+			  {% if request.session.ponto_bool %}
+			  <ul class="navbar-nav mr-auto">
+				<li class="nav-item active">
+				  <a class="nav-link" href="{% url 'report-menu-ponto' %}">
+					<button class="btn btn-outline-warning my-2 my-sm-0" type="submit">Relatar Ocorrência</button>
+					<span class="sr-only">(current)</span></a>
+				</li>
+			  </ul>
+			  {% endif %}
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
 				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>

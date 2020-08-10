@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, RelatoPonto
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -68,11 +68,11 @@ def validate_semana(request, date_transacao, beneficiario_final):
 
     n_dia = calendar.weekday(date_transacao.year, date_transacao.month, date_transacao.day)
     
-    if n_dia is 0:
+    if n_dia == 0:
         first_semana_day = date_transacao
         last_semana_day  = date_transacao + timedelta(days=6)
 
-    elif n_dia is 6:
+    elif n_dia == 6:
         first_semana_day = date_transacao - timedelta(days=6)
         last_semana_day = date_transacao
     else:
@@ -415,3 +415,29 @@ def download_transactions_consumidores(request):
         else:
             return response
     return redirect(reverse('visualizar-transacaofinal-leite'))
+
+def report_menu_ponto(request):
+    try:
+        if (request.session['ponto_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.ponto_bool:
+                ponto_list = list(Ponto.objects.filter(membro=user))
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/report-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                        'today'     : today})
+        else:
+            return redirect(reverse('index'))
+    except:
+        return redirect(reverse('index'))
+
+def report_send_ponto(request):
+    relato           = RelatoPonto()
+    relato.usuario   = Usuario.objects.get(id=request.session['user_id'])
+    relato.descricao = request.POST['descricao']
+    relato.ponto     = Ponto.objects.get(pk=request.POST['ponto'])
+    relato.data      = request.POST['data']
+    try:
+        relato.save()
+        return redirect(reverse('report-menu-ponto'))
+    except:
+        return redirect(reverse('report-menu-ponto'))
