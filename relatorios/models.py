@@ -58,22 +58,12 @@ class Entidade(models.Model):
             return self.nome
 
 class Ponto(models.Model):
-    nome      = models.CharField(max_length=50)
-    membro    = models.ManyToManyField(Usuario)
-    entidade  = models.BooleanField(default=False)
-    limit_ben = models.IntegerField(default=50)
+    nome     = models.CharField(max_length=50)
+    membro   = models.ManyToManyField(Usuario)
+    entidade = models.ForeignKey(Entidade, on_delete=models.CASCADE)
 
     def __str__(self):
             return self.nome
-
-class RelatoPonto(models.Model):
-    descricao    = models.CharField(max_length=144)
-    data         = models.DateField(default=timezone.now)
-    ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
-    usuario      = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-
-    def __str__(self):
-            return  self.data.strftime("%d/%m/%Y") + " | " + self.ponto + " | " + self.descricao
 
 class Transacao(models.Model):
     litros       = models.FloatField()
@@ -81,7 +71,6 @@ class Transacao(models.Model):
     cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE)
-    usuario      = models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo
@@ -92,7 +81,6 @@ class TransacaoFinal(models.Model):
     ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(BeneficiarioFinal, on_delete=models.CASCADE)
-    usuario      = models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros)
