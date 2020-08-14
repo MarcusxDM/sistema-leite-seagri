@@ -7,6 +7,13 @@ class Leite(models.TextChoices):
         VACA  = 1, "VACA"
         CABRA = 2, "CABRA"
 
+class Localizacao(models.Model):
+    cod_ibge = models.CharField(max_length=7, primary_key=True)
+    uf       = models.CharField(max_length=2)
+    municipio = models.CharField(max_length=50)
+    def __str__(self):
+            return self.municipio
+
 class Usuario(models.Model):
     nome        = models.CharField(max_length=50)
     email       = models.CharField(max_length=100, unique=True)
@@ -15,13 +22,19 @@ class Usuario(models.Model):
     coop_bool   = models.BooleanField(default=False)
     ponto_bool  = models.BooleanField(default=False)
     seagri_bool = models.BooleanField(default=False)
+    telefone    = models.CharField(max_length=50, default=None, null=True)
+    cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
             return self.nome
 
 class Cooperativa(models.Model):
-    nome   = models.CharField(max_length=50)
-    membro = models.ManyToManyField(Usuario)
+    nome     = models.CharField(max_length=150)
+    sigla    = models.CharField(max_length=50, null=True)
+    cnpj     = models.CharField(max_length=50, null=True)
+    responsavel = models.CharField(max_length=50, null=True)
+    endereco    = models.CharField(max_length=150, null=True)
+    membro   = models.ManyToManyField(Usuario)
 
     def __str__(self):
             return self.nome
@@ -51,16 +64,13 @@ class BeneficiarioFinal(models.Model):
             return self.nis+" | "+self.nome
 
 
-class Entidade(models.Model):
-    nome   = models.CharField(max_length=50)
-
-    def __str__(self):
-            return self.nome
-
 class Ponto(models.Model):
-    nome     = models.CharField(max_length=50)
+    nome     = models.CharField(max_length=150)
     membro   = models.ManyToManyField(Usuario)
-    entidade = models.ForeignKey(Entidade, on_delete=models.CASCADE)
+    coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True)
+    cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
+    cnpj     = models.CharField(max_length=50, null=True)
+    endereco = models.CharField(max_length=150, null=True)
 
     def __str__(self):
             return self.nome
@@ -84,3 +94,4 @@ class TransacaoFinal(models.Model):
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros)
+
