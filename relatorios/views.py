@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -394,8 +394,13 @@ def download_transactions_consumidores(request):
         response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['NIS', 'Nome', 'Código IBGE', 'Litros de Leite'])
+        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento', 'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição',
+                        'COOPERATIVA', 'Litros de Leite'])
 
+        # Ponto
+        ponto = Ponto.objects.get(id=request.POST['ponto'])
+        loc   = Localizacao.objects.get(cod_ibge=ponto.cod_ibge.cod_ibge)
+        
         # Grouping by Produtor
         query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
         if query_set:
@@ -408,7 +413,8 @@ def download_transactions_consumidores(request):
 
             for key, value in df_dict.items():
                 consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([consumidor.nis, consumidor.nome, consumidor.cod_ibge_munic_nasc, str(value['litros']).replace(".", ",")])
+                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.cpf, consumidor.nis,
+                            ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
             return response

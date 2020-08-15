@@ -57,7 +57,7 @@ class BeneficiarioFinal(models.Model):
     nome                = models.CharField(max_length=150, null=True)
     nis                 = models.CharField(max_length=11, primary_key=True)
     data_nascimento     = models.DateField(null=True)
-    cod_ibge            = models.CharField(max_length=7, null=True)
+    cod_ibge_munic_nasc = models.CharField(max_length=7, null=True)
     identidade          = models.CharField(max_length=20, null=True)
 
     def __str__(self):
