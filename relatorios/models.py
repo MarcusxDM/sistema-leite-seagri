@@ -57,7 +57,7 @@ class BeneficiarioFinal(models.Model):
     nome                = models.CharField(max_length=150, null=True)
     nis                 = models.CharField(max_length=11, primary_key=True)
     data_nascimento     = models.DateField(null=True)
-    cod_ibge_munic_nasc = models.CharField(max_length=7, null=True)
+    cod_ibge            = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
     identidade          = models.CharField(max_length=20, null=True)
 
     def __str__(self):
@@ -73,7 +73,7 @@ class Ponto(models.Model):
     endereco = models.CharField(max_length=150, null=True)
 
     def __str__(self):
-            return self.nome
+            return self.cod_ibge.municipio+' | '+self.nome
 
 class Transacao(models.Model):
     litros       = models.FloatField()
