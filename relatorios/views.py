@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -9,6 +9,13 @@ import calendar
 import csv
 import pandas as pd
 import numpy as np
+from unicodedata import normalize
+
+def remover_acentos(txt):
+    return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
+
+def getCodIBGE(uf, municipio):
+    return Localizacao.objects.get(uf=uf, municipio=remover_acentos(municipio))
 
 class BenefiarioAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
@@ -344,7 +351,13 @@ def download_transactions_produtores(request):
         response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['DAP', 'Enquadramento', 'Categoria', 'Nome', 'UF', 'Munícipio', 'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
+        writer.writerow(['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'Nº DA DAP',
+        	'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA', 
+            'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
+
+        # Get Coop
+        coop = Cooperativa.objects.get(id=request.POST['cooperativa'])
+        print(coop)
 
         # Grouping by Produtor
         query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
@@ -370,8 +383,11 @@ def download_transactions_produtores(request):
                     litros_cabra = value['CABRA']
                 except:
                     litros_cabra = 0
-                    
-                output.append([produtor.dap, produtor.enquadramento, produtor.categoria, produtor.nome, produtor.UF, produtor.municipio, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
+                
+                prod_local = getCodIBGE(produtor.UF, produtor.municipio)
+
+                output.append([produtor.UF, prod_local.cod_ibge, produtor.municipio, produtor.nome, produtor.dap, produtor.categoria, produtor.enquadramento,
+                            coop.sigla, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
             return response
@@ -394,7 +410,12 @@ def download_transactions_consumidores(request):
         response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['NIS', 'Nome', 'Código IBGE', 'Litros de Leite'])
+        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento', 'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição',
+                        'COOPERATIVA', 'Litros de Leite'])
+
+        # Ponto
+        ponto = Ponto.objects.get(id=request.POST['ponto'])
+        loc   = Localizacao.objects.get(cod_ibge=ponto.cod_ibge.cod_ibge)
 
         # Grouping by Produtor
         query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
@@ -408,7 +429,8 @@ def download_transactions_consumidores(request):
 
             for key, value in df_dict.items():
                 consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([consumidor.nis, consumidor.nome, consumidor.cod_ibge_munic_nasc, str(value['litros']).replace(".", ",")])
+                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.cpf, consumidor.nis,
+                            ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
             return response
