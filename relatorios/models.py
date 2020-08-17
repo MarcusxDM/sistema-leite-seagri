@@ -22,7 +22,7 @@ class Usuario(models.Model):
     coop_bool   = models.BooleanField(default=False)
     ponto_bool  = models.BooleanField(default=False)
     seagri_bool = models.BooleanField(default=False)
-    telefone    = models.CharField(max_length=50, default=None, null=True)
+    telefone    = models.CharField(max_length=50, default=None, null=True, blank=True)
     cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
@@ -66,11 +66,11 @@ class BeneficiarioFinal(models.Model):
 
 class Ponto(models.Model):
     nome     = models.CharField(max_length=150)
-    membro   = models.ManyToManyField(Usuario)
+    membro   = models.ManyToManyField(Usuario, blank=True)
     coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True)
     cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
-    cnpj     = models.CharField(max_length=50, null=True)
-    endereco = models.CharField(max_length=150, null=True)
+    cnpj     = models.CharField(max_length=50, null=True, blank=True)
+    endereco = models.CharField(max_length=150, null=True, blank=True)
 
     def __str__(self):
             return self.cod_ibge.municipio+' | '+self.nome
