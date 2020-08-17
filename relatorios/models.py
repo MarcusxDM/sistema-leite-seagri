@@ -83,7 +83,7 @@ class Transacao(models.Model):
     beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE)
 
     def __str__(self):
-            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo
+            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo + " | " + self.cooperativa.nome
 
 
 class TransacaoFinal(models.Model):
@@ -93,5 +93,5 @@ class TransacaoFinal(models.Model):
     beneficiario = models.ForeignKey(BeneficiarioFinal, on_delete=models.CASCADE)
 
     def __str__(self):
-            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros)
+            return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio
 
