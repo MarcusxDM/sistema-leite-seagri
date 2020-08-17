@@ -10,9 +10,11 @@ class PontoAdmin(admin.ModelAdmin):
 
 class TransacaoFinalAdmin(admin.ModelAdmin):
     search_fields = (['beneficiario__nome', 'ponto__nome', 'ponto__cod_ibge__municipio'])
+    list_filter = (['data'])
 
 class TransacaoAdmin(admin.ModelAdmin):
     search_fields = (['beneficiario__nome', 'cooperativa__nome', 'beneficiario__cod_ibge__municipio'])
+    list_filter = (['data'])
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Cooperativa)
