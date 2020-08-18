@@ -32,6 +32,7 @@ urlpatterns = [
     path('inserir-transacaofinal-leite/', views.insert_transactions_ponto_menu, name='inserir-transacaofinal-leite'),
     path('visualizar-transacaofinal-leite/', views.view_transactions_ponto_menu, name='visualizar-transacaofinal-leite'),
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),
-    path('download-produtores/', views.download_transactions_produtores, name='download-produtores')
+    path('download-produtores/', views.download_transactions_produtores, name='download-produtores'),
+    path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos')
     
 ]

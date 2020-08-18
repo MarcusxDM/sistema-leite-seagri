@@ -1,0 +1,4 @@
+
+{% for ponto in ponto_list %}
+    <option value={{ponto.id}}>{{ponto.nome}} | {{ponto.cod_ibge.municipio}}</option>
+{% endfor %}

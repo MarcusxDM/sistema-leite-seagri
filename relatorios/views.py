@@ -39,6 +39,17 @@ class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
 
         return qs
 
+def load_pontos(request):
+    cod_ibge = request.GET.get('cod_ibge')
+    
+    user = Usuario.objects.get(id=request.session['user_id'])
+    if user.admin or user.seagri_bool:
+        pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge).order_by('nome')
+    else:
+        pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
+    print(pontos)
+    return render(request, 'relatorios/load-pontos.html', {'ponto_list': pontos})
+
 def semana_list(date_time):
     first_day_month     = date_time.replace(day=1)
     last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
@@ -321,19 +332,22 @@ def view_transactions_coop_menu(request):
 
 
 def view_transactions_ponto_menu(request):
-    try:
+    #try:
         if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin or user.seagri_bool:
-                ponto_list = list(Ponto.objects.all())
+                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
             else:
                 ponto_list = list(Ponto.objects.filter(membro=user))
+                municipio_list = set([p.cod_ibge for p in ponto_list])
+            ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
             return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                        'today'     : today})
+                                                                        'today'     : today,
+                                                                        'municipio_list' : municipio_list})
         else:
             return redirect(reverse('index'))
-    except:
+    #except:
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
