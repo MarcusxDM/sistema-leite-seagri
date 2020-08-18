@@ -59,6 +59,9 @@ class BeneficiarioFinal(models.Model):
     data_nascimento     = models.DateField(null=True)
     cod_ibge_munic_nasc = models.CharField(max_length=7, null=True)
     identidade          = models.CharField(max_length=20, null=True)
+    nome_mae            = models.CharField(max_length=150, null=True)
+    faixa_renda         = models.IntegerField()
+    data_att            = models.DateField(null=True)
 
     def __str__(self):
             return self.nis+" | "+self.nome
