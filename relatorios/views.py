@@ -410,8 +410,8 @@ def download_transactions_consumidores(request):
         response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento', 'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição',
-                        'COOPERATIVA', 'Litros de Leite'])
+        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
+                         'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição', 'COOPERATIVA', 'Litros de Leite'])
 
         # Ponto
         ponto = Ponto.objects.get(id=request.POST['ponto'])
@@ -429,8 +429,9 @@ def download_transactions_consumidores(request):
 
             for key, value in df_dict.items():
                 consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.cpf, consumidor.nis,
-                            ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                            (consumidor.cpf[:2]+'.'+consumidor.cpf[3:5]+'.'+consumidor.cpf[6:8]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                             ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
             return response
