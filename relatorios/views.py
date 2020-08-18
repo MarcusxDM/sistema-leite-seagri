@@ -406,7 +406,7 @@ def download_transactions_consumidores(request):
             date_fim = date_inicio
 
         output = []
-        response = HttpResponse (content_type='text/csv')
+        response = HttpResponse (content_type='text/csv;')
         response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
@@ -415,7 +415,6 @@ def download_transactions_consumidores(request):
 
         # Ponto
         ponto = Ponto.objects.get(id=request.POST['ponto'])
-        loc   = Localizacao.objects.get(cod_ibge=ponto.cod_ibge.cod_ibge)
 
         # Grouping by Produtor
         query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
@@ -429,7 +428,7 @@ def download_transactions_consumidores(request):
 
             for key, value in df_dict.items():
                 consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
                             (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
                              ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
             #CSV Data
