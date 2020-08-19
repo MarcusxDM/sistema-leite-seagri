@@ -54,17 +54,26 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form action="{% url 'download-consumidores' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form action="{% url 'download-consumidores' %}" id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
+
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Município</label>
+					<select name=ponto class="form-control" id="cod_ibge" required>
+					  <option value=>Escolha aqui</option>
+					  {% for municipio in municipio_list %}
+					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
+					  {% endfor %}
+					</select>
+				  </div>
 				
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Ponto</label>
-				  <select name=ponto class="form-control" id="exampleFormControlSelect1" required>
-					{% for ponto in ponto_list %}
-					<option value={{ponto.id}}>{{ponto.nome}}</option>
-					{% endfor %}
+				  <select name=ponto class="form-control" id="pontoSelect" required>
+					{% include 'relatorios/load-pontos.html' %}
 				  </select>
 				</div>
+			  
 			
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Data Inicio</label>
@@ -85,7 +94,6 @@
 			</div>
 		</div>
 	</div>
-	
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/jquery/jquery-3.2.1.min.js" %} "></script>
 <!--===============================================================================================-->
@@ -102,6 +110,22 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
-
+	<script>
+		$("#cod_ibge").change(function () {
+		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
+		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
+	
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'cod_ibge': cod_ibge       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#pontoSelect").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
+	  </script>
 </body>
 </html>

@@ -35,9 +35,20 @@ class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
         # qs = BeneficiarioFinal.objects.filter()
 
         # if self.q:
-        qs = BeneficiarioFinal.objects.filter(nis=self.q)
+        qs = BeneficiarioFinal.objects.filter(nis=self.q, faixa_renda__lte=2)
 
         return qs
+
+def load_pontos(request):
+    cod_ibge = request.GET.get('cod_ibge')
+    
+    user = Usuario.objects.get(id=request.session['user_id'])
+    if user.admin or user.seagri_bool:
+        pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge).order_by('nome')
+    else:
+        pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
+    print(pontos)
+    return render(request, 'relatorios/load-pontos.html', {'ponto_list': pontos})
 
 def semana_list(date_time):
     first_day_month     = date_time.replace(day=1)
@@ -321,19 +332,22 @@ def view_transactions_coop_menu(request):
 
 
 def view_transactions_ponto_menu(request):
-    try:
+    #try:
         if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin or user.seagri_bool:
-                ponto_list = list(Ponto.objects.all())
+                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
             else:
                 ponto_list = list(Ponto.objects.filter(membro=user))
+                municipio_list = set([p.cod_ibge for p in ponto_list])
+            ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
             return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                        'today'     : today})
+                                                                        'today'     : today,
+                                                                        'municipio_list' : municipio_list})
         else:
             return redirect(reverse('index'))
-    except:
+    #except:
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
@@ -406,16 +420,15 @@ def download_transactions_consumidores(request):
             date_fim = date_inicio
 
         output = []
-        response = HttpResponse (content_type='text/csv')
+        response = HttpResponse (content_type='text/csv;')
         response['Content-Disposition'] = 'attachment; filename="Leite_Consumidores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento', 'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição',
-                        'COOPERATIVA', 'Litros de Leite'])
+        writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
+                         'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição', 'COOPERATIVA', 'Litros de Leite'])
 
         # Ponto
         ponto = Ponto.objects.get(id=request.POST['ponto'])
-        loc   = Localizacao.objects.get(cod_ibge=ponto.cod_ibge.cod_ibge)
 
         # Grouping by Produtor
         query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
@@ -429,8 +442,9 @@ def download_transactions_consumidores(request):
 
             for key, value in df_dict.items():
                 consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([loc.uf, loc.cod_ibge, loc.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.cpf, consumidor.nis,
-                            ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                            (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                             ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
             return response
