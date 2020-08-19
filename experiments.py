@@ -53,16 +53,20 @@ def usersCoopAdd(csv_path):
 def sendEmails():
     usuarios = relatorios.models.Usuario.objects.all()
     for usuario in usuarios:
-        send_mail(
-        'Sua senha de acesso ao Programa do Leite',
-        'Seu email: '+ usuario.email+'\n\n'+'Sua senha: ' + usuario.senha,
-        'sic@agricultura.al.gov.br',
-        [usuario.email],
-        fail_silently=False,
-        )
+        try:
+            send_mail(
+            'Sua senha de acesso ao Programa do Leite',
+            'Seu email: '+ usuario.email+'\n\n'+'Sua senha: ' + usuario.senha,
+            'marcusvpestana@gmail.com',
+            [usuario.email],
+            fail_silently=False,
+            )
+            print("######### ENVIADO para "+usuario.email+" #########\n")
+        except:
+            print("######### ERRO "+usuario.email+" #########\n")
 
 
 
 if __name__ == "__main__":
-    usersCoopAdd("users_coop.csv")
+    sendEmails()
 
