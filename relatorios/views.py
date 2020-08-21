@@ -293,9 +293,8 @@ def save_transacao(request):
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
         produtor = Beneficiario.objects.get(pk=request.POST['beneficiario'])
         if date_transacao <= produtor.data_validade:
-                if validate_quinzena(request, date_transacao, produtor):
-                    if validate_semestre(request, date_transacao, produtor):
-                        transacao_succes(request)
+                if validate_semestre(request, date_transacao, produtor):
+                    transacao_succes(request)
         else:
             request.session['insert_leite_success'] = ''
             request.session['insert_leite_error'] = "DAP FORA DE VALIDADE"
