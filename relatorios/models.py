@@ -74,6 +74,7 @@ class Ponto(models.Model):
     cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
     cnpj     = models.CharField(max_length=50, null=True, blank=True)
     endereco = models.CharField(max_length=150, null=True, blank=True)
+    limit_beneficiarios = models.IntegerField(null=False, default=0) 
 
     def __str__(self):
             return self.cod_ibge.municipio+' | '+self.nome

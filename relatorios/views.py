@@ -81,6 +81,15 @@ def semestre_list(date_time):
         last_day_semestre  = (first_day_semestre.replace(month=1, year=date_time.year+1) - timedelta(days=1))
     return[first_day_semestre, last_day_semestre]
 
+def validate_limit_ben(request, date_transacao):
+    month      = date_transacao.month
+    ponto      = Ponto.objects.get(pk=request.POST['ponto'])
+    transacoes = TransacaoFinal.objects.filter(data__month=month, ponto__id=request.POST['ponto']).values('beneficiario').distinct().count()
+    print(ponto.limit_beneficiarios, transacoes)
+    print(ponto.limit_beneficiarios > transacoes)
+    return ponto.limit_beneficiarios > transacoes
+
+
 def validate_semana(request, date_transacao, beneficiario_final):
     limit_semanal = 4
 
@@ -250,9 +259,9 @@ def insert_transactions_coop_menu(request):
         if(request.session['coop_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin:
-                coop_list = list(Cooperativa.objects.all())
+                coop_list = list(Cooperativa.objects.all().order_by('nome'))
             else:
-                coop_list = list(Cooperativa.objects.filter(membro=user))
+                coop_list = list(Cooperativa.objects.filter(membro=user).order_by('nome'))
             form = TransacaoProdutor()
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
@@ -271,9 +280,9 @@ def insert_transactions_ponto_menu(request):
         if(request.session['ponto_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin:
-                ponto_list = list(Ponto.objects.all())
+                ponto_list = list(Ponto.objects.all().order_by('nome'))
             else:
-                ponto_list = list(Ponto.objects.filter(membro=user))
+                ponto_list = list(Ponto.objects.filter(membro=user).order_by('nome'))
             form = TransacaoBeneficiarioFinal()
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
@@ -307,7 +316,11 @@ def save_transacao_ponto(request):
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
         beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
         if validate_semana(request, date_transacao, beneficiario):
-            transacao_final_succes(request)
+            if (validate_limit_ben(request, date_transacao)):
+                transacao_final_succes(request)
+            else:
+                request.session['insert_leite_final_success'] = ''
+                request.session['insert_leite_final_error'] = 'ESTE PONTO JÁ ENTREGOU AO NÚMERO MÁXIMO DE CONSUMIDORES'
         else:
             request.session['insert_leite_final_success'] = ''
             print(request.session['insert_leite_final_error'])
