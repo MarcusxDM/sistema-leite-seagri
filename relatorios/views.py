@@ -486,6 +486,8 @@ def download_transactions_consumidores(request):
                     df_dict = df.to_dict('index')
                     for key, value in df_dict.items():
                         consumidor = BeneficiarioFinal.objects.get(pk=key)
+                        if not consumidor.cpf:
+                            cpf = ''
                         output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
                                     (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
                                     ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
