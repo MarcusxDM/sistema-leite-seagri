@@ -468,7 +468,8 @@ def download_transactions_consumidores(request):
                 return response
         else:
             # Pontos
-            pontos = Ponto.objects.all()
+            pontos_id = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim).distinct().values_list('ponto_id')
+            pontos = Ponto.objects.filter(id__in=pontos_id)
             for ponto in pontos:
                 output = []
                 # Grouping by Produtor
