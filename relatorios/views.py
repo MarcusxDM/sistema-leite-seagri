@@ -349,14 +349,17 @@ def view_transactions_ponto_menu(request):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin or user.seagri_bool:
                 municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+                municipio_all = True
             else:
                 ponto_list = list(Ponto.objects.filter(membro=user))
                 municipio_list = set([p.cod_ibge for p in ponto_list])
+                municipio_all = False
             ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
             return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                         'today'     : today,
-                                                                        'municipio_list' : municipio_list})
+                                                                        'municipio_list' : municipio_list,
+                                                                        'municipio_all' : municipio_all})
         else:
             return redirect(reverse('index'))
     #except:
@@ -439,27 +442,55 @@ def download_transactions_consumidores(request):
         writer.writerow(['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
                          'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição', 'COOPERATIVA', 'Litros de Leite'])
 
-        # Ponto
-        ponto = Ponto.objects.get(id=request.POST['ponto'])
+        if request.POST['action'] == "PONTO":
+            # Ponto
+            ponto = Ponto.objects.get(id=request.POST['ponto'])
 
-        # Grouping by Produtor
-        query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
-        if query_set:
-            df = pd.DataFrame.from_records(query_set.values())
-            sf = df.groupby(['beneficiario_id'])['litros'].sum()
-            df = sf.to_frame().reset_index()
+            # Grouping by Produtor
+            query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
+            if query_set:
+                df = pd.DataFrame.from_records(query_set.values())
+                sf = df.groupby(['beneficiario_id'])['litros'].sum()
+                df = sf.to_frame().reset_index()
 
-            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
-            df_dict = df.to_dict('index')
+                df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
+                df_dict = df.to_dict('index')
 
-            for key, value in df_dict.items():
-                consumidor = BeneficiarioFinal.objects.get(pk=key)
-                output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
-                            (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
-                             ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
-            #CSV Data
-            writer.writerows(output)
-            return response
+                for key, value in df_dict.items():
+                    consumidor = BeneficiarioFinal.objects.get(pk=key)
+                    output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                #CSV Data
+                writer.writerows(output)
+                return response
+            else:
+                return response
         else:
+            # Pontos
+            pontos = Ponto.objects.all()
+            for ponto in pontos:
+                output = []
+                # Grouping by Produtor
+                query_set = TransacaoFinal.objects.filter(ponto=ponto, data__gte=date_inicio, data__lte=date_fim)
+                # print(query_set)
+                if query_set:
+                    df = pd.DataFrame.from_records(query_set.values())
+                    sf = df.groupby(['beneficiario_id'])['litros'].sum()
+                    
+                    df = sf.to_frame().reset_index()
+                    
+                    df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
+                    
+                    df_dict = df.to_dict('index')
+                    print(df_dict.items())
+                    for key, value in df_dict.items():
+                        print(key, value)
+                        consumidor = BeneficiarioFinal.objects.get(pk=key)
+                        output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                                    (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                    ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                    #CSV Data
+                    writer.writerows(output)
             return response
     return redirect(reverse('visualizar-transacaofinal-leite'))

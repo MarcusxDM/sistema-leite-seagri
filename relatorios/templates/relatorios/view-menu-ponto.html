@@ -59,8 +59,9 @@
 
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Município</label>
-					<select name=ponto class="form-control" id="cod_ibge" required>
+					<select name=ponto class="form-control" id="cod_ibge" onchange="func2()" required>
 					  <option value=>Escolha aqui</option>
+				
 					  {% for municipio in municipio_list %}
 					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
 					  {% endfor %}
@@ -86,9 +87,17 @@
 				</div>
 
 				<div class="container-login100-form-btn">
-				<button class="login100-form-btn">
+				<button class="login100-form-btn" name="action" value="PONTO">
 					Baixar Relatório
 				</button>
+
+				{% if municipio_all %}
+				<div class="container-login100-form-btn" style="padding-top: 3%; ">
+				<button class="login100-form-btn" name="action" value="PONTOS">
+					Baixar Relatório (Todos os Pontos)
+				</button>
+				</div>
+				{% endif %}			 
 				</div>
 			  </form>
 			</div>
@@ -126,6 +135,12 @@
 		  });
 	
 		});
+
+		function func2(){
+			if(document.getElementById('cod_ibge').value == 0) {
+				document.getElementById('pontoSelect').value = 0
+			}
+		}
 	  </script>
 </body>
 </html>
