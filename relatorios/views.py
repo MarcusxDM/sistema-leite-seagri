@@ -484,9 +484,7 @@ def download_transactions_consumidores(request):
                     df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
                     
                     df_dict = df.to_dict('index')
-                    print(df_dict.items())
                     for key, value in df_dict.items():
-                        print(key, value)
                         consumidor = BeneficiarioFinal.objects.get(pk=key)
                         output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
                                     (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
