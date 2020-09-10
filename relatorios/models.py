@@ -21,6 +21,7 @@ class Usuario(models.Model):
     admin       = models.BooleanField(default=False)
     coop_bool   = models.BooleanField(default=False)
     ponto_bool  = models.BooleanField(default=False)
+    entidade_bool   = models.BooleanField(default=False)
     seagri_bool = models.BooleanField(default=False)
     telefone    = models.CharField(max_length=50, default=None, null=True, blank=True)
     cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
@@ -99,3 +100,32 @@ class TransacaoFinal(models.Model):
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio
 
+class Entidade(models.Model):
+    cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
+    nome     = models.CharField(max_length=150)
+    cnpj     = models.CharField(max_length=50)
+    rep_nome = models.CharField(max_length=150)
+    rep_end  = models.CharField(max_length=150,  blank=True)
+    email    = models.CharField(max_length=150)
+    tipo     = models.IntegerField(null=False, default=1)
+    coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True) 
+    membro   = models.ManyToManyField(Usuario, blank=True)
+    limit_beneficiarios = models.IntegerField(null=False, default=0) 
+
+    def __str__(self):
+        return self.cod_ibge.municipio+' | '+self.nome
+
+class TransacaoEntidade(models.Model):
+    litros      = models.FloatField()
+    entidade    = models.ForeignKey(Entidade, on_delete=models.CASCADE)
+    data        = models.DateField(default=timezone.now)
+    ben_0_6     = models.IntegerField(null=False, default=0)
+    ben_7_14    = models.IntegerField(null=False, default=0)
+    ben_15_23   = models.IntegerField(null=False, default=0)
+    ben_24_65   = models.IntegerField(null=False, default=0)
+    ben_66_mais = models.IntegerField(null=False, default=0)
+    ben_m       = models.IntegerField(null=False, default=0)
+    ben_f       = models.IntegerField(null=False, default=0)   
+
+    def __str__(self):
+        return self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.entidade.nome + " | " + self.entidade.cod_ibge.municipio

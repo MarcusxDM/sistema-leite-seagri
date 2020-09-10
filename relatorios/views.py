@@ -296,6 +296,27 @@ def insert_transactions_ponto_menu(request):
     except:
         return redirect(reverse('index'))
 
+def insert_transactions_entidade_menu(request):
+    try:
+        if(request.session['entidade_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin:
+                entidade_list = list(Entidade.objects.all().order_by('nome'))
+            else:
+                entidade_list = list(Entidade.objects.filter(membro=user).order_by('nome'))
+            form = TransacaoEntidadeFinal()
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            return render(request, 'relatorios/insert-menu-entidade.html', {'user'      : user,
+                                                                            'entidade_list' : entidade_list, 
+                                                                            'form'      : form, 
+                                                                            'today'     : today, 
+                                                                            'today30'   : today30})
+        else:
+            return redirect(reverse('index'))
+    except:
+        return redirect(reverse('index'))
+
 def save_transacao(request):
     if request.method == "POST":
         request.session['insert_leite_error'] = ""
@@ -357,6 +378,28 @@ def view_transactions_ponto_menu(request):
             ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
             return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                        'today'     : today,
+                                                                        'municipio_list' : municipio_list,
+                                                                        'municipio_all' : municipio_all})
+        else:
+            return redirect(reverse('index'))
+    #except:
+        return redirect(reverse('index'))
+
+def view_transactions_entidade_menu(request):
+    #try:
+        if (request.session['entidade_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+                municipio_all = True
+            else:
+                entidade_list = list(Entidade.objects.filter(membro=user))
+                municipio_list = set([p.cod_ibge for p in entidade_list])
+                municipio_all = False
+            entidade_list = []
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/view-menu-entidade.html', {'entidade_list' : entidade_list, 
                                                                         'today'     : today,
                                                                         'municipio_list' : municipio_list,
                                                                         'municipio_all' : municipio_all})
