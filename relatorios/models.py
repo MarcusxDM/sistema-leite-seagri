@@ -21,7 +21,7 @@ class Usuario(models.Model):
     admin       = models.BooleanField(default=False)
     coop_bool   = models.BooleanField(default=False)
     ponto_bool  = models.BooleanField(default=False)
-    entidade_bool   = models.BooleanField(default=False)
+    # entidade_bool   = models.BooleanField(default=False)
     seagri_bool = models.BooleanField(default=False)
     telefone    = models.CharField(max_length=50, default=None, null=True, blank=True)
     cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)

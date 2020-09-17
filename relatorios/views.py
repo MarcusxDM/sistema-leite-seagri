@@ -39,6 +39,11 @@ class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
 
         return qs
 
+def week_start_end(date):
+    start_week = date - timedelta(date.weekday())
+    end_week = start_week + timedelta(6)
+    return [start_week, end_week]
+
 def load_pontos(request):
     cod_ibge = request.GET.get('cod_ibge')
     
@@ -81,13 +86,12 @@ def semestre_list(date_time):
         last_day_semestre  = (first_day_semestre.replace(month=1, year=date_time.year+1) - timedelta(days=1))
     return[first_day_semestre, last_day_semestre]
 
-def validate_limit_ben(request, date_transacao):
+def validate_limit_ben(request, date_transacao, beneficiario):
     month      = date_transacao.month
     ponto      = Ponto.objects.get(pk=request.POST['ponto'])
-    transacoes = TransacaoFinal.objects.filter(data__month=month, ponto__id=request.POST['ponto']).values('beneficiario').distinct().count()
-    print(ponto.limit_beneficiarios, transacoes)
-    print(ponto.limit_beneficiarios > transacoes)
-    return ponto.limit_beneficiarios > transacoes
+    transacoes = TransacaoFinal.objects.filter(data__range=week_start_end(date_transacao), ponto__id=request.POST['ponto']).values('beneficiario').distinct()
+    is_ben_in  = transacoes.filter(beneficiario=beneficiario).count() > 0
+    return (ponto.limit_beneficiarios > transacoes.count() or is_ben_in)
 
 
 def validate_semana(request, date_transacao, beneficiario_final):
@@ -337,7 +341,7 @@ def save_transacao_ponto(request):
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
         beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
         if validate_semana(request, date_transacao, beneficiario):
-            if (validate_limit_ben(request, date_transacao)):
+            if (validate_limit_ben(request, date_transacao, beneficiario)):
                 transacao_final_succes(request)
             else:
                 request.session['insert_leite_final_success'] = ''
