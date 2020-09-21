@@ -109,7 +109,7 @@ class Entidade(models.Model):
     email    = models.CharField(max_length=150)
     tipo     = models.IntegerField(null=False, default=1)
     coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True) 
-    membro   = models.ManyToManyField(Usuario, blank=True)
+    # membro   = models.ManyToManyField(Usuario, blank=True)
     limit_beneficiarios = models.IntegerField(null=False, default=0) 
 
     def __str__(self):
