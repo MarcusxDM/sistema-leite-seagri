@@ -164,6 +164,34 @@
 						  </div>
 					</div>
 				{% endif %}
+				{% if request.session.entidade_bool %}
+					<div class="col mt-5">
+						<div class="card mx-auto" style="width: 18rem;">
+							<div class="embed-responsive embed-responsive-4by3">
+								 <img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/leite.jpg" %}" />
+							  </div>
+							<div class="card-body">
+							  <h5 class="card-title">Inserir Transações de Leite - Entidades</h5>
+							  <p class="card-text"></p>
+							  <a href="{% url 'inserir-transacao-entidade-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+							</div>
+						  </div>
+					</div>
+				{% endif %}
+				{% if request.session.entidade_bool or request.session.seagri_bool %}
+					<div class="col mt-5">
+						<div class="card mx-auto" style="width: 18rem;">
+							<div class="embed-responsive embed-responsive-4by3">
+								<img alt="Card image cap" class="card-img-top embed-responsive-item" src="{% static "relatorios/images/view1.png" %}" />
+							 </div>
+							<div class="card-body">
+							  <h5 class="card-title">Visualizar Transações de Leite - Entidades</h5>
+							  <p class="card-text"></p>
+							  <a href="{% url 'visualizar-transacao-entidade-leite' %}" class="btn btn-primary btn-home">Entrar</a>
+							</div>
+						  </div>
+					</div>
+				{% endif %}
 			</div>
 			{% endif %}
 		</div>

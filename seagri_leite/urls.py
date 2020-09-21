@@ -26,13 +26,17 @@ urlpatterns = [
     path('inserir-transacao-leite/', views.insert_transactions_coop_menu, name='inserir-transacao-leite'),
     path('save-transacao/', views.save_transacao, name='save-transacao'),
     path('save-transacao-ponto/', views.save_transacao_ponto, name='save-transacao-ponto'),
+    path('save-transacao-entidade/', views.save_transacao_entidade, name='save-transacao-entidade'),
     path('beneficiario-autocomplete/', views.BenefiarioAutocomplete.as_view(), name='beneficiario-autocomplete'),
     path('beneficiario-final-autocomplete/', views.BenefiarioFinalAutocomplete.as_view(), name='beneficiario-final-autocomplete'),
     path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
     path('inserir-transacaofinal-leite/', views.insert_transactions_ponto_menu, name='inserir-transacaofinal-leite'),
-    path('visualizar-transacaofinal-leite/', views.view_transactions_ponto_menu, name='visualizar-transacaofinal-leite'),
+    path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
+    path('inserir-transacao-entidade-leite/', views.insert_transactions_entidade_menu, name='inserir-transacao-entidade-leite'),
+    path('visualizar-transacao-entidade-leite/', views.view_transactions_entidade_menu, name='visualizar-transacao-entidade-leite'),
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),
     path('download-produtores/', views.download_transactions_produtores, name='download-produtores'),
+    # path('download-entidades/', views.download_transactions_entidades, name='download-entidades'),
     path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos')
     
 ]

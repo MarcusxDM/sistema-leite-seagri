@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao
+from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao, TransacaoEntidade, Entidade
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -221,6 +221,30 @@ def transacao_final_succes(request):
         print(request.session['insert_leite_final_error'])
         return redirect(reverse('inserir-transacaofinal-leite'))
 
+def save_transacao_entidade(request):
+    transacao             = TransacaoEntidade()
+    transacao.litros      = abs(float(request.POST['litros']))
+    transacao.data        = request.POST['data']
+    transacao.entidade    = Entidade.objects.get(pk=request.POST['entidade'])
+    transacao.ben_0_6     = request.POST['ben_0_6']
+    transacao.ben_7_14    = request.POST['ben_7_14']
+    transacao.ben_15_23   = request.POST['ben_15_23']
+    transacao.ben_24_65   = request.POST['ben_24_65']
+    transacao.ben_66_mais = request.POST['ben_66_mais']
+    transacao.ben_m       = request.POST['ben_m']
+    transacao.ben_f       = request.POST['ben_f']
+    try:
+        transacao.save()
+        request.session['insert_leite_final_error'] = ''
+        request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES"])
+        print(transacao.litros, " LITROS DE LEITE ENTREGUES")
+        return redirect(reverse('inserir-transacaofinal-leite'))
+    except:
+        request.session['insert_leite_final_success'] = ''
+        request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
+        print(request.session['insert_leite_final_error'])
+        return redirect(reverse('inserir-transacaofinal-leite'))
+
 def index(request):
     request.session.flush()
     return render(request, 'relatorios/index.html', {})
@@ -236,6 +260,7 @@ def login(request):
                 request.session['ponto_bool'] = user.ponto_bool
                 request.session['admin'] = user.admin
                 request.session['seagri_bool'] = user.seagri_bool
+                request.session['entidade_bool'] = user.entidade_bool
                 return redirect('home')
             else:
                 request.session['login_error'] = 'Senha incorreta'
@@ -308,12 +333,10 @@ def insert_transactions_entidade_menu(request):
                 entidade_list = list(Entidade.objects.all().order_by('nome'))
             else:
                 entidade_list = list(Entidade.objects.filter(membro=user).order_by('nome'))
-            form = TransacaoEntidadeFinal()
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
             return render(request, 'relatorios/insert-menu-entidade.html', {'user'      : user,
                                                                             'entidade_list' : entidade_list, 
-                                                                            'form'      : form, 
                                                                             'today'     : today, 
                                                                             'today30'   : today30})
         else:
@@ -544,3 +567,6 @@ def download_transactions_consumidores(request):
                     writer.writerows(output)
             return response
     return redirect(reverse('visualizar-transacaofinal-leite'))
+
+    def download_transactions_entidades():
+        pass

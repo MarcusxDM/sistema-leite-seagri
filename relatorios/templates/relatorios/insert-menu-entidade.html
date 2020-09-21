@@ -51,56 +51,66 @@
 			</div>
 		  </nav>
 		<div class="container ">
-			
-
-			{% block footer %}
-			<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
-
-			{{ form.media }}
-
-			<script>
-			(function($) {
-				$('#add-form').click(function() {
-					var index = $('#id_inline_test_models-TOTAL_FORMS').val()
-					var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
-					newTable.find(':input').each(function() {
-						for (attr of ['name', 'id'])
-							$(this).attr(
-								attr,
-								$(this).attr(attr).replace('__prefix__', index)
-							)
-					})
-					newTable.insertBefore($(this))
-					$('#id_inline_test_models-TOTAL_FORMS').val(
-						parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
-					)
-					newTable.slideDown()
-				})
-			})($)
-			</script>
-			{% endblock %}
 			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
-			<form action="{% url 'save-transacao-ponto' %}" method="post" style="margin-top: 20vh;">
+			<form action="{% url 'save-transacao-entidade' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
-				<div class="form-group ">
-					<label for="exampleFormControlSelect1">NIS | Beneficiário</label>
-					{{form.beneficiario}}
-					</div>
-
-				<div class="form-group">
-				  <label for="exampleFormControlSelect1">Ponto</label>
-				  <select name=ponto class="form-control" id="exampleFormControlSelect1" required>
-					{% for ponto in ponto_list %}
-					<option value={{ponto.id}}>{{ponto.nome}} | {{ponto.cod_ibge.municipio}}</option>
+				  <label for="exampleFormControlSelect1">Entidade</label>
+				  <select name=entidade class="form-control" id="exampleFormControlSelect1" required>
+					{% for entidade in entidade_list %}
+					<option value={{entidade.id}}>{{entidade.nome}} | {{entidade.cod_ibge.municipio}}</option>
 					{% endfor %}
 				  </select>
-				</div>
 
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Litros</label>
-					<input name=litros type=number step=1 value=1 min=1 max=4 /><br />
+					<input name=litros type=number step=1 value=1 min=1 max=999 /><br />
 				  </div>
+				  
+				  <table class="table">
+					<tbody>
+					  <tr>
 
+						<td>
+							<div class="form-group">
+								<label for="exampleFormControlSelect1">0 a 6 anos</label>
+								<input name=ben_0_6 type=number step=1 value=0 min=0 max=999 /><br />
+							  </div>
+
+							<div class="form-group">
+								<label for="exampleFormControlSelect1">7 a 14 anos</label>
+								<input name=ben_7_14 type=number step=1 value=0 min=0 max=999 /><br />
+							  </div>
+							  
+							  <div class="form-group">
+								<label for="exampleFormControlSelect1">15 a 23 anos</label>
+								<input name=ben_15_23 type=number step=1 value=0 min=0 max=999 /><br />
+							</div>
+
+							<div class="form-group">
+								<label for="exampleFormControlSelect1">24 a 65 anos</label>
+								<input name=ben_24_65 type=number step=1 value=0 min=0 max=999 /><br />
+							  </div>
+						</td>
+
+						<td>
+							<div class="form-group">
+								<label for="exampleFormControlSelect1">66 ou mais anos</label>
+								<input name=ben_66_mais type=number step=1 value=0 min=0 max=999 /><br />
+							  </div>
+
+							  <div class="form-group">
+								<label for="exampleFormControlSelect1">Gênero Masculino</label>
+								<input name=ben_m type=number step=1 value=0 min=0 max=999 /><br />
+							  </div>
+
+							<div class="form-group">
+								<label for="exampleFormControlSelect1">Gênero Feminino</label>
+								<input name=ben_f type=number step=1 value=0 min=0 max=999 /><br />
+							</div>
+						</td>
+					</tbody>
+				  </table>
+				
 				  <div class="form-group">
 					<label for="exampleFormControlSelect1">Data</label>
 					<input name=data type=date value="{{today}}" min="{{today30}}" max="{{today}}" /> <br />

@@ -22,4 +22,4 @@ admin.site.register(Ponto, PontoAdmin)
 admin.site.register(Transacao, TransacaoAdmin)
 admin.site.register(TransacaoFinal, TransacaoFinalAdmin)
 admin.site.register(BeneficiarioFinal)
-
+admin.site.register(Entidade)

@@ -21,7 +21,7 @@ class Usuario(models.Model):
     admin       = models.BooleanField(default=False)
     coop_bool   = models.BooleanField(default=False)
     ponto_bool  = models.BooleanField(default=False)
-    # entidade_bool   = models.BooleanField(default=False)
+    entidade_bool   = models.BooleanField(default=False)
     seagri_bool = models.BooleanField(default=False)
     telefone    = models.CharField(max_length=50, default=None, null=True, blank=True)
     cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
@@ -109,7 +109,7 @@ class Entidade(models.Model):
     email    = models.CharField(max_length=150)
     tipo     = models.IntegerField(null=False, default=1)
     coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True) 
-    # membro   = models.ManyToManyField(Usuario, blank=True)
+    membro   = models.ManyToManyField(Usuario, blank=True)
     limit_beneficiarios = models.IntegerField(null=False, default=0) 
 
     def __str__(self):
