@@ -31,12 +31,14 @@ urlpatterns = [
     path('beneficiario-final-autocomplete/', views.BenefiarioFinalAutocomplete.as_view(), name='beneficiario-final-autocomplete'),
     path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
     path('inserir-transacaofinal-leite/', views.insert_transactions_ponto_menu, name='inserir-transacaofinal-leite'),
+    path('visualizar-transacaofinal-leite/', views.view_transactions_ponto_menu, name='visualizar-transacaofinal-leite'),
     path('visualizar-transacao-leite/', views.view_transactions_coop_menu, name='visualizar-transacao-leite'),
     path('inserir-transacao-entidade-leite/', views.insert_transactions_entidade_menu, name='inserir-transacao-entidade-leite'),
     path('visualizar-transacao-entidade-leite/', views.view_transactions_entidade_menu, name='visualizar-transacao-entidade-leite'),
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),
     path('download-produtores/', views.download_transactions_produtores, name='download-produtores'),
-    # path('download-entidades/', views.download_transactions_entidades, name='download-entidades'),
-    path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos')
+    path('download-entidades/', views.download_transactions_entidades, name='download-entidades'),
+    path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos'),
+    path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades')
     
 ]

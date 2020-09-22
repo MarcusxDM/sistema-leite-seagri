@@ -22,3 +22,13 @@
     background-repeat:   no-repeat !important;
     background-position: center center !important;  
 }
+
+.body-fit{
+    height: calc(100vh + 65px) !important;
+}
+
+@media (max-width: 576px) {
+    .body-fit{
+        height: calc(100vh + 75px) !important;
+    }
+  }

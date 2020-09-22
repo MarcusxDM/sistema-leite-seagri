@@ -55,6 +55,17 @@ def load_pontos(request):
     print(pontos)
     return render(request, 'relatorios/load-pontos.html', {'ponto_list': pontos})
 
+def load_entidades(request):
+    cod_ibge = request.GET.get('cod_ibge')
+    
+    user = Usuario.objects.get(id=request.session['user_id'])
+    if user.admin or user.seagri_bool:
+        entidades = Entidade.objects.filter(cod_ibge__cod_ibge=cod_ibge).order_by('nome')
+    else:
+        entidades = Entidade.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
+    print(entidades, 1)
+    return render(request, 'relatorios/load-entidades.html', {'entidade_list': entidades})
+
 def semana_list(date_time):
     first_day_month     = date_time.replace(day=1)
     last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
@@ -222,28 +233,28 @@ def transacao_final_succes(request):
         return redirect(reverse('inserir-transacaofinal-leite'))
 
 def save_transacao_entidade(request):
-    transacao             = TransacaoEntidade()
-    transacao.litros      = abs(float(request.POST['litros']))
-    transacao.data        = request.POST['data']
-    transacao.entidade    = Entidade.objects.get(pk=request.POST['entidade'])
-    transacao.ben_0_6     = request.POST['ben_0_6']
-    transacao.ben_7_14    = request.POST['ben_7_14']
-    transacao.ben_15_23   = request.POST['ben_15_23']
-    transacao.ben_24_65   = request.POST['ben_24_65']
-    transacao.ben_66_mais = request.POST['ben_66_mais']
-    transacao.ben_m       = request.POST['ben_m']
-    transacao.ben_f       = request.POST['ben_f']
-    try:
-        transacao.save()
-        request.session['insert_leite_final_error'] = ''
-        request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES"])
-        print(transacao.litros, " LITROS DE LEITE ENTREGUES")
-        return redirect(reverse('inserir-transacaofinal-leite'))
-    except:
-        request.session['insert_leite_final_success'] = ''
-        request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
-        print(request.session['insert_leite_final_error'])
-        return redirect(reverse('inserir-transacaofinal-leite'))
+    if request.method == 'POST':
+        transacao             = TransacaoEntidade()
+        transacao.litros      = abs(float(request.POST['litros']))
+        transacao.data        = request.POST['data']
+        transacao.entidade    = Entidade.objects.get(pk=request.POST['entidade'])
+        transacao.ben_0_6     = request.POST['ben_0_6']
+        transacao.ben_7_14    = request.POST['ben_7_14']
+        transacao.ben_15_23   = request.POST['ben_15_23']
+        transacao.ben_24_65   = request.POST['ben_24_65']
+        transacao.ben_66_mais = request.POST['ben_66_mais']
+        transacao.ben_m       = request.POST['ben_m']
+        transacao.ben_f       = request.POST['ben_f']
+        try:
+            transacao.save()
+            request.session['insert_leite_final_error'] = ''
+            request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES"])
+            print(transacao.litros, " LITROS DE LEITE ENTREGUES")
+        except:
+            request.session['insert_leite_final_success'] = ''
+            request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
+            print(request.session['insert_leite_final_error'])
+    return redirect(reverse('inserir-transacao-entidade-leite'))
 
 def index(request):
     request.session.flush()
@@ -568,5 +579,78 @@ def download_transactions_consumidores(request):
             return response
     return redirect(reverse('visualizar-transacaofinal-leite'))
 
-    def download_transactions_entidades():
-        pass
+def download_transactions_entidades(request):
+    if request.method == "POST":
+        date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
+        date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
+
+        if date_inicio > date_fim:
+            d = date_inicio
+            date_inicio = date_fim
+            date_fim = date_inicio
+
+        output = []
+        response = HttpResponse (content_type='text/csv;')
+        response['Content-Disposition'] = 'attachment; filename="Leite_Entidade_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
+        writer = csv.writer(response, delimiter=";")
+        #Header
+        writer.writerow(['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DA ENTIDADE','CNPJ',
+                    'NOME DO REPRESENTANTE', 'C. P. F',	'TELEFONE',	'ENDEREÇO',	'E-MAIL', 'IDENTIFICAÇÃO DA ENTIDADE',
+                    'COOPERATIVA',	'0 - 6 anos',	'7 - 14 anos',	'15 - 23 anos',	'24 - 65 anos',	'Acima de 65 anos',
+                    'M', 'F', 'QUANTIDADE DE LITROS'])
+
+        if request.POST['action'] == "ENTIDADE":
+            # Ponto
+            entidade = Entidade.objects.get(id=request.POST['entidade'])
+
+            # Grouping by Produtor
+            query_set = TransacaoEntidade.objects.filter(entidade=request.POST['entidade'], data__gte=date_inicio, data__lte=date_fim)
+            if query_set:
+                df = pd.DataFrame.from_records(query_set.values())
+                sf = df.groupby(['entidade_id'])[['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros']].sum()
+                df = sf.reset_index()
+
+                df = pd.pivot_table(df, values=['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros'], index=['entidade_id'], fill_value=0)
+                df_dict = df.to_dict('index')
+
+                for key, value in df_dict.items():
+                    if not entidade.rep_cpf:
+                        entidade.rep_cpf = '00000000000'
+                        output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
+                                    (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
+                                    entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
+                                    value['ben_24_65'], value['ben_66_mais'], value['ben_m'], value['ben_f'],str(value['litros']).replace(".", ",")])
+                #CSV Data
+                writer.writerows(output)
+                return response
+            else:
+                return response
+        else:
+            # Pontos
+            pontos_id = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim).distinct().values_list('ponto_id')
+            pontos = Ponto.objects.filter(id__in=pontos_id)
+            for ponto in pontos:
+                output = []
+                # Grouping by Produtor
+                query_set = TransacaoFinal.objects.filter(ponto=ponto, data__gte=date_inicio, data__lte=date_fim)
+                # print(query_set)
+                if query_set:
+                    df = pd.DataFrame.from_records(query_set.values())
+                    sf = df.groupby(['beneficiario_id'])['litros'].sum()
+                    
+                    df = sf.to_frame().reset_index()
+                    
+                    df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
+                    
+                    df_dict = df.to_dict('index')
+                    for key, value in df_dict.items():
+                        consumidor = BeneficiarioFinal.objects.get(pk=key)
+                        if not consumidor.cpf:
+                            consumidor.cpf = '00000000000'
+                        output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                                    (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                    ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                    #CSV Data
+                    writer.writerows(output)
+            return response
+    return redirect(reverse('visualizar-transacao-entidade-leite'))
