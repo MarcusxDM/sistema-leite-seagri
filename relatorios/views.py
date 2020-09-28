@@ -461,7 +461,7 @@ def download_transactions_produtores(request):
         response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
         #Header
-        writer.writerow(['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'Nº DA DAP',
+        writer.writerow(['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'C. P. F.', 'Nº DA DAP',
         	'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA', 
             'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
 
@@ -496,7 +496,9 @@ def download_transactions_produtores(request):
                 
                 prod_local = getCodIBGE(produtor.UF, produtor.municipio)
 
-                output.append([produtor.UF, prod_local.cod_ibge, produtor.municipio, produtor.nome, produtor.dap, produtor.categoria, produtor.enquadramento,
+                if not produtor.cpf:
+                    produtor.cpf = "000.000.000-00"
+                output.append([produtor.UF, prod_local.cod_ibge, produtor.municipio, produtor.nome, produtor.cpf, produtor.dap, produtor.categoria, produtor.enquadramento,
                             coop.sigla, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
             #CSV Data
             writer.writerows(output)
