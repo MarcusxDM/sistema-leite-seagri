@@ -600,57 +600,47 @@ def download_transactions_entidades(request):
                     'M', 'F', 'QUANTIDADE DE LITROS'])
 
         if request.POST['action'] == "ENTIDADE":
-            # Ponto
+            # Entidade
             entidade = Entidade.objects.get(id=request.POST['entidade'])
 
-            # Grouping by Produtor
+            # Grouping by Entidade
             query_set = TransacaoEntidade.objects.filter(entidade=request.POST['entidade'], data__gte=date_inicio, data__lte=date_fim)
             if query_set:
                 df = pd.DataFrame.from_records(query_set.values())
                 sf = df.groupby(['entidade_id'])[['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros']].sum()
                 df = sf.reset_index()
-
+                
                 df = pd.pivot_table(df, values=['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros'], index=['entidade_id'], fill_value=0)
                 df_dict = df.to_dict('index')
-
+                
                 for key, value in df_dict.items():
-                    if not entidade.rep_cpf:
-                        entidade.rep_cpf = '00000000000'
-                        output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
-                                    (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
-                                    entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
-                                    value['ben_24_65'], value['ben_66_mais'], value['ben_m'], value['ben_f'],str(value['litros']).replace(".", ",")])
+                    output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
+                                (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
+                                entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
+                                value['ben_24_65'], value['ben_66_mais'], value['ben_m'], value['ben_f'],str(value['litros']).replace(".", ",")])
                 #CSV Data
                 writer.writerows(output)
                 return response
             else:
                 return response
         else:
-            # Pontos
-            pontos_id = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim).distinct().values_list('ponto_id')
-            pontos = Ponto.objects.filter(id__in=pontos_id)
-            for ponto in pontos:
-                output = []
-                # Grouping by Produtor
-                query_set = TransacaoFinal.objects.filter(ponto=ponto, data__gte=date_inicio, data__lte=date_fim)
-                # print(query_set)
-                if query_set:
-                    df = pd.DataFrame.from_records(query_set.values())
-                    sf = df.groupby(['beneficiario_id'])['litros'].sum()
-                    
-                    df = sf.to_frame().reset_index()
-                    
-                    df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
-                    
-                    df_dict = df.to_dict('index')
-                    for key, value in df_dict.items():
-                        consumidor = BeneficiarioFinal.objects.get(pk=key)
-                        if not consumidor.cpf:
-                            consumidor.cpf = '00000000000'
-                        output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
-                                    (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
-                                    ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
-                    #CSV Data
-                    writer.writerows(output)
+
+            query_set = TransacaoEntidade.objects.filter(data__gte=date_inicio, data__lte=date_fim)
+            if query_set:
+                df = pd.DataFrame.from_records(query_set.values())
+                sf = df.groupby(['entidade_id'])[['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros']].sum()
+                df = sf.reset_index()
+                
+                df = pd.pivot_table(df, values=['ben_0_6', 'ben_7_14', 'ben_15_23', 'ben_24_65', 'ben_66_mais', 'ben_m', 'ben_f', 'litros'], index=['entidade_id'], fill_value=0)
+                df_dict = df.to_dict('index')
+                
+                for key, value in df_dict.items():
+                    entidade = Entidade.objects.get(id=key)
+                    output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
+                                (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
+                                entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
+                                value['ben_24_65'], value['ben_66_mais'], value['ben_m'], value['ben_f'],str(value['litros']).replace(".", ",")])
+                #CSV Data
+                writer.writerows(output)
             return response
     return redirect(reverse('visualizar-transacao-entidade-leite'))

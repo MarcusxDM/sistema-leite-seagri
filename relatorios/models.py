@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from dal import autocomplete
 from django import forms
+from cpf_field.models import CPFField
 
 class Leite(models.TextChoices):
         VACA  = 1, "VACA"
@@ -41,7 +42,8 @@ class Cooperativa(models.Model):
             return self.nome
 
 class Beneficiario(models.Model):
-    dap           = models.CharField(max_length=25)
+    cpf           = CPFField('cpf', primary_key=True)
+    dap           = models.CharField(max_length=50)
     enquadramento = models.CharField(max_length=25)
     categoria     = models.CharField(max_length=50)
     nome          = models.CharField(max_length=150)
@@ -112,7 +114,6 @@ class Entidade(models.Model):
     tipo     = models.IntegerField(null=False, default=1)
     coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True) 
     membro   = models.ManyToManyField(Usuario, blank=True)
-    limit_beneficiarios = models.IntegerField(null=False, default=0) 
 
     def __str__(self):
         return self.cod_ibge.municipio+' | '+self.nome
