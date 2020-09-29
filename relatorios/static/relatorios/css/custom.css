@@ -32,3 +32,13 @@
         height: calc(100vh + 75px) !important;
     }
   }
+
+.last-ben{
+    height: 15vh;
+    width: auto;
+    overflow:auto;
+    ;color:black;
+    scrollbar-base-color:gold;
+    font-family:sans-serif;
+    padding:10px;
+}

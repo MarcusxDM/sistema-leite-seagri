@@ -13,7 +13,7 @@ class TransacaoFinalAdmin(admin.ModelAdmin):
     list_filter = (['data'])
 
 class TransacaoAdmin(admin.ModelAdmin):
-    search_fields = (['beneficiario__nome', 'cooperativa__nome', 'beneficiario__cod_ibge__municipio'])
+    search_fields = (['beneficiario__nome', 'cooperativa__nome', 'beneficiario__municipio', 'cooperativa__sigla'])
     list_filter = (['data'])
 
 admin.site.register(Usuario, UsuarioAdmin)

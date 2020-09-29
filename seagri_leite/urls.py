@@ -39,6 +39,7 @@ urlpatterns = [
     path('download-produtores/', views.download_transactions_produtores, name='download-produtores'),
     path('download-entidades/', views.download_transactions_entidades, name='download-entidades'),
     path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos'),
-    path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades')
+    path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades'),
+    path('ajax/last-beneficiarios/', views.last_beneficiarios, name='ajax_last_beneficiarios')
     
 ]

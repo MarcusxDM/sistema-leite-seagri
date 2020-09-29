@@ -81,7 +81,7 @@
 			</script>
 			{% endblock %}
 			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
-			<form action="{% url 'save-transacao-ponto' %}" method="post" style="margin-top: 20vh;">
+			<form action="{% url 'save-transacao-ponto' %}" id="Teste" data-pontos-url="{% url 'ajax_last_beneficiarios' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
 				<div class="form-group ">
 					<label for="exampleFormControlSelect1">NIS | Beneficiário</label>
@@ -121,6 +121,12 @@
 				<p style="color: green; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_final_success }}</p>
 				{% endif %}
 			</b>
+
+			<b>Beneficiários da Semana Passada:</b>
+				<div id="lastBeneficiarios" class="last-ben">
+					{% include 'relatorios/last-beneficiarios.html' %}
+				</div>
+			
 			</div>
 			  <div>
 			</div>
@@ -146,6 +152,38 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
+	<script>
+		$("#exampleFormControlSelect1").change(function () {
+		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
+		  var ponto = $(this).val();  // get the selected country ID from the HTML input
+	
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'ponto': ponto       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#lastBeneficiarios").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
 
+		window.onload = function() {
+				var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
+				var ponto = $("#exampleFormControlSelect1").val();  // get the selected country ID from the HTML input
+			
+				$.ajax({                       // initialize an AJAX request
+					url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+					data: {
+					'ponto': ponto       // add the country id to the GET parameters
+					},
+					success: function (data) {   // `data` is the return of the `load_cities` view function
+					$("#lastBeneficiarios").html(data);  // replace the contents of the city input with the data that came from the server
+					}
+				});
+			
+				};
+	  </script>
 </body>
 </html>

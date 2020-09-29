@@ -646,3 +646,9 @@ def download_transactions_entidades(request):
                 writer.writerows(output)
             return response
     return redirect(reverse('visualizar-transacao-entidade-leite'))
+
+def last_beneficiarios(request):
+    ponto_id = request.GET.get('ponto')
+    ben_ids = TransacaoFinal.objects.filter(data__range=week_start_end(datetime.now() - timedelta(7)), ponto__id=ponto_id).values_list('beneficiario').distinct()
+    ben_query = BeneficiarioFinal.objects.filter(nis__in=ben_ids)
+    return render(request, 'relatorios/last-beneficiarios.html', {'beneficiarios_list': ben_query})
