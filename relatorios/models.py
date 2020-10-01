@@ -104,8 +104,8 @@ class TransacaoFinal(models.Model):
 class Entidade(models.Model):
     cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
     nome     = models.CharField(max_length=150)
-    cnpj     = models.CharField(max_length=50)
-    rep_cpf  = models.CharField(max_length=50)
+    cnpj     = models.CharField(max_length=50, null=True, blank=True)
+    rep_cpf  = models.CharField(max_length=50, null=True, blank=True)
     rep_nome = models.CharField(max_length=150)
     rep_end  = models.CharField(max_length=150,  blank=True)
     rep_tel  = models.CharField(max_length=50)
