@@ -35,7 +35,9 @@ class Cooperativa(models.Model):
     cnpj     = models.CharField(max_length=50, null=True)
     responsavel = models.CharField(max_length=50, null=True)
     endereco    = models.CharField(max_length=150, null=True)
-    membro   = models.ManyToManyField(Usuario)
+    membro      = models.ManyToManyField(Usuario)
+    cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
+    dap         = models.CharField(max_length=50)
 
     def __str__(self):
             return self.nome
@@ -131,3 +133,12 @@ class TransacaoEntidade(models.Model):
 
     def __str__(self):
         return self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.entidade.nome + " | " + self.entidade.cod_ibge.municipio
+
+class Laticinio(models.Model):
+    cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
+    nome     = models.CharField(max_length=150)
+    cnpj     = models.CharField(max_length=50, null=True, blank=True)
+    coop     = models.ManyToManyField(Cooperativa, blank=True)
+
+    def __str__(self):
+        return self.cod_ibge.municipio+' | '+self.nome
