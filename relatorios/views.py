@@ -650,5 +650,11 @@ def download_transactions_entidades(request):
 def last_beneficiarios(request):
     ponto_id = request.GET.get('ponto')
     ben_ids = TransacaoFinal.objects.filter(data__range=week_start_end(datetime.now() - timedelta(7)), ponto__id=ponto_id).values_list('beneficiario').distinct()
-    ben_query = BeneficiarioFinal.objects.filter(nis__in=ben_ids)
+    ben_ids_this_week = TransacaoFinal.objects.filter(data__range=week_start_end(datetime.now()), ponto__id=ponto_id).values_list('beneficiario').distinct()
+
+    ben_ids = [x[0] for x in ben_ids] 
+    ben_ids_this_week = [x[0] for x in ben_ids_this_week]
+    history_ben = set(ben_ids) - set(ben_ids_this_week)
+    ben_query = BeneficiarioFinal.objects.filter(nis__in=history_ben)
+    
     return render(request, 'relatorios/last-beneficiarios.html', {'beneficiarios_list': ben_query})
