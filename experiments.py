@@ -4,6 +4,7 @@ import random
 import os
 import relatorios
 from django.core.mail import send_mail
+from datetime import datetime
 
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'seagri_leite.settings'
@@ -65,8 +66,31 @@ def sendEmails():
         except:
             print("######### ERRO "+usuario.email+" #########\n")
 
+def updateDap(csv_path):
+    with open(csv_path, 'r', encoding='utf-8') as csvfile:
+        r = csv.reader(csvfile, delimiter=';')
+        next(r, None)
+        for row in r:
+            print("\nPRODUTOR:\n")
+            print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
 
+            produtor, created = relatorios.models.Beneficiario.objects.update_or_create(
+                                                        dap=row[0],
+                                                        defaults={
+                                                            'enquadramento': row[1],
+                                                            'categoria'    : row[2],
+                                                            'nome'         : row[3],
+                                                            'UF'           : row[5],
+                                                            'municipio'    : row[6],
+                                                            'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
+                                                            'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
+                                                            },
+                                                        )
+            if created:
+                print("################## CREATED ##################")
+            else:
+                print("################## UPDATED ##################")
 
 if __name__ == "__main__":
-    sendEmails()
+    updateDap('dap\\teste.csv')
 

@@ -11,6 +11,8 @@ class Localizacao(models.Model):
     cod_ibge = models.CharField(max_length=7, primary_key=True)
     uf       = models.CharField(max_length=2)
     municipio = models.CharField(max_length=50)
+    territorio = models.CharField(max_length=50, null=True, default='')
+
     def __str__(self):
             return self.municipio
 
@@ -37,13 +39,14 @@ class Cooperativa(models.Model):
     endereco    = models.CharField(max_length=150, null=True)
     membro      = models.ManyToManyField(Usuario)
     cod_ibge    = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
-    dap         = models.CharField(max_length=50)
+    dap         = models.CharField(max_length=50, null=True, default='')
 
     def __str__(self):
             return self.nome
 
 class Beneficiario(models.Model):
     cpf           = models.CharField(max_length=14, null=True)
+    sexo          = models.CharField(max_length=1, null=True, default='')
     dap           = models.CharField(max_length=50, primary_key=True)
     enquadramento = models.CharField(max_length=25)
     categoria     = models.CharField(max_length=50)
