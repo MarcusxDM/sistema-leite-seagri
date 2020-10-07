@@ -92,5 +92,5 @@ def updateDap(csv_path):
                 print("################## UPDATED ##################")
 
 if __name__ == "__main__":
-    updateDap('dap\\teste.csv')
+    updateDap('dap/cafdapativa.csv')
 
