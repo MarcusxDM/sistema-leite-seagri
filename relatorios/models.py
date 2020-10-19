@@ -95,6 +95,10 @@ class Transacao(models.Model):
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo + " | " + self.cooperativa.nome
+        
+    class Meta:
+        verbose_name = "Transação Produtor"
+        verbose_name_plural = "Transações de Produtores"
 
 
 class TransacaoFinal(models.Model):
@@ -105,6 +109,10 @@ class TransacaoFinal(models.Model):
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio
+    
+    class Meta:
+        verbose_name = "Transação Consumidor"
+        verbose_name_plural = "Transações para Consumidores"
 
 class Entidade(models.Model):
     cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
@@ -136,6 +144,10 @@ class TransacaoEntidade(models.Model):
 
     def __str__(self):
         return self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.entidade.nome + " | " + self.entidade.cod_ibge.municipio
+    
+    class Meta:
+        verbose_name = "Transação Entidade"
+        verbose_name_plural = "Transações de Entidades"
 
 class Laticinio(models.Model):
     cod_ibge = models.ForeignKey(Localizacao, on_delete=models.CASCADE, null=True)
