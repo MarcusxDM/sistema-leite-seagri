@@ -202,6 +202,7 @@ def transacao_succes(request):
     transacao.tipo         = request.POST['tipo']
     transacao.cooperativa  = Cooperativa.objects.get(pk=request.POST['cooperativa'])
     transacao.data         = request.POST['data']
+    transacao.user         = Usuario.objects.get(pk=request.session['user_id'])
     try:
         transacao.save()
         request.session['insert_leite_error'] = ''
@@ -220,6 +221,7 @@ def transacao_final_succes(request):
     transacao.litros       = abs(float(request.POST['litros']))
     transacao.ponto        = Ponto.objects.get(pk=request.POST['ponto'])
     transacao.data         = request.POST['data']
+    transacao.user         = Usuario.objects.get(pk=request.session['user_id'])
     try:
         transacao.save()
         request.session['insert_leite_final_error'] = ''
@@ -245,6 +247,7 @@ def save_transacao_entidade(request):
         transacao.ben_66_mais = request.POST['ben_66_mais']
         transacao.ben_m       = request.POST['ben_m']
         transacao.ben_f       = request.POST['ben_f']
+        transacao.user        = Usuario.objects.get(pk=request.session['user_id'])
         try:
             transacao.save()
             request.session['insert_leite_final_error'] = ''

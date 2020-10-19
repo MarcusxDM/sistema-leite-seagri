@@ -92,6 +92,7 @@ class Transacao(models.Model):
     cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE)
+    user         = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " de " + self.tipo + " | " + self.cooperativa.nome
@@ -106,6 +107,7 @@ class TransacaoFinal(models.Model):
     ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
     data         = models.DateField(default=timezone.now)
     beneficiario = models.ForeignKey(BeneficiarioFinal, on_delete=models.CASCADE)
+    user         = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
             return self.beneficiario.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio
@@ -126,7 +128,7 @@ class Entidade(models.Model):
     tipo     = models.IntegerField(null=False, default=1)
     coop     = models.ForeignKey(Cooperativa, on_delete=models.CASCADE, null=True) 
     membro   = models.ManyToManyField(Usuario, blank=True)
-
+    
     def __str__(self):
         return self.cod_ibge.municipio+' | '+self.nome
 
@@ -140,7 +142,8 @@ class TransacaoEntidade(models.Model):
     ben_24_65   = models.IntegerField(null=False, default=0)
     ben_66_mais = models.IntegerField(null=False, default=0)
     ben_m       = models.IntegerField(null=False, default=0)
-    ben_f       = models.IntegerField(null=False, default=0)   
+    ben_f       = models.IntegerField(null=False, default=0)
+    user        = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)   
 
     def __str__(self):
         return self.data.strftime("%d/%m/%Y") + " | " + str(self.litros) + " | " + self.entidade.nome + " | " + self.entidade.cod_ibge.municipio
