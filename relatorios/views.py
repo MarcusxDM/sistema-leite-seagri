@@ -10,6 +10,7 @@ import csv
 import pandas as pd
 import numpy as np
 from unicodedata import normalize
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def remover_acentos(txt):
     return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
@@ -661,3 +662,42 @@ def last_beneficiarios(request):
     ben_query = BeneficiarioFinal.objects.filter(nis__in=history_ben)
     
     return render(request, 'relatorios/last-beneficiarios.html', {'beneficiarios_list': ben_query})
+
+def load_transacoes(request):
+    date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
+    # transacao_list = TransacaoFinal.objects.filter(ponto_id=2, data=date_search)
+    transacao_list = TransacaoFinal.objects.all()
+    print(transacao_list)
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(transacao_list, 10)
+    try:
+        transacoes = paginator.page(page)
+    except PageNotAnInteger:
+        transacoes = paginator.page(1)
+    except EmptyPage:
+        transacoes = paginator.page(paginator.num_pages)
+
+    return render(request, 'relatorios/load-transacoes-ponto.html', { 'transacoes': transacoes })
+
+def manage_transactions_ponto_menu(request):
+#try:
+    if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin or user.seagri_bool:
+            municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+            municipio_all = True
+        else:
+            ponto_list = list(Ponto.objects.filter(membro=user))
+            municipio_list = set([p.cod_ibge for p in ponto_list])
+            municipio_all = False
+        ponto_list = []
+        today = datetime.now().date().strftime('%Y-%m-%d')
+        return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                    'today'     : today,
+                                                                    'municipio_list' : municipio_list,
+                                                                    'municipio_all' : municipio_all})
+    else:
+        return redirect(reverse('index'))
+#except:
+    return redirect(reverse('index'))

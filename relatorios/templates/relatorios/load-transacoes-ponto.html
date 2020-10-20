@@ -1,0 +1,40 @@
+<table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>First name</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transacao in transacoes %}
+        <tr>
+          <td>{{ transacao.data }}</td>
+          <td>{{ transacao.beneficiario_id }}</td>
+          <td>{{ transacao.litros }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  {% if transacoes.has_other_pages %}
+    <ul class="pagination">
+      {% if transacoes.has_previous %}
+        <li><button type="button" name="pagination-link" page="{{ transacoes.previous_page_number }}">&laquo;</button></li>
+      {% else %}
+        <li class="disabled"><span>&laquo;</span></li>
+      {% endif %}
+      {% for i in transacoes.paginator.page_range %}
+        {% if transacoes.number == i %}
+          <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+        {% else %}
+          <li><button type="button" name="pagination-link" href="" page="{{ i }}">{{ i }}</button></li>
+        {% endif %}
+      {% endfor %}
+      {% if transacoes.has_next %}
+        <li><button type="button" id="pagination-link" name="pagination-link" href="" page="{{ transacoes.next_page_number }}">&raquo;</button></li>
+      {% else %}
+        <li class="disabled"><span>&raquo;</span></li>
+      {% endif %}
+    </ul>
+  {% endif %}

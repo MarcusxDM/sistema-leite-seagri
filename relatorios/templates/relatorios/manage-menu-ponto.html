@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	{% include 'relatorios/ga-tag.html' %}
+	<title>Home</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->
+	{% load static %}	
+	<link rel="icon" type="image/png" href="{% static "relatorios/images/icons/favicon.ico" %}"    />
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/bootstrap/css/bootstrap.min.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/fonts/font-awesome-4.7.0/css/font-awesome.min.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/fonts/Linearicons-Free-v1.0.0/icon-font.min.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/animate/animate.css" %} ">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/css-hamburgers/hamburgers.min.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/animsition/css/animsition.min.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/select2/select2.min.css" %} ">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/daterangepicker/daterangepicker.css" %} ">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/util.css" %} ">
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/main.css" %} ">
+	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/custom.css" %} ">
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter back" style="min-height: 100%;">
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<a class="navbar-brand" href="#">Sistema Leite</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			  <span class="navbar-toggler-icon"></span>
+			</button>
+		  
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			  <ul class="navbar-nav mr-auto">
+				<li class="nav-item active">
+				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+				</li>
+			  </ul>
+			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
+				{% csrf_token %}
+				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>
+			  </form>
+			</div>
+		  </nav>
+		<div class="row w-100" style="margin-top: 13%">
+		<div class="col align-self-center">
+		<div class="container insert-form" style="background-color: whitesmoke;" >
+			
+			<form  id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+				{% csrf_token %}
+
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Município</label>
+					<select name=ponto class="form-control" id="cod_ibge" onchange="func2()" required>
+					  <option value=>Escolha aqui</option>
+				
+					  {% for municipio in municipio_list %}
+					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
+					  {% endfor %}
+					</select>
+				  </div>
+				  
+				  <div class="form-group">
+					<label for="exampleFormControlSelect1">Ponto</label>
+					<select name=ponto class="form-control" id="pontoSelect" required>
+					  {% include 'relatorios/load-pontos.html' %}
+					</select>
+				  </div>			  
+			
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data</label>
+					<input name="data-search"  id="data-search" type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
+
+
+				<div id="transacoes-table">
+					{% include 'relatorios/load-pontos.html' %}
+				</div>
+				
+				  
+			  </form>
+			  <div class="container-login100-form-btn">
+				<button class="login100-form-btn" id="search">
+					Procurar
+				</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/jquery/jquery-3.2.1.min.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/animsition/js/animsition.min.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/bootstrap/js/popper.js" %} "></script>
+	<script src="{% static "relatorios/vendor/bootstrap/js/bootstrap.min.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/select2/select2.min.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/daterangepicker/moment.min.js" %} "></script>
+	<script src="{% static "relatorios/vendor/daterangepicker/daterangepicker.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="{% static "relatorios/js/main.js" %} "></script>
+	<script>
+		$("#cod_ibge").change(function () {
+		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
+		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
+	
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'cod_ibge': cod_ibge       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#pontoSelect").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
+
+		function func2(){
+			if(document.getElementById('cod_ibge').value == 0) {
+				document.getElementById('pontoSelect').value = 0
+			}
+		}
+
+		$("#search").click(function () {
+		  var url = $("#Teste").attr("data-transacoes-url");  // get the url of the `load_cities` view
+		  var ponto = $("#pontoSelect").val();  // get the selected country ID from the HTML input
+		  var data_search = $("#data-search").val();
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'ponto': ponto,
+			  'data-search': data_search       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#transacoes-table").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
+
+		function go_page() {
+			var url = $("#Teste").attr("data-transacoes-url");
+		  	var param = $(this).attr("page");
+		  	$.ajax({                       // initialize an AJAX request
+				url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+				data: {
+					'page': param			        
+				},
+				success: function (data) {   // `data` is the return of the `load_cities` view function
+				$("#transacoes-table").html(data);  // replace the contents of the city input with the data that came from the server
+				}
+		  });
+		}
+	  </script>
+</body>
+</html>
