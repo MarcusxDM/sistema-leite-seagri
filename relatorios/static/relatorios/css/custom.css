@@ -42,3 +42,13 @@
     font-family:sans-serif;
     padding:10px;
 }
+
+.tableFixHead          { 
+    overflow-y: auto; 
+    height: 400px; 
+}
+
+.tableFixHead thead th { 
+    position: sticky; top: 0; 
+    background:#eee;
+}

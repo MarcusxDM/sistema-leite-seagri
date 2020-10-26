@@ -1,4 +1,5 @@
-<table class="table table-bordered">
+<div class="tableFixHead">
+<table class="table table-hover ">
     <thead>
       <tr>
         <th>Username</th>
@@ -16,25 +17,26 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   
   {% if transacoes.has_other_pages %}
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
       {% if transacoes.has_previous %}
-        <li><button type="button" name="pagination-link" page="{{ transacoes.previous_page_number }}">&laquo;</button></li>
+        <li class="page-item"><button type="button" name="pagination-link" class="page-link" onclick="go_page(this)" page="{{ transacoes.previous_page_number }}">&laquo;</button></li>
       {% else %}
-        <li class="disabled"><span>&laquo;</span></li>
+        <li class="page-item" ><span class="page-link">&laquo;</span></li>
       {% endif %}
       {% for i in transacoes.paginator.page_range %}
         {% if transacoes.number == i %}
-          <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+          <li class="active page-item"><span class="page-link">{{ i }} <span class="sr-only" class="page-link">(current)</span></span></li>
         {% else %}
-          <li><button type="button" name="pagination-link" href="" page="{{ i }}">{{ i }}</button></li>
+          <li class="page-item"><button type="button" name="pagination-link" class="page-link" onclick="go_page(this)" href="" page="{{ i }}">{{ i }}</button></li>
         {% endif %}
       {% endfor %}
       {% if transacoes.has_next %}
-        <li><button type="button" id="pagination-link" name="pagination-link" href="" page="{{ transacoes.next_page_number }}">&raquo;</button></li>
+        <li class="page-item"><button type="button" id="pagination-link" name="pagination-link" class="page-link" onclick="go_page(this)" href="" page="{{ transacoes.next_page_number }}">&raquo;</button></li>
       {% else %}
-        <li class="disabled"><span>&raquo;</span></li>
+        <li class="page-item"><span class="page-link">&raquo;</span></li>
       {% endif %}
     </ul>
   {% endif %}
