@@ -702,3 +702,10 @@ def manage_transactions_ponto_menu(request):
         return redirect(reverse('index'))
 #except:
     return redirect(reverse('index'))
+
+def delete_transacao_ponto(request):
+    if request.method == "POST":
+        transacao = TransacaoFinal.objects.get(pk=request.POST['ponto'])
+        transacao.delete()
+    return 
+        
