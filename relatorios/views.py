@@ -308,7 +308,7 @@ def insert_transactions_coop_menu(request):
                 coop_list = list(Cooperativa.objects.filter(membro=user).order_by('nome'))
             form = TransacaoProdutor()
             today = datetime.now().date().strftime('%Y-%m-%d')
-            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
             return render(request, 'relatorios/insert-menu-coop.html', {'user'      : user,
                                                                         'coop_list' : coop_list, 
                                                                         'form'      : form, 
@@ -329,7 +329,7 @@ def insert_transactions_ponto_menu(request):
                 ponto_list = list(Ponto.objects.filter(membro=user).order_by('nome'))
             form = TransacaoBeneficiarioFinal()
             today = datetime.now().date().strftime('%Y-%m-%d')
-            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
             return render(request, 'relatorios/insert-menu-ponto.html', {'user'      : user,
                                                                         'ponto_list' : ponto_list, 
                                                                         'form'      : form, 
@@ -349,7 +349,7 @@ def insert_transactions_entidade_menu(request):
             else:
                 entidade_list = list(Entidade.objects.filter(membro=user).order_by('nome'))
             today = datetime.now().date().strftime('%Y-%m-%d')
-            today30 = (datetime.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+            today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
             return render(request, 'relatorios/insert-menu-entidade.html', {'user'      : user,
                                                                             'entidade_list' : entidade_list, 
                                                                             'today'     : today, 
