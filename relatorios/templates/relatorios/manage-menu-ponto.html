@@ -154,12 +154,14 @@
 
 		function go_page(e) {
 			var url = $("#Teste").attr("data-transacoes-url");
+			var ponto = $("#pontoSelect").val();
 		  	var page = $(e).attr("page");
 			var data_search = $("#data-search").val();
 			
 		  	$.ajax({                       // initialize an AJAX request
 				url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
 				data: {
+					'ponto' : ponto,
 					'page': page,
 					'data-search': data_search			        
 				},

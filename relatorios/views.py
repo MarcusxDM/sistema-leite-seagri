@@ -665,12 +665,8 @@ def last_beneficiarios(request):
 
 def load_transacoes(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
-    
-    # transacao_list = TransacaoFinal.objects.filter(ponto_id=2, data=date_search)
-    transacao_list = TransacaoFinal.objects.all()
-    print(transacao_list)
+    transacao_list = TransacaoFinal.objects.filter(ponto_id=request.GET['ponto'], data=date_search)
     page = request.GET.get('page', 1)
-    print(page)
     paginator = Paginator(transacao_list, 10)
     try:
         transacoes = paginator.page(page)
