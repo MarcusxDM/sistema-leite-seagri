@@ -665,7 +665,7 @@ def last_beneficiarios(request):
 
 def load_transacoes(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
-    transacao_list = TransacaoFinal.objects.filter(ponto_id=request.GET['ponto'], data=date_search)
+    transacao_list = TransacaoFinal.objects.select_related('beneficiario').filter(ponto_id=request.GET['ponto'], data=date_search)
     page = request.GET.get('page', 1)
     paginator = Paginator(transacao_list, 10)
     try:
@@ -678,30 +678,30 @@ def load_transacoes(request):
     return render(request, 'relatorios/load-transacoes-ponto.html', { 'transacoes': transacoes })
 
 def manage_transactions_ponto_menu(request):
-#try:
-    if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
-        user = Usuario.objects.get(id=request.session['user_id'])
-        if user.admin or user.seagri_bool:
-            municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
-            municipio_all = True
+    try:
+        if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+                municipio_all = True
+            else:
+                ponto_list = list(Ponto.objects.filter(membro=user))
+                municipio_list = set([p.cod_ibge for p in ponto_list])
+                municipio_all = False
+            ponto_list = []
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                        'today'     : today,
+                                                                        'municipio_list' : municipio_list,
+                                                                        'municipio_all' : municipio_all})
         else:
-            ponto_list = list(Ponto.objects.filter(membro=user))
-            municipio_list = set([p.cod_ibge for p in ponto_list])
-            municipio_all = False
-        ponto_list = []
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                    'today'     : today,
-                                                                    'municipio_list' : municipio_list,
-                                                                    'municipio_all' : municipio_all})
-    else:
+            return redirect(reverse('index'))
+    except:
         return redirect(reverse('index'))
-#except:
-    return redirect(reverse('index'))
 
 def delete_transacao_ponto(request):
     if request.method == "POST":
-        transacao = TransacaoFinal.objects.get(pk=request.POST['ponto'])
+        transacao = TransacaoFinal.objects.get(pk=request.POST['transacao'])
         transacao.delete()
-    return 
+    return render(request, 'relatorios/load-transacoes-ponto.html')
         
