@@ -55,26 +55,17 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form  id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form  id="Teste" data-transacoes-url="{% url 'ajax_load_transacoes' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Município</label>
-					<select name=ponto class="form-control" id="cod_ibge" onchange="func2()" required>
-					  <option value=>Escolha aqui</option>
-				
-					  {% for municipio in municipio_list %}
-					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
-					  {% endfor %}
-					</select>
-				  </div>
-				  
-				  <div class="form-group">
-					<label for="exampleFormControlSelect1">Ponto</label>
-					<select name=ponto class="form-control" id="pontoSelect" required>
-					  {% include 'relatorios/load-pontos.html' %}
-					</select>
-				  </div>			  
+				  <label for="exampleFormControlSelect1">Cooperativa</label>
+				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1" required>
+					{% for coop in coop_list %}
+					<option value={{coop.id}}>{{coop.nome}}</option>
+					{% endfor %}
+				  </select>
+				</div>			  
 			
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Data</label>
@@ -83,7 +74,7 @@
 
 
 				<div id="transacoes-table">
-					{% include 'relatorios/load-pontos.html' %}
+					<!-- load-transacoes-coop by ajax-->
 				</div>
 				
 				  
