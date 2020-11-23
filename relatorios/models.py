@@ -59,6 +59,10 @@ class Beneficiario(models.Model):
     def __str__(self):
             return self.dap+" | "+self.nome
 
+    class Meta:
+        verbose_name = "Produtor"
+        verbose_name_plural = "Produtores"
+
 class BeneficiarioFinal(models.Model):    
     cpf                 = models.CharField(max_length=11, null=True)
     nome                = models.CharField(max_length=150, null=True)
@@ -72,6 +76,10 @@ class BeneficiarioFinal(models.Model):
 
     def __str__(self):
             return self.nis+" | "+self.nome
+    
+    class Meta:
+        verbose_name = "Consumidor"
+        verbose_name_plural = "Consumidores"
 
 
 class Ponto(models.Model):

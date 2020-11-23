@@ -20,11 +20,19 @@ class TransacaoAdmin(admin.ModelAdmin):
 class TransacaoEntidadeAdmin(admin.ModelAdmin):
     list_filter = ([('data', DateRangeFilter)])
 
+class BeneficiarioFinalAdmin(admin.ModelAdmin):
+    search_fields = (['nome', 'nis', 'cod_ibge_munic_nasc'])
+    list_filter = ([('data_att', DateRangeFilter)])
+
+class BeneficiarioAdmin(admin.ModelAdmin):
+    search_fields = (['nome', 'dap', 'UF', 'municipio'])
+
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Cooperativa)
 admin.site.register(Ponto, PontoAdmin)
 admin.site.register(Transacao, TransacaoAdmin)
 admin.site.register(TransacaoFinal, TransacaoFinalAdmin)
-admin.site.register(BeneficiarioFinal)
+admin.site.register(BeneficiarioFinal, BeneficiarioFinalAdmin)
+admin.site.register(Beneficiario, BeneficiarioAdmin)
 admin.site.register(Entidade)
 admin.site.register(TransacaoEntidade, TransacaoEntidadeAdmin)
