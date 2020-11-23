@@ -419,6 +419,7 @@ def view_transactions_ponto_menu(request):
                 municipio_all = False
             ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
+            first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
             return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                         'today'     : today,
                                                                         'municipio_list' : municipio_list,
@@ -704,8 +705,10 @@ def manage_transactions_ponto_menu(request):
                 municipio_all = False
             ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
+            first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
             return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                         'today'     : today,
+                                                                        'first_day_month' : first_day_month,
                                                                         'municipio_list' : municipio_list,
                                                                         'municipio_all' : municipio_all})
         else:
@@ -722,8 +725,10 @@ def manage_transactions_coop_menu(request):
             else:
                 coop_list = list(Cooperativa.objects.filter(membro=user))
             today = datetime.now().date().strftime('%Y-%m-%d')
+            first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
             return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
-                                                                        'today'     : today})
+                                                                        'today'     : today,
+                                                                        'first_day_month' : first_day_month})
         else:
             return redirect(reverse('index'))
     except:
