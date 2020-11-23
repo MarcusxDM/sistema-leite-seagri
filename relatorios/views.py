@@ -663,7 +663,7 @@ def last_beneficiarios(request):
     
     return render(request, 'relatorios/last-beneficiarios.html', {'beneficiarios_list': ben_query})
 
-def load_transacoes(request):
+def load_transacoes_ponto(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
     transacao_list = TransacaoFinal.objects.select_related('beneficiario').filter(ponto_id=request.GET['ponto'], data=date_search)
     page = request.GET.get('page', 1)
@@ -676,6 +676,20 @@ def load_transacoes(request):
         transacoes = paginator.page(paginator.num_pages)
 
     return render(request, 'relatorios/load-transacoes-ponto.html', { 'transacoes': transacoes })
+
+def load_transacoes_coop(request):
+    date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
+    transacao_list = Transacao.objects.select_related('beneficiario').filter(cooperativa_id=request.GET['coop'], data=date_search)
+    page = request.GET.get('page', 1)
+    paginator = Paginator(transacao_list, 10)
+    try:
+        transacoes = paginator.page(page)
+    except PageNotAnInteger:
+        transacoes = paginator.page(1)
+    except EmptyPage:
+        transacoes = paginator.page(paginator.num_pages)
+
+    return render(request, 'relatorios/load-transacoes-coop.html', { 'transacoes': transacoes })
 
 def manage_transactions_ponto_menu(request):
     try:
@@ -699,9 +713,31 @@ def manage_transactions_ponto_menu(request):
     except:
         return redirect(reverse('index'))
 
+def manage_transactions_coop_menu(request):
+    try:
+        if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                coop_list = list(Cooperativa.objects.all())
+            else:
+                coop_list = list(Cooperativa.objects.filter(membro=user))
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
+                                                                        'today'     : today})
+        else:
+            return redirect(reverse('index'))
+    except:
+        return redirect(reverse('index'))
+
 def delete_transacao_ponto(request):
     if request.method == "POST":
         transacao = TransacaoFinal.objects.get(pk=request.POST['transacao'])
         transacao.delete()
     return render(request, 'relatorios/load-transacoes-ponto.html')
+
+def delete_transacao_coop(request):
+    if request.method == "POST":
+        transacao = Transacao.objects.get(pk=request.POST['transacao'])
+        transacao.delete()
+    return render(request, 'relatorios/load-transacoes-coop.html')
         

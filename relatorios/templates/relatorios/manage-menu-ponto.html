@@ -55,7 +55,7 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form  id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form  id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes_ponto' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 
 				<div class="form-group">
