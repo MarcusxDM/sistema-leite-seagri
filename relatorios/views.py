@@ -522,7 +522,6 @@ def download_transactions_produtores(request):
                     month_val.append(value[v])
                 for i in dff_dict[key].items():
                     month_val.append(i[1])
-                    print(i[1])
                 prod_local = getCodIBGE(produtor.UF, produtor.municipio)
 
                 if not produtor.cpf:
