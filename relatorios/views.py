@@ -452,6 +452,8 @@ def view_transactions_entidade_menu(request):
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
+    header = ['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'C. P. F.', 'Nº DA DAP',
+              'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA']
     if request.method == "POST":
         date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
         date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
@@ -465,11 +467,7 @@ def download_transactions_produtores(request):
         response = HttpResponse (content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="Leite_Produtores_"'+str(date_inicio)+"-"+str(date_fim)+".csv"
         writer = csv.writer(response, delimiter=";")
-        #Header
-        writer.writerow(['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'C. P. F.', 'Nº DA DAP',
-        	'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA', 
-            'Litros de Leite de Vaca', 'Litros de Leite de Cabra'])
-
+        
         # Get Coop
         coop = Cooperativa.objects.get(id=request.POST['cooperativa'])
         print(coop)
@@ -478,33 +476,62 @@ def download_transactions_produtores(request):
         query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
         if query_set:
             df = pd.DataFrame.from_records(query_set.values())
-            sf = df.groupby(['beneficiario_id', 'tipo'])['litros'].sum()
-            df = sf.to_frame().reset_index()
+            df['data'] = pd.to_datetime(df['data'])
+            df.set_index('data', inplace=True)
+            df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
+            sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'tipo', 'month'])['litros'].sum()
+            sff = df.groupby(['beneficiario_id', 'tipo', 'month'])['litros'].sum()
+            df = sf.to_frame()
+            dff = sff.to_frame()
+            print(dff)
+            #.reset_index()
+            
 
-            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo'], fill_value=0)
+            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo', 'data'], fill_value=0)
+            dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['tipo', 'month'], fill_value=0)
+            
             df_dict = df.to_dict('index')
+            dff_dict = dff.to_dict('index')
 
+            month_col = []
+            sum_col = []
+            first_row = True
+            # print(df_dict.items())
+
+            # ----- Procurar por meses e escrever header
             for key, value in df_dict.items():
+                for v in value:
+                    if v[1].day >= 15:
+                        quinzena = "2ª Quinz. "
+                    else:
+                        quinzena = "1ª Quinz. "
+                    if (v[0] + " - " + quinzena +  str(v[1].month) + "/" + str(v[1].year)) not in month_col:
+                        month_col.append(v[0] + " - " + quinzena + str(v[1].month) + "/" + str(v[1].year))
+                for i in dff_dict[key].items():
+                    if ("TOTAL " + i[0][0] + ' - ' + i[0][1]) not in month_col:
+                        month_col.append("TOTAL " + i[0][0] + ' - ' + i[0][1])
+                    
+            header.extend(month_col)
+            writer.writerow(header)
+            
+            # ----- Escrever produtores e valores
+            for key, value in df_dict.items():
+                month_val = []
                 produtor = Beneficiario.objects.get(pk=key)
-
-                try:
-                    value['VACA']
-                    litros_vaca = value['VACA']
-                except:
-                    litros_vaca = 0
-                
-                try:
-                    value['CABRA']
-                    litros_cabra = value['CABRA']
-                except:
-                    litros_cabra = 0
-                
+                for v in value:
+                    month_val.append(value[v])
+                for i in dff_dict[key].items():
+                    month_val.append(i[1])
+                    print(i[1])
                 prod_local = getCodIBGE(produtor.UF, produtor.municipio)
 
                 if not produtor.cpf:
                     produtor.cpf = "000.000.000-00"
-                output.append([produtor.UF, prod_local.cod_ibge, produtor.municipio, produtor.nome, produtor.cpf, produtor.dap, produtor.categoria, produtor.enquadramento,
-                            coop.sigla, str(litros_vaca).replace(".", ","), str(litros_cabra).replace(".", ",")])
+                produtor_row = [produtor.UF, prod_local.cod_ibge, produtor.municipio, produtor.nome, produtor.cpf, produtor.dap, produtor.categoria, produtor.enquadramento,
+                            coop.sigla]
+                produtor_row.extend(month_val)
+                output.append(produtor_row)
+    
             #CSV Data
             writer.writerows(output)
             return response
