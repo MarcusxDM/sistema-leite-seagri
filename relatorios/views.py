@@ -730,7 +730,7 @@ def manage_transactions_ponto_menu(request):
                 municipio_list = set([p.cod_ibge for p in ponto_list])
                 municipio_all = False
             ponto_list = []
-            month_prev = datetime.now().date().month - 2
+            month_prev = datetime.now().date().month - 3
             first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
             return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                         'today'     : today,
@@ -751,7 +751,7 @@ def manage_transactions_coop_menu(request):
             else:
                 coop_list = list(Cooperativa.objects.filter(membro=user))
             today = datetime.now().date().strftime('%Y-%m-%d')
-            month_prev = datetime.now().date().month - 2
+            month_prev = datetime.now().date().month - 3
             first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
             return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
                                                                         'today'     : today,
