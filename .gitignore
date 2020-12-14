@@ -127,3 +127,4 @@ dmypy.json
 # custom
 backup/
 seagri_leite/settings.py
+.vscode/settings.json

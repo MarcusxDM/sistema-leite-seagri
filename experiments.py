@@ -71,25 +71,26 @@ def updateDap(csv_path):
         r = csv.reader(csvfile, delimiter=';')
         next(r, None)
         for row in r:
-            print("\nPRODUTOR:\n")
-            print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
+            if (row[5] == 'AL'):
+                print("\nPRODUTOR:\n")
+                print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
 
-            produtor, created = relatorios.models.Beneficiario.objects.update_or_create(
-                                                        dap=row[0],
-                                                        defaults={
-                                                            'enquadramento': row[1],
-                                                            'categoria'    : row[2],
-                                                            'nome'         : row[3],
-                                                            'UF'           : row[5],
-                                                            'municipio'    : row[6],
-                                                            'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
-                                                            'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
-                                                            },
-                                                        )
-            if created:
-                print("################## CREATED ##################")
-            else:
-                print("################## UPDATED ##################")
+                produtor, created = relatorios.models.Beneficiario.objects.update_or_create(
+                                                            dap=row[0],
+                                                            defaults={
+                                                                'enquadramento': row[1],
+                                                                'categoria'    : row[2],
+                                                                'nome'         : row[3],
+                                                                'UF'           : row[5],
+                                                                'municipio'    : row[6],
+                                                                'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
+                                                                'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
+                                                                },
+                                                            )
+                if created:
+                    print("################## CREATED ##################")
+                else:
+                    print("################## UPDATED ##################")
 
 if __name__ == "__main__":
     updateDap('dap/cafdapativa.csv')
