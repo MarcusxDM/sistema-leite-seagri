@@ -2,6 +2,21 @@ from django.db import models
 from django.utils import timezone
 from dal import autocomplete
 from django import forms
+import os
+from uuid import uuid4
+
+def path_and_rename(path):
+        def wrapper(instance, filename):
+            ext = filename.split('.')[-1]
+            # get filename
+            if instance.pk:
+                filename = '{}.{}'.format(instance.pk, ext)
+            else:
+                # set filename as random string
+                filename = '{}.{}'.format(uuid4().hex, ext)
+            # return the whole path to the file
+            return os.path.join(path, filename)
+        return wrapper
 
 class Leite(models.TextChoices):
         VACA  = 1, "VACA"
@@ -168,3 +183,31 @@ class Laticinio(models.Model):
 
     def __str__(self):
         return self.cod_ibge.municipio+' | '+self.nome
+
+class OcorrenciaPonto(models.Model):
+    ponto        = models.ForeignKey(Ponto, on_delete=models.CASCADE)
+    data         = models.DateField(default=timezone.now)
+    user         = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    descricao    = models.CharField(max_length=150, null=False)
+    foto         = models.ImageField(upload_to=path_and_rename('ocorrencias/coop'), null=True)
+
+    def __str__(self):
+            return self.user.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio
+    
+    class Meta:
+        verbose_name = "Ocorrência de Ponto"
+        verbose_name_plural = "Ocorrências de Ponto"
+
+class OcorrenciaCoop(models.Model):
+    coop         = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
+    data         = models.DateField(default=timezone.now)
+    user         = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    descricao    = models.CharField(max_length=150, null=False)
+    foto         = models.ImageField(upload_to=path_and_rename('ocorrencias/ponto'), null=True)
+
+    def __str__(self):
+            return self.user.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + self.coop.nome
+    
+    class Meta:
+        verbose_name = "Ocorrência de Cooperativa"
+        verbose_name_plural = "Ocorrências de Cooperativa"

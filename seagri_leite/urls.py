@@ -37,9 +37,20 @@ urlpatterns = [
     path('visualizar-transacao-entidade-leite/', views.view_transactions_entidade_menu, name='visualizar-transacao-entidade-leite'),
     path('procurar-transacaofinal-leite/', views.manage_transactions_ponto_menu, name='procurar-transacaofinal-leite'),
     path('procurar-transacao-leite/', views.manage_transactions_coop_menu, name='procurar-transacao-leite'),
+    
+    # Ocorrencias
+    path('ocorrencia/', views.button_ocorrencia, name='button-ocorrencia'),
+    path('ocorrencia-menu-ponto/', views.menu_ponto_ocorrencia, name='ocorrencia-menu-ponto'),
+    path('ocorrencia-menu-coop/', views.menu_coop_ocorrencia, name='ocorrencia-menu-coop'),
+    path('enviar-ponto-ocorrencia/', views.insert_ponto_ocorrencia, name='insert-ponto-ocorrencia'),
+    path('enviar-coop-ocorrencia/', views.insert_coop_ocorrencia, name='insert-coop-ocorrencia'),
+
+    # Relatorios download
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),
     path('download-produtores/', views.download_transactions_produtores, name='download-produtores'),
     path('download-entidades/', views.download_transactions_entidades, name='download-entidades'),
+
+    
     path('ajax/load-pontos/', views.load_pontos, name='ajax_load_pontos'),
     path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades'),
     path('ajax/last-beneficiarios/', views.last_beneficiarios, name='ajax_last_beneficiarios'),

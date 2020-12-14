@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao, TransacaoEntidade, Entidade
+from .models import OcorrenciaCoop, OcorrenciaPonto, Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao, TransacaoEntidade, Entidade
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -773,4 +773,85 @@ def delete_transacao_coop(request):
         transacao = Transacao.objects.get(pk=request.POST['transacao'])
         transacao.delete()
     return render(request, 'relatorios/load-transacoes-coop.html')
-        
+
+def menu_ponto_ocorrencia(request):
+    try:
+        if (request.session['ponto_bool']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+                municipio_all = True
+            else:
+                ponto_list = list(Ponto.objects.filter(membro=user))
+                municipio_list = set([p.cod_ibge for p in ponto_list])
+                municipio_all = False
+            ponto_list = []
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            month_prev = datetime.now().date().month - 3
+            first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
+            return render(request, 'relatorios/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                        'today'     : today,
+                                                                        'first_day_month' : first_day_month,
+                                                                        'municipio_list' : municipio_list,
+                                                                        'municipio_all' : municipio_all})
+        else:
+            return redirect(reverse('index'))
+    except:
+        return redirect(reverse('index'))
+
+def menu_coop_ocorrencia(request):
+    try:
+        if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
+            user = Usuario.objects.get(id=request.session['user_id'])
+            if user.admin or user.seagri_bool:
+                coop_list = list(Cooperativa.objects.all())
+            else:
+                coop_list = list(Cooperativa.objects.filter(membro=user))
+            today = datetime.now().date().strftime('%Y-%m-%d')
+            month_prev = datetime.now().date().month - 3
+            first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
+            return render(request, 'relatorios/ocorrencia-menu-coop.html', {'coop_list' : coop_list, 
+                                                                        'today'     : today,
+                                                                        'first_day_month' : first_day_month})
+        else:
+            return redirect(reverse('index'))
+    except:
+        return redirect(reverse('index'))
+    
+def insert_ponto_ocorrencia(request):
+    if request.method == 'POST':
+        ocorrencia            = OcorrenciaPonto()
+        ocorrencia.data       = request.POST['data']
+        ocorrencia.ponto      = Ponto.objects.get(pk=request.POST['ponto'])
+        ocorrencia.user       = Usuario.objects.get(pk=request.session['user_id'])
+        ocorrencia.descricao  = request.POST['descricao']
+        try:
+            ocorrencia.save()
+            print("OCORRENCIA ENVIADA")
+        except:
+            print("OCORRENCIA NAO ENVIADA")
+    return redirect('ocorrencia-menu-ponto')
+
+def insert_coop_ocorrencia(request):
+    if request.method == 'POST':
+        ocorrencia            = OcorrenciaCoop()
+        ocorrencia.data       = request.POST['data']
+        ocorrencia.coop       = Cooperativa.objects.get(pk=request.POST['cooperativa'])
+        ocorrencia.user       = Usuario.objects.get(pk=request.session['user_id'])
+        ocorrencia.descricao  = request.POST['descricao']
+        try:
+            ocorrencia.save()
+            print("OCORRENCIA ENVIADA")
+        except:
+            print("OCORRENCIA NAO ENVIADA")
+    return redirect('ocorrencia-menu-coop')
+
+def button_ocorrencia(request):
+    if request.method == 'GET':
+        print(request.session['coop_bool'])
+        print(request.session['ponto_bool'])
+        if (request.session['coop_bool']):
+            return redirect('ocorrencia-menu-coop')
+        elif(request.session['ponto_bool']):
+            return redirect('ocorrencia-menu-ponto')
+    return redirect('home')
