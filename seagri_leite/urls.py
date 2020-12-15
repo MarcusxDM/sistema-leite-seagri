@@ -41,7 +41,9 @@ urlpatterns = [
     # Ocorrencias
     path('ocorrencia/', views.button_ocorrencia, name='button-ocorrencia'),
     path('ocorrencia-menu-ponto/', views.menu_ponto_ocorrencia, name='ocorrencia-menu-ponto'),
+    path('ocorrencia-menu-coop/', views.menu_coop_ocorrencia, name='ocorrencia-menu-coop'),
     path('enviar-ponto-ocorrencia/', views.insert_ponto_ocorrencia, name='insert-ponto-ocorrencia'),
+    path('enviar-coop-ocorrencia/', views.insert_coop_ocorrencia, name='insert-coop-ocorrencia'),
 
     # Relatorios download
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),

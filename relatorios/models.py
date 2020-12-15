@@ -197,3 +197,17 @@ class OcorrenciaPonto(models.Model):
     class Meta:
         verbose_name = "Ocorrência de Ponto"
         verbose_name_plural = "Ocorrências de Ponto"
+
+class OcorrenciaCoop(models.Model):
+    coop         = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
+    data         = models.DateField(default=timezone.now)
+    user         = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    descricao    = models.CharField(max_length=150, null=False)
+    foto         = models.ImageField(upload_to=path_and_rename('ocorrencias/ponto'), null=True)
+
+    def __str__(self):
+            return self.user.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + self.coop.nome
+    
+    class Meta:
+        verbose_name = "Ocorrência de Cooperativa"
+        verbose_name_plural = "Ocorrências de Cooperativa"
