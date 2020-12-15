@@ -55,7 +55,7 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form  id="Teste" action="{% url 'insert-ponto-ocorrencia' %}" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes_ponto' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form  id="Teste" action="{% url 'insert-ponto-ocorrencia' %}" enctype="multipart/form-data" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes_ponto' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 
 				<div class="form-group">
@@ -85,7 +85,12 @@
 					<label for="exampleFormControlTextarea1">Descrição</label>
 					<textarea name="descricao" maxLength=150 class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
 				</div>
-				  
+
+				<div class="form-group">
+					<label for="img">Selecione uma imagem:</label>
+					<input type="file" id="foto" name="foto" accept="image/*">
+				</div>
+
 				<div>
 					<div class="container-login100-form-btn">
 						<button type="submit" class="login100-form-btn" id="enviar">

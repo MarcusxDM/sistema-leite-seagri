@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
-from .models import OcorrenciaCoop, OcorrenciaPonto, Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao, TransacaoEntidade, Entidade
+from .models import OcorrenciaPonto, Usuario, Cooperativa, Beneficiario, Transacao, Ponto, BeneficiarioFinal, TransacaoFinal, Localizacao, TransacaoEntidade, Entidade
 from dal import autocomplete
 from .forms import TransacaoProdutor, TransacaoBeneficiarioFinal
 from django.utils import timezone
@@ -825,26 +825,13 @@ def insert_ponto_ocorrencia(request):
         ocorrencia.ponto      = Ponto.objects.get(pk=request.POST['ponto'])
         ocorrencia.user       = Usuario.objects.get(pk=request.session['user_id'])
         ocorrencia.descricao  = request.POST['descricao']
-        try:
-            ocorrencia.save()
-            print("OCORRENCIA ENVIADA")
-        except:
-            print("OCORRENCIA NAO ENVIADA")
+        ocorrencia.foto       = request.FILES['foto']
+        # try:
+        ocorrencia.save()
+        print("OCORRENCIA ENVIADA")
+        # except:
+        #     print("OCORRENCIA NAO ENVIADA")
     return redirect('ocorrencia-menu-ponto')
-
-def insert_coop_ocorrencia(request):
-    if request.method == 'POST':
-        ocorrencia            = OcorrenciaCoop()
-        ocorrencia.data       = request.POST['data']
-        ocorrencia.coop       = Cooperativa.objects.get(pk=request.POST['cooperativa'])
-        ocorrencia.user       = Usuario.objects.get(pk=request.session['user_id'])
-        ocorrencia.descricao  = request.POST['descricao']
-        try:
-            ocorrencia.save()
-            print("OCORRENCIA ENVIADA")
-        except:
-            print("OCORRENCIA NAO ENVIADA")
-    return redirect('ocorrencia-menu-coop')
 
 def button_ocorrencia(request):
     if request.method == 'GET':
