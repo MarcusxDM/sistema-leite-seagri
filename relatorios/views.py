@@ -738,7 +738,7 @@ def last_beneficiarios(request):
 
 def load_transacoes_ponto(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
-    transacao_list = TransacaoFinal.objects.select_related('beneficiario').filter(ponto_id=request.GET['ponto'], data=date_search)
+    transacao_list = TransacaoFinal.objects.select_related('beneficiario').filter(ponto_id=request.GET['ponto'], data=date_search).order_by('beneficiario__nome')
     page = request.GET.get('page', 1)
     paginator = Paginator(transacao_list, 10)
     try:
@@ -752,7 +752,7 @@ def load_transacoes_ponto(request):
 
 def load_transacoes_coop(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
-    transacao_list = Transacao.objects.select_related('beneficiario').filter(cooperativa_id=request.GET['coop'], data=date_search)
+    transacao_list = Transacao.objects.select_related('beneficiario').filter(cooperativa_id=request.GET['coop'], data=date_search).order_by('beneficiario__nome')
     page = request.GET.get('page', 1)
     paginator = Paginator(transacao_list, 10)
     try:
@@ -881,10 +881,6 @@ def insert_ponto_ocorrencia(request):
 
 def button_ocorrencia(request):
     if request.method == 'GET':
-        print(request.session['coop_bool'])
-        print(request.session['ponto_bool'])
-        if (request.session['coop_bool']):
-            return redirect('ocorrencia-menu-coop')
-        elif(request.session['ponto_bool']):
+        if(request.session['ponto_bool']):
             return redirect('ocorrencia-menu-ponto')
     return redirect('home')
