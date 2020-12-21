@@ -872,11 +872,11 @@ def insert_ponto_ocorrencia(request):
         ocorrencia.user       = Usuario.objects.get(pk=request.session['user_id'])
         ocorrencia.descricao  = request.POST['descricao']
         ocorrencia.foto       = request.FILES['foto']
-        try:
-            ocorrencia.save()
-            print("OCORRENCIA ENVIADA")
-        except:
-            print("OCORRENCIA NAO ENVIADA")
+        # try:
+        ocorrencia.save()
+        print("OCORRENCIA ENVIADA")
+        # except:
+        #     print("OCORRENCIA NAO ENVIADA")
     return redirect('ocorrencia-menu-ponto')
 
 def button_ocorrencia(request):
