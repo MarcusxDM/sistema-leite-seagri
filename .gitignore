@@ -128,3 +128,4 @@ dmypy.json
 backup/
 seagri_leite/settings.py
 .vscode/settings.json
+media/
