@@ -111,11 +111,11 @@ def validate_semana(request, date_transacao, beneficiario_final):
 
     n_dia = calendar.weekday(date_transacao.year, date_transacao.month, date_transacao.day)
     
-    if n_dia is 0:
+    if n_dia == 0:
         first_semana_day = date_transacao
         last_semana_day  = date_transacao + timedelta(days=6)
 
-    elif n_dia is 6:
+    elif n_dia == 6:
         first_semana_day = date_transacao - timedelta(days=6)
         last_semana_day = date_transacao
     else:
@@ -630,31 +630,70 @@ def download_transactions_consumidores(request):
                 return response
         else:
             # Pontos
-            pontos_id = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim).distinct().values_list('ponto_id')
-            pontos = Ponto.objects.filter(id__in=pontos_id)
-            for ponto in pontos:
-                output = []
-                # Grouping by Consumidor
-                query_set = TransacaoFinal.objects.filter(ponto=ponto, data__gte=date_inicio, data__lte=date_fim)
-                # print(query_set)
-                if query_set:
-                    df = pd.DataFrame.from_records(query_set.values())
-                    sf = df.groupby(['beneficiario_id'])['litros'].sum()
+            query_set = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim)
+            # print(query_set)
+            if query_set:
+                df = pd.DataFrame.from_records(query_set.values())
+            
+                df['data'] = pd.to_datetime(df['data'])
+                df.set_index('data', inplace=True)
+                df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
+                sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'ponto_id', 'month'])['litros'].sum()
+                sff = df.groupby(['beneficiario_id', 'ponto_id', 'month'])['litros'].sum()
+                df = sf.to_frame()
+                dff = sff.to_frame() 
+
+                df = pd.pivot_table(df, values='litros', index=['beneficiario_id', 'ponto_id'], columns=['data'], fill_value=0)
+                dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id', 'ponto_id'], columns=['month'], fill_value=0)
+
+                df_dict = df.to_dict('index')
+                dff_dict = dff.to_dict('index')
+                
+                month_col = []
+                sum_col = []
+                # ----- Procurar por meses e escrever header
+                for key, value in df_dict.items():
+                    for v in value:
+                        if v.day >= 15:
+                            quinzena = "2ª Quinz. "
+                        else:
+                            quinzena = "1ª Quinz. "
+                        if (quinzena +  str(v.month) + "/" + str(v.year)) not in month_col:
+                            month_col.append(quinzena + str(v.month) + "/" + str(v.year))
+                    for i in dff_dict[key].items():
+                        if ("TOTAL " + i[0]) not in month_col:
+                            month_col.append("TOTAL " + i[0])
                     
-                    df = sf.to_frame().reset_index()
-                    
-                    df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], fill_value=0)
-                    
-                    df_dict = df.to_dict('index')
-                    for key, value in df_dict.items():
-                        consumidor = BeneficiarioFinal.objects.get(pk=key)
-                        if not consumidor.cpf:
-                            consumidor.cpf = '00000000000'
-                        output.append([ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
-                                    (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
-                                    ponto.nome, ponto.coop.sigla, str(value['litros']).replace(".", ",")])
+                header.extend(month_col)
+                writer.writerow(header)
+
+                # ----- Escrever consumidores e valores
+                for key, value in df_dict.items():
+                    month_val = []
+                    for v in value:
+                        month_val.append(value[v])
+                    for i in dff_dict[key].items():
+                        month_val.append(i[1])
+
+                # ----- Escrever consumidores e valores
+                for key, value in df_dict.items():
+                    month_val = []
+                    consumidor = BeneficiarioFinal.objects.get(pk=key[0])
+                    ponto      = Ponto.objects.get(pk=key[1])
+                    for v in value:
+                        month_val.append(value[v])
+                    for i in dff_dict[key].items():
+                        month_val.append(i[1])
+
+                    if not consumidor.cpf:
+                        consumidor.cpf = '00000000000'
+                    consumidor_row = [ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
+                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                ponto.nome, ponto.coop.sigla]
+                    consumidor_row.extend(month_val)
+                    output.append(consumidor_row)
                     #CSV Data
-                    writer.writerows(output)
+                writer.writerows(output)
             return response
     return redirect(reverse('visualizar-transacaofinal-leite'))
 
