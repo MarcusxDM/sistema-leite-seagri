@@ -190,6 +190,7 @@ class OcorrenciaPonto(models.Model):
     user         = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     descricao    = models.CharField(max_length=150, null=False)
     foto         = models.ImageField(upload_to=path_and_rename, null=True)
+    viewed       = models.BooleanField(default=False, null=False)
 
     def __str__(self):
             return self.user.nome + " | " + self.data.strftime("%d/%m/%Y") + " | " + self.ponto.nome + " | " + self.ponto.cod_ibge.municipio

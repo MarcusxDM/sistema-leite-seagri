@@ -1,0 +1,46 @@
+<div class="tableFixHead">
+<table class="table table-hover ">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Ponto</th>
+        <th>Usuário</th>
+        <th>Situação</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ocorrencia in ocorrencias %}
+        <tr>
+          <td>{{ ocorrencia.data|date:'d/m/Y' }}</td>
+          <td>{{ ocorrencia.ponto.nome }}</td>
+          <td>{{ ocorrencia.usuario.nome }}</td>
+          <td>{{ ocorrencia.situacao }}</td>
+          <td><button class="login100-form-btn" type="button" view-url="{% url 'ajax_visualizar_ocorrencia' %}" ocorrencia-id="{{ ocorrencia.id }}" onclick="visualizar_ocorrencia(this)">VISUALIZAR</button></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <br>
+  {% if ocorrencias.has_other_pages %}
+    <ul class="pagination justify-content-center">
+      {% if ocorrencias.has_previous %}
+        <li class="page-item"><button type="button" name="pagination-link" class="page-link" onclick="go_page(this)" page="{{ ocorrencias.previous_page_number }}">&laquo;</button></li>
+      {% else %}
+        <li class="page-item" ><span class="page-link">&laquo;</span></li>
+      {% endif %}
+      {% for i in ocorrencias.paginator.page_range %}
+        {% if ocorrencias.number == i %}
+          <li class="active page-item"><span id="active-page" page="{{ i }}" class="page-link">{{ i }} <span class="sr-only" class="page-link">(current)</span></span></li>
+        {% else %}
+          <li class="page-item"><button type="button" name="pagination-link" class="page-link" onclick="go_page(this)" href="" page="{{ i }}">{{ i }}</button></li>
+        {% endif %}
+      {% endfor %}
+      {% if ocorrencias.has_next %}
+        <li class="page-item"><button type="button" id="pagination-link" name="pagination-link" class="page-link" onclick="go_page(this)" href="" page="{{ ocorrencias.next_page_number }}">&raquo;</button></li>
+      {% else %}
+        <li class="page-item"><span class="page-link">&raquo;</span></li>
+      {% endif %}
+    </ul>
+  {% endif %}
