@@ -42,6 +42,8 @@ urlpatterns = [
     path('ocorrencia/', views.button_ocorrencia, name='button-ocorrencia'),
     path('ocorrencia-menu-ponto/', views.menu_ponto_ocorrencia, name='ocorrencia-menu-ponto'),
     path('enviar-ponto-ocorrencia/', views.insert_ponto_ocorrencia, name='insert-ponto-ocorrencia'),
+    path('ocorrencia-menu-seagri/', views.menu_seagri_ocorrencia, name='ocorrencia-menu-seagri'),
+    path('ajax/load-ocorrencias-ponto/', views.load_ocorrencias_ponto, name='ajax_load_ocorrencias_ponto'),
 
     # Relatorios download
     path('download-consumidores/', views.download_transactions_consumidores, name='download-consumidores'),

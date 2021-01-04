@@ -14,9 +14,9 @@
         <tr>
           <td>{{ ocorrencia.data|date:'d/m/Y' }}</td>
           <td>{{ ocorrencia.ponto.nome }}</td>
-          <td>{{ ocorrencia.usuario.nome }}</td>
-          <td>{{ ocorrencia.situacao }}</td>
-          <td><button class="login100-form-btn" type="button" view-url="{% url 'ajax_visualizar_ocorrencia' %}" ocorrencia-id="{{ ocorrencia.id }}" onclick="visualizar_ocorrencia(this)">VISUALIZAR</button></td>
+          <td>{{ ocorrencia.user.nome }}</td>
+          <td>{{ ocorrencia.viewed }}</td>
+          <td><button class="login100-form-btn" type="button" ocorrencia-id="{{ ocorrencia.id }}" onclick="visualizar_ocorrencia(this)">VISUALIZAR</button></td>
         </tr>
       {% endfor %}
     </tbody>

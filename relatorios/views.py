@@ -881,11 +881,12 @@ def menu_ponto_ocorrencia(request):
                 municipio_list = set([p.cod_ibge for p in ponto_list])
                 municipio_all = False
             ponto_list = []
-            today = datetime.now().date().strftime('%Y-%m-%d')
-            month_prev = datetime.now().date().month - 3
-            first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
+            today = datetime.now().date()
+            today_str = today.strftime('%Y-%m-%d')
+            month_prev = subtractMonth(today, 3)
+            first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
             return render(request, 'relatorios/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                        'today'     : today,
+                                                                        'today'     : today_str,
                                                                         'first_day_month' : first_day_month,
                                                                         'municipio_list' : municipio_list,
                                                                         'municipio_all' : municipio_all})
@@ -894,24 +895,12 @@ def menu_ponto_ocorrencia(request):
     except:
         return redirect(reverse('index'))
 
-def menu_coop_ocorrencia(request):
-    try:
-        if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
-            user = Usuario.objects.get(id=request.session['user_id'])
-            if user.admin or user.seagri_bool:
-                coop_list = list(Cooperativa.objects.all())
-            else:
-                coop_list = list(Cooperativa.objects.filter(membro=user))
-            today = datetime.now().date().strftime('%Y-%m-%d')
-            month_prev = datetime.now().date().month - 3
-            first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/ocorrencia-menu-coop.html', {'coop_list' : coop_list, 
-                                                                        'today'     : today,
-                                                                        'first_day_month' : first_day_month})
-        else:
-            return redirect(reverse('index'))
-    except:
+def menu_seagri_ocorrencia(request):
+    if (request.session['seagri_bool'] or request.session['admin']):
+        return render(request, 'relatorios/ocorrencia-menu-seagri.html', {})
+    else:
         return redirect(reverse('index'))
+    
     
 def insert_ponto_ocorrencia(request):
     if request.method == 'POST':
@@ -931,4 +920,18 @@ def button_ocorrencia(request):
     if request.method == 'GET':
         if(request.session['ponto_bool']):
             return redirect('ocorrencia-menu-ponto')
+        else:
+            return redirect('ocorrencia-menu-seagri')
     return redirect('home')
+
+def load_ocorrencias_ponto(request):
+    ocorrencias = OcorrenciaPonto.objects.filter(viewed=request.GET['viewed']).order_by('-data')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(ocorrencias, 10)
+    try:
+        ocorrencias = paginator.page(page)
+    except PageNotAnInteger:
+        ocorrencias = paginator.page(1)
+    except EmptyPage:
+        ocorrencias = paginator.page(paginator.num_pages)
+    return render(request, 'relatorios/load-ocorrencias-ponto.html', { 'ocorrencias': ocorrencias })
