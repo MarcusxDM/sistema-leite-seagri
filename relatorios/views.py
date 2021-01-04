@@ -12,6 +12,14 @@ import numpy as np
 from unicodedata import normalize
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+def subtractMonth(date, months):
+    date_day = date.day
+    for i in range(months):
+        date = date.replace(day=1) - timedelta(days=1)
+    date = date.replace(day=date_day)
+    return date
+
+
 def remover_acentos(txt):
     return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
 
@@ -815,11 +823,12 @@ def manage_transactions_ponto_menu(request):
             municipio_list = set([p.cod_ibge for p in ponto_list])
             municipio_all = False
         ponto_list = []
-        today = datetime.now().date().strftime('%Y-%m-%d')
-        month_prev = datetime.now().date().month - 3
-        first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
+        today = datetime.now().date()
+        today_str = today.strftime('%Y-%m-%d')
+        month_prev = subtractMonth(today, 3)
+        first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
         return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                    'today'     : today,
+                                                                    'today'     : today_str,
                                                                     'first_day_month' : first_day_month,
                                                                     'municipio_list' : municipio_list,
                                                                     'municipio_all' : municipio_all})
@@ -829,23 +838,24 @@ def manage_transactions_ponto_menu(request):
     #     return redirect(reverse('index'))
 
 def manage_transactions_coop_menu(request):
-    try:
-        if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
-            user = Usuario.objects.get(id=request.session['user_id'])
-            if user.admin or user.seagri_bool:
-                coop_list = list(Cooperativa.objects.all())
-            else:
-                coop_list = list(Cooperativa.objects.filter(membro=user))
-            today = datetime.now().date().strftime('%Y-%m-%d')
-            month_prev = datetime.now().date().month - 3
-            first_day_month = datetime.now().date().replace(day=1, month=month_prev).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
-                                                                        'today'     : today,
-                                                                        'first_day_month' : first_day_month})
+    # try:
+    if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin or user.seagri_bool:
+            coop_list = list(Cooperativa.objects.all())
         else:
-            return redirect(reverse('index'))
-    except:
+            coop_list = list(Cooperativa.objects.filter(membro=user))
+        today = datetime.now().date()
+        today_str = today.strftime('%Y-%m-%d')
+        month_prev = subtractMonth(today, 3)
+        first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
+        return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
+                                                                    'today'     : today_str,
+                                                                    'first_day_month' : first_day_month})
+    else:
         return redirect(reverse('index'))
+    # except:
+    #     return redirect(reverse('index'))
 
 def delete_transacao_ponto(request):
     if request.method == "POST":

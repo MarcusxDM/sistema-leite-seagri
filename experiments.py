@@ -4,13 +4,13 @@ import random
 import os
 import relatorios
 from django.core.mail import send_mail
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'seagri_leite.settings'
 
 import django
 django.setup()
+
 def usersAdd(csv_path):
     with open(csv_path, 'r', encoding='utf-8') as csvfile:
         r = csv.reader(csvfile, delimiter=';')
@@ -93,5 +93,5 @@ def updateDap(csv_path):
                     print("################## UPDATED ##################")
 
 if __name__ == "__main__":
-    updateDap('dap/cafdapativa.csv')
-
+    # updateDap('dap/cafdapativa.csv')
+    pass
