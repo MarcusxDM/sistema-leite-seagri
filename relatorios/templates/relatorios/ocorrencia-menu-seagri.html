@@ -51,7 +51,7 @@
 			  </form>
 			</div>
 		  </nav>
-		<div class="row w-100" style="margin-top: 13%">
+		<div class="row w-100" style="margin-top: 5%">
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
@@ -67,11 +67,19 @@
 				  </div>			  
 
 				<div id="ocorrencias-table">
-					<!-- load-transacoes-pontos by ajax-->
+					<!-- load-ocorrencias-pontos by ajax-->
 				</div>
 				
 			  </form>
+
 			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="ExemploModalCentralizado" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div id="modal-ocorrencia-content" class="modal-content">
+			
 		</div>
 	</div>
 <!--===============================================================================================-->
@@ -95,9 +103,9 @@
 	<script>
 		const csrftoken = Cookies.get('csrftoken');
 
-		$("#situacaoSelect").change(function () {
+		function load_new_ocorrencias() {
 		  var url = $("#Teste").attr("data-ocorrencias-url");  // get the url of the `load_cities` view
-		  var viewed = $("#situacaoSelect").val()
+		  var viewed = 0
 		  $.ajax({                       // initialize an AJAX request
 			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
 			data: {
@@ -108,18 +116,15 @@
 			}
 		  });
 	
-		});
+		};
 
-
-		$("#search").click(function () {
+		$("#situacaoSelect").change(function () {
 		  var url = $("#Teste").attr("data-ocorrencias-url");  // get the url of the `load_cities` view
-		  var ponto = $("#pontoSelect").val();  // get the selected country ID from the HTML input
-		  var data_search = $("#data-search").val();
+		  var viewed = $("#situacaoSelect").val()
 		  $.ajax({                       // initialize an AJAX request
 			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
 			data: {
-			  'ponto': ponto,
-			  'data-search': data_search       // add the country id to the GET parameters
+			  'viewed': viewed    // add the country id to the GET parameters
 			},
 			success: function (data) {   // `data` is the return of the `load_cities` view function
 			  $("#ocorrencias-table").html(data);  // replace the contents of the city input with the data that came from the server
@@ -145,26 +150,27 @@
 		  });
 		}
 
-		function delete_transacao(e) {
-			var url = $(e).attr("delete-url");
-			var transacao = $(e).attr("transacao-id");
+		function visualizar_ocorrencia(e) {
+			var url = $(e).attr("view-url");
+			var ocorrencia = $(e).attr("ocorrencia-id");
 			var page = $("#active-page").innerText;
 			
 		  	$.ajax({
 				  url: url,
 				  type: 'post',
 				  data: {
-						'transacao' : transacao		        
+						'ocorrencia' : ocorrencia		        
 			      },
 				  headers: {
 					'X-CSRFToken': csrftoken
 				  },
-				success: function(){
-					go_page($("#active-page"))
-					alert("Transação deletada com sucesso.") 
+				success: function (data) {  
+			  		$("#modal-ocorrencia-content").html(data);
 				}
 		  	});
 		}
+
+		window.onload(load_new_ocorrencias())
 	  </script>
 </body>
 </html>

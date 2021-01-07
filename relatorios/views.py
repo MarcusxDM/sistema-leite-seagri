@@ -935,3 +935,10 @@ def load_ocorrencias_ponto(request):
     except EmptyPage:
         ocorrencias = paginator.page(paginator.num_pages)
     return render(request, 'relatorios/load-ocorrencias-ponto.html', { 'ocorrencias': ocorrencias })
+
+def view_ocorrencia_ponto(request):
+    if request.method == "POST":
+        ocorrencia = OcorrenciaPonto.objects.get(pk=request.POST['ocorrencia'])
+        ocorrencia.viewed = True
+        ocorrencia.save()
+    return render(request, 'relatorios/modal-ocorrencia-seagri.html', { 'ocorrencia_selected': ocorrencia })
