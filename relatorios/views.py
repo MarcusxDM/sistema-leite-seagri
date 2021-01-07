@@ -870,30 +870,30 @@ def delete_transacao_coop(request):
     return render(request, 'relatorios/load-transacoes-coop.html')
 
 def menu_ponto_ocorrencia(request):
-    try:
-        if (request.session['ponto_bool']):
-            user = Usuario.objects.get(id=request.session['user_id'])
-            if user.admin or user.seagri_bool:
-                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
-                municipio_all = True
-            else:
-                ponto_list = list(Ponto.objects.filter(membro=user))
-                municipio_list = set([p.cod_ibge for p in ponto_list])
-                municipio_all = False
-            ponto_list = []
-            today = datetime.now().date()
-            today_str = today.strftime('%Y-%m-%d')
-            month_prev = subtractMonth(today, 3)
-            first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                        'today'     : today_str,
-                                                                        'first_day_month' : first_day_month,
-                                                                        'municipio_list' : municipio_list,
-                                                                        'municipio_all' : municipio_all})
+    # try:
+    if (request.session['ponto_bool']):
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin or user.seagri_bool:
+            municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+            municipio_all = True
         else:
-            return redirect(reverse('index'))
-    except:
+            ponto_list = list(Ponto.objects.filter(membro=user))
+            municipio_list = set([p.cod_ibge for p in ponto_list])
+            municipio_all = False
+        ponto_list = []
+        today = datetime.now().date()
+        today_str = today.strftime('%Y-%m-%d')
+        month_prev = subtractMonth(today, 3)
+        first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
+        return render(request, 'relatorios/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                    'today'     : today_str,
+                                                                    'first_day_month' : first_day_month,
+                                                                    'municipio_list' : municipio_list,
+                                                                    'municipio_all' : municipio_all})
+    else:
         return redirect(reverse('index'))
+    # except:
+    #     return redirect(reverse('index'))
 
 def menu_seagri_ocorrencia(request):
     if (request.session['seagri_bool'] or request.session['admin']):
