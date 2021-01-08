@@ -5,7 +5,7 @@
         <th>Data</th>
         <th>Ponto</th>
         <th>Usuário</th>
-        <th>Situação</th>
+        <th>Nº</th>
         <th></th>
       </tr>
     </thead>
@@ -15,7 +15,7 @@
           <td>{{ ocorrencia.data|date:'d/m/Y' }}</td>
           <td>{{ ocorrencia.ponto.nome }}</td>
           <td>{{ ocorrencia.user.nome }}</td>
-          <td>{{ ocorrencia.viewed }}</td>
+          <td>{{ ocorrencia.id }}</td>
           <td><button class="login100-form-btn" type="button" view-url="{% url 'ajax_view_ocorrencia_ponto' %}" data-toggle="modal" data-target="#ExemploModalCentralizado" ocorrencia-id="{{ ocorrencia.id }}" onclick="visualizar_ocorrencia(this)">VISUALIZAR</button></td>
         </tr>
       {% endfor %}

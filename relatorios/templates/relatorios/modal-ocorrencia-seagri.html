@@ -7,8 +7,12 @@
 </div>
 <div class="modal-body">
     {{ ocorrencia_selected.descricao }}
+    <br>
+    {{ ocorrencia_selected.data|date:'d/m/Y' }}
+    <br>
+    <img src="{{ ocorrencia_selected.foto.url }}" alt="Foto" class="img-thumbnail">
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-    <button type="button" class="btn btn-primary">Salvar mudanças</button>
+    <button id="modal-close" type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+    <!-- <button type="button" class="btn btn-primary">Salvar mudanças</button> -->
 </div>
