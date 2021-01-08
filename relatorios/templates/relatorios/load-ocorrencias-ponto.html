@@ -3,6 +3,7 @@
     <thead>
       <tr>
         <th>Data</th>
+        <th>Município</th>
         <th>Ponto</th>
         <th>Usuário</th>
         <th>Nº</th>
@@ -13,6 +14,7 @@
       {% for ocorrencia in ocorrencias %}
         <tr>
           <td>{{ ocorrencia.data|date:'d/m/Y' }}</td>
+          <td>{{ ocorrencia.ponto.cod_ibge.municipio }}</td>
           <td>{{ ocorrencia.ponto.nome }}</td>
           <td>{{ ocorrencia.user.nome }}</td>
           <td>{{ ocorrencia.id }}</td>
