@@ -740,6 +740,8 @@ def download_transactions_entidades(request):
                 df_dict = df.to_dict('index')
                 
                 for key, value in df_dict.items():
+                    if not entidade.rep_cpf:
+                        entidade.rep_cpf = "00000000000"
                     output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
                                 (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
                                 entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
@@ -762,6 +764,8 @@ def download_transactions_entidades(request):
                 
                 for key, value in df_dict.items():
                     entidade = Entidade.objects.get(id=key)
+                    if not entidade.rep_cpf:
+                        entidade.rep_cpf = "00000000000"
                     output.append([entidade.cod_ibge.uf, entidade.cod_ibge.cod_ibge, entidade.cod_ibge.municipio, entidade.nome, entidade.cnpj, entidade.rep_nome,
                                 (entidade.rep_cpf[0:3]+'.'+entidade.rep_cpf[3:6]+'.'+entidade.rep_cpf[6:9]+'-'+entidade.rep_cpf[9:]), entidade.rep_tel,
                                 entidade.rep_end, entidade.rep_email, entidade.tipo, entidade.coop.sigla, value['ben_0_6'], value['ben_7_14'], value['ben_15_23'],
