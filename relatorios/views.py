@@ -918,10 +918,10 @@ def insert_ponto_ocorrencia(request):
 
 def button_ocorrencia(request):
     if request.method == 'GET':
-        if(request.session['ponto_bool']):
-            return redirect('ocorrencia-menu-ponto')
-        else:
+        if(request.session['seagri_bool']):
             return redirect('ocorrencia-menu-seagri')
+        elif(request.session['ponto_bool']):
+            return redirect('ocorrencia-menu-ponto')
     return redirect('home')
 
 def load_ocorrencias_ponto(request):
@@ -943,3 +943,9 @@ def view_ocorrencia_ponto(request):
             ocorrencia.viewed = True
             ocorrencia.save()
     return render(request, 'relatorios/modal-ocorrencia-seagri.html', { 'ocorrencia_selected': ocorrencia })
+
+def count_ocorrencia_new(request):
+    if request.method == "GET":
+        ocorrencias_new = OcorrenciaPonto.objects.filter(viewed=0).count()
+        print(ocorrencias_new)
+    return render(request, 'relatorios/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })

@@ -46,12 +46,23 @@
 				</li>
 
 				<div>
-					<a href="{% url 'button-ocorrencia' %}">
+					<a href="{% url 'button-ocorrencia' %}" class="notification">
 						<button class="btn btn-outline-success my-2 my-sm-0" type="submit">
 							Ocorrências
 						</button>
+						{% if request.session.seagri_bool %}
+						<span id="ocorrenciaNotification" count-ocorrencia-url="{% url 'ajax_count_ocorrencia_new' %}" class="badge">
+						<!-- count-ocorrencias-new by ajax-->
+						</span>
+						{% endif %}
 					</a>
 				</div>
+
+				
+				<div >
+					
+				</div>
+				
 
 			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
@@ -226,6 +237,29 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
+	<script>
+
+	function ocorrencia_notifications() {
+		  var url = $("#ocorrenciaNotification").attr("count-ocorrencia-url");
+		  
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+	
+			success: function (data) {   
+			  $("#ocorrenciaNotification").html(data);
+			}
+		  });
+	
+	};
+	
+	setInterval(
+  		ocorrencia_notifications()
+	, 60000 );
+	
+	window.onload = function() {
+  		ocorrencia_notifications();
+	};
+	</script>
 
 </body>
 </html>

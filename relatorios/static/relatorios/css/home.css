@@ -23,3 +23,32 @@
     background-repeat:   no-repeat !important;
     background-position: center center !important;  
 }
+
+  
+.notification {
+    color: white;
+    text-decoration: none;
+    position: relative;
+    display: inline-block;
+    border-radius: 2px;
+  }
+  
+  
+.notification .badge {
+    position: absolute;
+    top: -7px;
+    right: -8px;
+    padding: 6px 8px;
+    border-radius: 50%;
+    background: red;
+    color: white;
+    border-color: black;
+    border-width: thick;
+    font-weight: bolder !important;
+  }
+
+  @media (max-width: 576px) {
+    .notification .badge {
+        top: 0px;
+      }
+}
