@@ -953,3 +953,8 @@ def count_ocorrencia_new(request):
         ocorrencias_new = OcorrenciaPonto.objects.filter(viewed=0).count()
         print(ocorrencias_new)
     return render(request, 'relatorios/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
+
+def insert_transacao_qr(request):
+    if request.method == "GET":
+        pass
+    return render(request, 'relatorios/insert-qr-ponto.html', {})
