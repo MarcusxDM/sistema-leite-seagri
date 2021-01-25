@@ -9,6 +9,9 @@ class UsuarioAdmin(admin.ModelAdmin):
 class PontoAdmin(admin.ModelAdmin):
     search_fields = (['nome', 'cod_ibge__municipio'])
 
+class EntidadeAdmin(admin.ModelAdmin):
+    search_fields = (['nome', 'cod_ibge__municipio'])
+
 class TransacaoFinalAdmin(admin.ModelAdmin):
     search_fields = (['beneficiario__nome', 'ponto__nome', 'ponto__cod_ibge__municipio'])
     list_filter = ([('data', DateRangeFilter)])
@@ -34,5 +37,5 @@ admin.site.register(Transacao, TransacaoAdmin)
 admin.site.register(TransacaoFinal, TransacaoFinalAdmin)
 admin.site.register(BeneficiarioFinal, BeneficiarioFinalAdmin)
 admin.site.register(Beneficiario, BeneficiarioAdmin)
-admin.site.register(Entidade)
+admin.site.register(Entidade, EntidadeAdmin)
 admin.site.register(TransacaoEntidade, TransacaoEntidadeAdmin)
