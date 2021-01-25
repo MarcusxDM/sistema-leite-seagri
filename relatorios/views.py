@@ -956,5 +956,6 @@ def count_ocorrencia_new(request):
 
 def insert_transacao_qr(request):
     if request.method == "GET":
-        pass
-    return render(request, 'relatorios/insert-qr-ponto.html', {})
+        user = Usuario.objects.get(id=request.session['user_id'])
+        ponto_list = list(Ponto.objects.filter(membro=user))
+    return render(request, 'relatorios/insert-qr-ponto.html', {'ponto_list' : ponto_list})

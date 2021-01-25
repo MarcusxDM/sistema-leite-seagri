@@ -5,6 +5,7 @@ import os
 import relatorios
 from django.core.mail import send_mail
 from datetime import datetime, timedelta
+import qrcode
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'seagri_leite.settings'
 
@@ -92,6 +93,19 @@ def updateDap(csv_path):
                 else:
                     print("################## UPDATED ##################")
 
+def generate_qr_code(cod_ibge):
+    pontos = relatorios.models.Ponto.objects.filter(cod_ibge=cod_ibge).values_list('pk', flat=True)
+    
+    for ponto in pontos:
+        beneficiarios = ponto.membros_set.all()
+        for ben in beneficiarios:
+            try:
+                img = qrcode.make(ben.nis)
+                img.save("C:/Users/marcus.pestana/Documents/Programa do Leite/QR Codes/Mar Vermelho"+ben.nis+".png")
+                print(ben.nis+" GERADO")
+            except:
+                print(ben.nis+" NÂO GERADO")
+
 if __name__ == "__main__":
-    # updateDap('dap/cafdapativa.csv')
+    # generate_qr_code("2704906")
     pass

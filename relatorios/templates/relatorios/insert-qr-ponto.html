@@ -10,6 +10,7 @@
 	{% comment %} <link href="{% static "relatorios/css/bootstrap.min.css" %}" rel="stylesheet"> {% endcomment %}
 	<link href="{% static "relatorios/css/style.css" %}" rel="stylesheet">
 	<link id="beep-audio" href="{% static "relatorios/audio/beep.mp3" %}" rel="audio">
+	<link  id="decoder-web" href="{% static "relatorios/js/DecoderWorker.js" %}"></script>
 	<link rel="icon" type="image/png" href="{% static "relatorios/images/icons/favicon.ico" %}"    />
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="{% static "relatorios/vendor/bootstrap/css/bootstrap.min.css" %} ">
@@ -56,10 +57,22 @@
 		  </nav>
 		<div class="container ">
 			<div class="container-fluid insert-form" style="margin-top: 15px;    min-height: 64vh;">
+			<form method="post" style="padding-top: 20px;">
+				{% csrf_token %}
 	
+			<div class="form-group">
+				  <label for="exampleFormControlSelect1">Ponto:</label>
+				  <select name=ponto class="form-control" id="exampleFormControlSelect1" required>
+					{% for ponto in ponto_list %}
+					<option value={{ponto.id}}>{{ponto.nome}} | {{ponto.cod_ibge.municipio}}</option>
+					{% endfor %}
+				  </select>
+			</div>
+
 			<div class="container" id="QR-Code">
             <div class="panel panel-info">
                 <div class="panel-heading">
+						<label>Câmera:</label>
                         <select class="form-control" id="camera-select"></select>
                         <div class="form-group">
                             <button title="Decode Image" class="btn btn-default btn-sm" id="decode-img" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-upload"></span></button>
@@ -70,9 +83,9 @@
                          </div>
                 </div>
                 <div class="panel-body text-center">
-                    <div class="col-md-6">
+                    <div class="col-md-auto">
                         <div class="well" style="position: relative;display: inline-block;">
-                            <canvas width="320" height="auto" id="webcodecam-canvas"></canvas>
+                            <canvas class="webcam-canvas" id="webcodecam-canvas"></canvas>
                             <div class="scanner-laser laser-rightBottom" style="opacity: 0.5;"></div>
                             <div class="scanner-laser laser-rightTop" style="opacity: 0.5;"></div>
                             <div class="scanner-laser laser-leftBottom" style="opacity: 0.5;"></div>
@@ -98,16 +111,16 @@
                             <input id="flipHorizontal" onchange="Page.changeHorizontal();" type="checkbox"> {% endcomment %}
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-auto">
                         <div class="thumbnail" id="result">
                             <div class="well" style="overflow: hidden;">
-                                <img width="320" height="240" id="scanned-img" src="">
+                                <img class="webcam-canvas-result" id="scanned-img" src="">
                             </div>
                             <div class="caption">
-                                <h3>Scanned result</h3>
                                 <p id="scanned-QR"></p>
-                                <input id="scanned-code" type="text" class="form-control" placeholder="NIS">
+                                <input id="scanned-code" readonly="readonly" type="text" class="form-control" placeholder="NIS">
                             </div>
+							</form>
                         </div>
                     </div>
                 </div>
@@ -140,5 +153,8 @@
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/select2/select2.min.js" %} "></script>
 <!--===============================================================================================-->
+	<script>
+	{% comment %} onchange check NIS, prompt if user sends transaction {% endcomment %}
+	</script>
 </body>
 </html>

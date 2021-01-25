@@ -63,7 +63,7 @@ urlpatterns = [
     path('ajax/delete-transacao-coop/', views.delete_transacao_coop, name='ajax_delete_transacao_coop'),
     path('ajax/delete-transacao-ponto/', views.delete_transacao_ponto, name='ajax_delete_transacao_ponto'),
 
-    # path('inserir-transacao-qr/', views.insert_transacao_qr, name='inserir-transacao-qr'),
+    path('inserir-transacao-qr/', views.insert_transacao_qr, name='inserir-transacao-qr'),
     
 ]
 

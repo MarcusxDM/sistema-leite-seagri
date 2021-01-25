@@ -28,6 +28,7 @@ var WebCodeCamJS = function(element) {
         }
     };
     var audioBeep = Q("#beep-audio");
+    var decoderWeb   = Q("#decoder-web");
     var videoSelect, lastImageSrc, con, beepSound, w, h, lastCode;
     var display = Q(element),
         DecodeWorker = null,
@@ -64,7 +65,7 @@ var WebCodeCamJS = function(element) {
             flipHorizontal: false,
             zoom: 0,
             beep: audioBeep.href,
-            decoderWorker: 'js/DecoderWorker.js',
+            decoderWorker: decoderWeb.href,
             brightness: 0,
             autoBrightnessValue: 0,
             grayScale: 0,

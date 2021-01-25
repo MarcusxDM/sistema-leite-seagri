@@ -27,12 +27,6 @@
     height: calc(100vh + 65px) !important;
 }
 
-@media (max-width: 576px) {
-    .body-fit{
-        height: calc(100vh + 75px) !important;
-    }
-  }
-
 .last-ben{
     height: 15vh;
     width: auto;
@@ -52,3 +46,25 @@
     position: sticky; top: 0; 
     background:#eee;
 }
+
+.webcam-canvas .webcam-canvas-result{
+    width: auto;
+    height: 240px;
+}
+
+@media (max-width: 576px) {
+    .body-fit{
+        height: calc(100vh + 75px) !important;
+    }
+
+    .webcam-canvas{
+        width: 67vw;
+        height: 240px;
+    }
+
+    .webcam-canvas-result{
+        max-width: 67vw;
+        width: auto;
+        height: 240px;
+    }
+  }
