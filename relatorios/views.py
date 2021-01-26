@@ -959,3 +959,27 @@ def insert_transacao_qr(request):
         user = Usuario.objects.get(id=request.session['user_id'])
         ponto_list = list(Ponto.objects.filter(membro=user))
     return render(request, 'relatorios/insert-qr-ponto.html', {'ponto_list' : ponto_list})
+
+def view_beneficiario(request):
+    if request.method == "POST":
+        valido = False
+        date_transacao = datetime.now().date()
+        try:
+            beneficiario = BeneficiarioFinal.objects.get(nis=request.POST['nis'])
+            if validate_semana(request, date_transacao, beneficiario):
+                if (validate_limit_ben(request, date_transacao, beneficiario)):
+                    valido = True
+                    mensagem_erro = ""
+                else: 
+                    valido = False
+                    mensagem_erro = "Limite do PONTO atingido."
+            else:
+                mensagem_erro = "Limite SEMANAL do BENEFICIÁRIO atingido."
+                valido = False
+        except:
+            beneficiario = BeneficiarioFinal()
+            mensagem_erro = "BENEFICIÁRIO NÃO ENCONTRADO."
+    return render(request, 'relatorios/modal-insert-qr-ponto.html', { 'beneficiario_selected'  : beneficiario,
+                                                                        'valido'               : valido,
+                                                                        'data'                 : date_transacao,
+                                                                        'mensagem_erro'       : mensagem_erro })

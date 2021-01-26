@@ -1,0 +1,28 @@
+  <!-- Modal -->
+<div class="modal-header">
+    <h5 class="modal-title" id="TituloModalCentralizado">Transação</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    {% if valido %}
+    C.P.F:    {{ beneficiario_selected.cpf }}
+    <br><br>
+    NIS:    {{ beneficiario_selected.nis }}
+    <br><br>
+    NOME: {{ beneficiario_selected.nome }}
+    <br><br>
+    Data: {{ data|date:'d/m/Y' }}
+    <br><br>
+    Litros de Leite: 4 L
+    {% else %}
+    <br><br>
+    {{ mensagem_erro }}
+    <br><br>
+    {% endif %}
+</div>
+<div class="modal-footer">
+    <button id="modal-close" type="button" onclick="cancelTransaction()" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+    <!-- <button type="button" class="btn btn-primary">Salvar mudanças</button> -->
+</div>

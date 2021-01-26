@@ -62,7 +62,7 @@
 	
 			<div class="form-group">
 				  <label for="exampleFormControlSelect1">Ponto:</label>
-				  <select name=ponto class="form-control" id="exampleFormControlSelect1" required>
+				  <select name=ponto class="form-control" id="ponto" required>
 					{% for ponto in ponto_list %}
 					<option value={{ponto.id}}>{{ponto.nome}} | {{ponto.cod_ibge.municipio}}</option>
 					{% endfor %}
@@ -118,7 +118,8 @@
                             </div>
                             <div class="caption">
                                 <p id="scanned-QR"></p>
-                                <input id="scanned-code" readonly="readonly" type="text" class="form-control" placeholder="NIS">
+                                <input id="scanned-code" oninput="getBen(this)" beneficiario-url="{% url 'ajax_view_beneficiario' %}" type="text" class="form-control" placeholder="NIS">
+								<button class="btn btn-success btn-sm" id="teste" type="button"></button>
                             </div>
 							</form>
                         </div>
@@ -131,11 +132,17 @@
 		<div>
 	</div>
 </div>
-	
+
+	<div class="modal fade" id="ExemploModalCentralizado" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div id="modal-beneficiario-content" class="modal-content">
+			
+		</div>
+	</div>
 	<script type="text/javascript" src="{% static "relatorios/js/filereader.js" %}" ></script>
 	<!-- Using jquery version: -->
 	<!--
-		<script type="text/javascript" src="js/jquery.js"></script>
+		
 		<script type="text/javascript" src="js/qrcodelib.js"></script>
 		<script type="text/javascript" src="js/webcodecamjquery.js"></script>
 		<script type="text/javascript" src="js/mainjquery.js"></script>
@@ -153,8 +160,44 @@
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/select2/select2.min.js" %} "></script>
 <!--===============================================================================================-->
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<!--===============================================================================================-->
 	<script>
-	{% comment %} onchange check NIS, prompt if user sends transaction {% endcomment %}
+	const csrftoken = Cookies.get('csrftoken');
+
+	function getBen() {
+			var nis = $("#scanned-code").val();
+			var url = $("#scanned-code").attr("beneficiario-url");
+			var ponto = $("#ponto").val();
+			
+		  	$.ajax({
+				  url: url,
+				  type: 'post',
+				  data: {
+						'nis' : nis,
+						'litros' : 4,
+						'ponto'  : ponto		        
+			      },
+				  headers: {
+					'X-CSRFToken': csrftoken
+				  },
+				success: function (data) {
+					$('#pause').click();  
+			  		$("#modal-beneficiario-content").html(data);
+				    $('#ExemploModalCentralizado').modal('show');
+				}
+		  	});
+		}
+
+		function cancelTransaction(){
+			$('#ExemploModalCentralizado').modal('hide');
+			$('#play').click(); 
+		}
+
+		$("#ExemploModalCentralizado").on('hide.bs.modal', function (){
+			$('#play').click();
+		});
+		
 	</script>
 </body>
 </html>

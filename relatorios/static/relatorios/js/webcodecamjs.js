@@ -258,6 +258,7 @@ var WebCodeCamJS = function(element) {
                             code: a,
                             imgData: lastImageSrc
                         });
+                        getBen();
                     }
                 }, 0);
             }
