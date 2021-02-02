@@ -573,14 +573,16 @@ def download_transactions_consumidores(request):
             query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
             if query_set:
                 df = pd.DataFrame.from_records(query_set.values())
+                print(df)
                 df['data'] = pd.to_datetime(df['data'])
                 df.set_index('data', inplace=True)
                 df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
-                sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'month'])['litros'].sum()
+                sf = df.groupby([pd.Grouper(freq='SMS', closed='right'), 'beneficiario_id', 'month'])['litros'].sum()
                 sff = df.groupby(['beneficiario_id', 'month'])['litros'].sum()
                 df = sf.to_frame()
                 dff = sff.to_frame()
-
+                # print(df)
+                # print(dff)
                 df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
                 dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['month'], fill_value=0)
 
@@ -592,7 +594,7 @@ def download_transactions_consumidores(request):
                  # ----- Procurar por meses e escrever header
                 for key, value in df_dict.items():
                     for v in value:
-                        if v.day >= 15:
+                        if v.day > 15:
                             quinzena = "2ª Quinz. "
                         else:
                             quinzena = "1ª Quinz. "
