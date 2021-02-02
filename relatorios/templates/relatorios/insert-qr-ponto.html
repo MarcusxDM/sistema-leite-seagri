@@ -116,10 +116,9 @@
                             <div class="well" style="overflow: hidden;">
                                 <img class="webcam-canvas-result" id="scanned-img" src="">
                             </div>
-                            <div class="caption">
+                            <div class="caption" style="padding-bottom: 15px;">
                                 <p id="scanned-QR"></p>
-                                <input id="scanned-code" oninput="getBen(this)" beneficiario-url="{% url 'ajax_view_beneficiario' %}" type="text" class="form-control" placeholder="NIS">
-								<button class="btn btn-success btn-sm" id="teste" type="button"></button>
+                                <input readonly id="scanned-code" oninput="getBen(this)" beneficiario-url="{% url 'ajax_view_beneficiario' %}" type="text" class="form-control" placeholder="NIS">
                             </div>
 							</form>
                         </div>
@@ -189,14 +188,37 @@
 		  	});
 		}
 
-		function cancelTransaction(){
-			$('#ExemploModalCentralizado').modal('hide');
-			$('#play').click(); 
-		}
+	function cancelTransaction(){
+		$('#ExemploModalCentralizado').modal('hide');
+		$('#play').click(); 
+	}
 
-		$("#ExemploModalCentralizado").on('hide.bs.modal', function (){
-			$('#play').click();
+	$("#ExemploModalCentralizado").on('hide.bs.modal', function (){
+		$('#play').click();
+	});
+
+	function insertTransacaoPonto() {
+		var nis = $("#final-nis").val();
+		var url = $("#insert-transacao").attr("insert-transacao-url");
+		var ponto = $("#final-ponto").val();
+		var date = $("#final-data").val();
+		$.ajax({
+				url: url,
+				type: 'post',
+				data: {
+					'beneficiario' : nis,
+					'litros' : 4,
+					'ponto'  : ponto,
+					'data'   : 	date	        
+				},
+				headers: {
+				'X-CSRFToken': csrftoken
+				},
+			success: function (data) {
+				$("#modal-beneficiario-content").html(data);
+			}
 		});
+	}
 		
 	</script>
 </body>

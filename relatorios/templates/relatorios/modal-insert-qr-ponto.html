@@ -1,21 +1,52 @@
   <!-- Modal -->
 <div class="modal-header">
-    <h5 class="modal-title" id="TituloModalCentralizado">Transação</h5>
+    <h5 class="modal-title" id="TituloModalCentralizado">Nova Transação</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
     <span aria-hidden="true">&times;</span>
     </button>
 </div>
 <div class="modal-body">
+    {% if message %}
+    <br><br>
+    {{ message }}
+    {% endif %}
     {% if valido %}
-    C.P.F:    {{ beneficiario_selected.cpf }}
-    <br><br>
-    NIS:    {{ beneficiario_selected.nis }}
-    <br><br>
-    NOME: {{ beneficiario_selected.nome }}
-    <br><br>
-    Data: {{ data|date:'d/m/Y' }}
-    <br><br>
-    Litros de Leite: 4 L
+    <form id="insert-transacao" insert-transacao-url="{% url 'ajax_insert_transacao_ponto' %}" method="post">
+        {% csrf_token %}
+
+        <div class="form-group ">
+            <input readonly name=ponto id="final-ponto" value="{{ ponto_selected }}" type="hidden" class="form-control" placeholder="Ponto">
+        </div>
+
+        <div class="form-group ">
+            <label for="exampleFormControlSelect1">CPF: </label>
+            <input readonly  value="{{ beneficiario_selected.cpf }}" type="text" class="form-control" placeholder="CPF">
+        </div>
+
+        <div class="form-group ">
+            <label for="exampleFormControlSelect1">NIS: </label>
+            <input readonly id="final-nis" name="beneficiario" value="{{ beneficiario_selected.nis }}" type="text" class="form-control" placeholder="NIS">
+        </div>
+
+        <div class="form-group ">
+            <label for="exampleFormControlSelect1">Nome: </label>
+            <input readonly value="{{ beneficiario_selected.nome }}" type="text" class="form-control" placeholder="Nome">
+        </div>
+
+        <div class="form-group">
+            <label for="exampleFormControlSelect1">Litros: </label>
+            <input name=litros type=number step=1 value=4 min=4 max=4 readonly /><br />
+        </div>
+
+        <div class="form-group ">
+            <label for="exampleFormControlSelect1">Data: </label>
+            <input name=data readonly id="final-data" value="{{ data|date:'Y-m-d' }}" type="text" class="form-control" placeholder="Date">
+        </div>
+
+        <div class="container-login100-form-btn">
+            <button type="button" onclick="insertTransacaoPonto()" class="btn btn-primary" >Confirmar</button>
+        </div>
+    </form>
     {% else %}
     <br><br>
     {{ mensagem_erro }}

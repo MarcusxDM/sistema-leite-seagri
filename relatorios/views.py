@@ -61,7 +61,7 @@ def load_pontos(request):
         pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge).order_by('nome')
     else:
         pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
-    print(pontos)
+    # print(pontos)
     return render(request, 'relatorios/load-pontos.html', {'ponto_list': pontos})
 
 def load_entidades(request):
@@ -72,7 +72,7 @@ def load_entidades(request):
         entidades = Entidade.objects.filter(cod_ibge__cod_ibge=cod_ibge).order_by('nome')
     else:
         entidades = Entidade.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
-    print(entidades, 1)
+    # print(entidades, 1)
     return render(request, 'relatorios/load-entidades.html', {'entidade_list': entidades})
 
 def semana_list(date_time):
@@ -139,13 +139,13 @@ def validate_semana(request, date_transacao, beneficiario_final):
     litros_disponivel_sem = limit_semanal - total_litros_semana
 
     if (litros_disponivel_sem > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_sem):
-        print("COTA QUINZENAL SEMANAL:", litros_disponivel_sem, " Litros")
+        # print("COTA QUINZENAL SEMANAL:", litros_disponivel_sem, " Litros")
         return True
         
     else:
         request.session['insert_leite_final_success'] = ''
         request.session['insert_leite_final_error'] = ''.join(["COTA SEMANAL ATINGIDA: ", str(litros_disponivel_sem), " Litros disponíveis para ", str(beneficiario_final)])
-        print(request.session['insert_leite_final_error'])
+        # print(request.session['insert_leite_final_error'])
         return False
 
 def validate_quinzena(request, date_transacao, produtor):
@@ -167,13 +167,13 @@ def validate_quinzena(request, date_transacao, produtor):
     litros_disponivel_quin = limit_quinzenal - total_litros_quinzena
 
     if (litros_disponivel_quin > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_quin):
-        print("COTA QUINZENAL LIBERADA:", litros_disponivel_quin, " Litros")
+        # print("COTA QUINZENAL LIBERADA:", litros_disponivel_quin, " Litros")
         return True
         
     else:
         request.session['insert_leite_success'] = ''
         request.session['insert_leite_error'] = ''.join(["COTA QUINZENAL ATINGIDA: ", str(litros_disponivel_quin), " Litros disponíveis para ", str(produtor)])
-        print(request.session['insert_leite_error'])
+        # print(request.session['insert_leite_error'])
         return False
 
 def validate_semestre(request, date_transacao, produtor):
@@ -195,13 +195,13 @@ def validate_semestre(request, date_transacao, produtor):
     litros_disponivel_semestre = limit_semestral - total_litros_semestre
 
     if (litros_disponivel_semestre > 0) and (abs(float(request.POST['litros'])) <= litros_disponivel_semestre):
-        print("COTA SEMESTRAL LIBERADA:", litros_disponivel_semestre, " Litros")
+        # print("COTA SEMESTRAL LIBERADA:", litros_disponivel_semestre, " Litros")
         return True
         
     else:
         request.session['insert_leite_success'] = ''
         request.session['insert_leite_error'] = ''.join(["COTA SEMESTRAL ATINGIDA: ", str(litros_disponivel_semestre), " Litros disponíveis"])
-        print("COTA SEMESTRAL ATINGIDA:", litros_disponivel_semestre, " Litros disponíveis para ", str(produtor))
+        # print("COTA SEMESTRAL ATINGIDA:", litros_disponivel_semestre, " Litros disponíveis para ", str(produtor))
         return False
 
 def transacao_succes(request):
@@ -216,12 +216,12 @@ def transacao_succes(request):
         transacao.save()
         request.session['insert_leite_error'] = ''
         request.session['insert_leite_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE DE ", str(transacao.tipo), " ADICIONADOS para ", str(transacao.beneficiario)])
-        print(transacao.litros, " LITROS DE LEITE DE ", transacao.tipo, " ADICIONADOS")
+        # print(transacao.litros, " LITROS DE LEITE DE ", transacao.tipo, " ADICIONADOS")
         return redirect(reverse('inserir-transacao-leite'))
     except:
         request.session['insert_leite_success'] = ''
         request.session['insert_leite_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
-        print(request.session['insert_leite_error'])
+        # print(request.session['insert_leite_error'])
         return redirect(reverse('inserir-transacao-leite'))
 
 def transacao_final_succes(request):
@@ -235,12 +235,12 @@ def transacao_final_succes(request):
         transacao.save()
         request.session['insert_leite_final_error'] = ''
         request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES para ", str(transacao.beneficiario)])
-        print(transacao.litros, " LITROS DE LEITE ENTREGUES")
+        # print(transacao.litros, " LITROS DE LEITE ENTREGUES")
         return redirect(reverse('inserir-transacaofinal-leite'))
     except:
         request.session['insert_leite_final_success'] = ''
         request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
-        print(request.session['insert_leite_final_error'])
+        # print(request.session['insert_leite_final_error'])
         return redirect(reverse('inserir-transacaofinal-leite'))
 
 def save_transacao_entidade(request):
@@ -261,11 +261,11 @@ def save_transacao_entidade(request):
             transacao.save()
             request.session['insert_leite_final_error'] = ''
             request.session['insert_leite_final_success'] = ''.join([str(transacao.litros), " LITROS DE LEITE ENTREGUES"])
-            print(transacao.litros, " LITROS DE LEITE ENTREGUES")
+            # print(transacao.litros, " LITROS DE LEITE ENTREGUES")
         except:
             request.session['insert_leite_final_success'] = ''
             request.session['insert_leite_final_error'] = "NÃO FOI POSSÍVEL SALVAR A TRANSAÇÃO"
-            print(request.session['insert_leite_final_error'])
+            # print(request.session['insert_leite_final_error'])
     return redirect(reverse('inserir-transacao-entidade-leite'))
 
 def index(request):
@@ -378,7 +378,7 @@ def save_transacao(request):
         else:
             request.session['insert_leite_success'] = ''
             request.session['insert_leite_error'] = "DAP FORA DE VALIDADE"
-            print(request.session['insert_leite_error'])
+            # print(request.session['insert_leite_error'])
     return redirect(reverse('inserir-transacao-leite'))
 
 def save_transacao_ponto(request):
@@ -394,7 +394,7 @@ def save_transacao_ponto(request):
                 request.session['insert_leite_final_error'] = 'ESTE PONTO JÁ ENTREGOU AO NÚMERO MÁXIMO DE CONSUMIDORES'
         else:
             request.session['insert_leite_final_success'] = ''
-            print(request.session['insert_leite_final_error'])
+            # print(request.session['insert_leite_final_error'])
     return redirect(reverse('inserir-transacaofinal-leite'))
 
 def view_transactions_coop_menu(request):
@@ -478,7 +478,7 @@ def download_transactions_produtores(request):
         
         # Get Coop
         coop = Cooperativa.objects.get(id=request.POST['cooperativa'])
-        print(coop)
+        # print(coop)
 
         # Grouping by Produtor
         query_set = Transacao.objects.filter(cooperativa=request.POST['cooperativa'], data__gte=date_inicio, data__lte=date_fim)
@@ -491,7 +491,7 @@ def download_transactions_produtores(request):
             sff = df.groupby(['beneficiario_id', 'tipo', 'month'])['litros'].sum()
             df = sf.to_frame()
             dff = sff.to_frame()
-            print(dff)
+            # print(dff)
             #.reset_index()
             
 
@@ -951,7 +951,7 @@ def view_ocorrencia_ponto(request):
 def count_ocorrencia_new(request):
     if request.method == "GET":
         ocorrencias_new = OcorrenciaPonto.objects.filter(viewed=0).count()
-        print(ocorrencias_new)
+        # print(ocorrencias_new)
     return render(request, 'relatorios/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
 
 def insert_transacao_qr(request):
@@ -982,4 +982,23 @@ def view_beneficiario(request):
     return render(request, 'relatorios/modal-insert-qr-ponto.html', { 'beneficiario_selected'  : beneficiario,
                                                                         'valido'               : valido,
                                                                         'data'                 : date_transacao,
+                                                                        'ponto_selected'      : request.POST['ponto'],
                                                                         'mensagem_erro'       : mensagem_erro })
+
+def save_transacao_ponto_qr(request):
+    if request.method == "POST":
+        transacao              = TransacaoFinal()
+        transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
+        transacao.litros       = abs(float(request.POST['litros']))
+        transacao.ponto        = Ponto.objects.get(pk=request.POST['ponto'])
+        transacao.data         = request.POST['data']
+        transacao.user         = Usuario.objects.get(pk=request.session['user_id'])
+        try:
+            transacao.save()
+            message = "Transação feita com sucesso!"
+        except:
+            message = "NÃO foi possível SALVAR a TRANSAÇÃO!"
+        return render(request, 'relatorios/modal-insert-qr-ponto.html', { 'message': message })
+            
+    else:
+        return redirect(reverse('index'))

@@ -170,9 +170,9 @@
     }, false);
     play.addEventListener("click", function() {
         if (!decoder.isInitialized()) {
-            scannedQR[txt] = "Scanning ...";
+            scannedQR[txt] = "Escaneando ...";
         } else {
-            scannedQR[txt] = "Scanning ...";
+            scannedQR[txt] = "Escaneando ...";
             decoder.play();
         }
     }, false);

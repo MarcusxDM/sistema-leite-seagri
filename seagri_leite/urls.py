@@ -66,6 +66,7 @@ urlpatterns = [
     # QR Code
     path('inserir-transacao-qr/', views.insert_transacao_qr, name='inserir-transacao-qr'), 
     path('ajax/view-beneficiario/', views.view_beneficiario, name='ajax_view_beneficiario'),
+    path('ajax/insert-beneficiario/', views.save_transacao_ponto_qr, name='ajax_insert_transacao_ponto')
     
 ]
 
