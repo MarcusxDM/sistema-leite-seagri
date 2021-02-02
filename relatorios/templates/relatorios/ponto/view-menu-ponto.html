@@ -34,7 +34,7 @@
 	
 	<div class="limiter back" style="min-height: 100%;">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<a class="navbar-brand" href="#">Sistema Leite</a>
+			<a class="navbar-brand" href="{% url 'home' %}">Sistema Leite</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			  <span class="navbar-toggler-icon"></span>
 			</button>
@@ -44,42 +44,71 @@
 				<li class="nav-item active">
 				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
-			  </ul>
+			  <div>
+			  	<a href="{% url 'procurar-transacaofinal-leite' %}">
+					<button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+						Gerenciar Transações
+					</button>
+				</a>
+				</div>
+			</ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
 				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>
 			  </form>
 			</div>
 		  </nav>
-		<div class="row w-100" style="margin-top: 5%">
+		<div class="row w-100" style="margin-top: 13%">
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form  id="Teste" data-ocorrencias-url="{% url 'ajax_load_ocorrencias_ponto' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form action="{% url 'download-consumidores' %}" id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
-				  
-				  <div class="form-group">
-					<label for="exampleFormControlSelect1">Situação</label>
-					<select name=ponto class="form-control" id="situacaoSelect" required>
-					  <option value=0>Novas</option>
-					  <option value=1>Visualizadas</option>
-					</select>
-				  </div>			  
 
-				<div id="ocorrencias-table">
-					<!-- load-ocorrencias-pontos by ajax-->
-				</div>
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Município</label>
+					<select name=ponto class="form-control" id="cod_ibge" onchange="func2()" required>
+					  <option value=>Escolha aqui</option>
 				
-			  </form>
-
-			</div>
-		</div>
-	</div>
-
-	<div class="modal fade" id="ExemploModalCentralizado" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div id="modal-ocorrencia-content" class="modal-content">
+					  {% for municipio in municipio_list %}
+					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
+					  {% endfor %}
+					</select>
+				  </div>
+				
+				<div class="form-group">
+				  <label for="exampleFormControlSelect1">Ponto</label>
+				  <select name=ponto class="form-control" id="pontoSelect" required>
+					{% include 'relatorios/ponto/load-pontos.html' %}
+				  </select>
+				</div>
+			  
 			
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data Inicio</label>
+					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
+
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data Fim</label>
+					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
+
+				<div class="container-login100-form-btn">
+				<button class="login100-form-btn" name="action" value="PONTO">
+					Baixar Relatório
+				</button>
+
+				{% if municipio_all %}
+				<div class="container-login100-form-btn" style="padding-top: 3%; ">
+				<button class="login100-form-btn" name="action" value="PONTOS">
+					Baixar Relatório (Todos os Pontos)
+				</button>
+				</div>
+				{% endif %}			 
+				</div>
+			  </form>
+			</div>
 		</div>
 	</div>
 <!--===============================================================================================-->
@@ -98,96 +127,28 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
-<!--===============================================================================================-->
-	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 	<script>
-		const csrftoken = Cookies.get('csrftoken');
-
-		function load_new_ocorrencias() {
-		  var url = $("#Teste").attr("data-ocorrencias-url");  // get the url of the `load_cities` view
-		  var viewed = 0
-		  $.ajax({                       // initialize an AJAX request
-			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
-			data: {
-			  'viewed': viewed    // add the country id to the GET parameters
-			},
-			success: function (data) {   // `data` is the return of the `load_cities` view function
-			  $("#ocorrencias-table").html(data);  // replace the contents of the city input with the data that came from the server
-			}
-		  });
+		$("#cod_ibge").change(function () {
+		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
+		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
 	
-		};
-
-		$("#situacaoSelect").change(function () {
-		  var url = $("#Teste").attr("data-ocorrencias-url");  // get the url of the `load_cities` view
-		  var viewed = $("#situacaoSelect").val()
 		  $.ajax({                       // initialize an AJAX request
 			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
 			data: {
-			  'viewed': viewed    // add the country id to the GET parameters
+			  'cod_ibge': cod_ibge       // add the country id to the GET parameters
 			},
 			success: function (data) {   // `data` is the return of the `load_cities` view function
-			  $("#ocorrencias-table").html(data);  // replace the contents of the city input with the data that came from the server
+			  $("#pontoSelect").html(data);  // replace the contents of the city input with the data that came from the server
 			}
 		  });
 	
 		});
 
-		function go_page(e) {
-			var url = $("#Teste").attr("data-ocorrencias-url");
-			var viewed = $("#situacaoSelect").val();
-		  	var page = $(e).attr("page");
-			
-		  	$.ajax({                       // initialize an AJAX request
-				url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
-				data: {
-					'viewed' : viewed,
-					'page': page			        
-				},
-				success: function (data) {   // `data` is the return of the `load_cities` view function
-					$("#ocorrencias-table").html(data);  // replace the contents of the city input with the data that came from the server
-				}
-		  });
+		function func2(){
+			if(document.getElementById('cod_ibge').value == 0) {
+				document.getElementById('pontoSelect').value = 0
+			}
 		}
-
-		function visualizar_ocorrencia(e) {
-			var url = $(e).attr("view-url");
-			var ocorrencia = $(e).attr("ocorrencia-id");
-			var page = $("#active-page").innerText;
-			
-		  	$.ajax({
-				  url: url,
-				  type: 'post',
-				  data: {
-						'ocorrencia' : ocorrencia		        
-			      },
-				  headers: {
-					'X-CSRFToken': csrftoken
-				  },
-				success: function (data) {  
-			  		$("#modal-ocorrencia-content").html(data);
-				}
-		  	});
-		}
-
-		$("#ExemploModalCentralizado").on('hide.bs.modal', function (){
-			var url = $("#Teste").attr("data-ocorrencias-url");
-			var viewed = $("#situacaoSelect").val();
-		  	var page = $("#active-page").attr("page");
-			
-		  	$.ajax({                       // initialize an AJAX request
-				url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
-				data: {
-					'viewed' : viewed,
-					'page': page			        
-				},
-				success: function (data) {   // `data` is the return of the `load_cities` view function
-					$("#ocorrencias-table").html(data);  // replace the contents of the city input with the data that came from the server
-				}
-		  });
-		});
-		
-		window.onload(load_new_ocorrencias())
 	  </script>
 </body>
 </html>

@@ -34,7 +34,7 @@
 	
 	<div class="limiter back" style="min-height: 100%;">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<a class="navbar-brand" href="#">Sistema Leite</a>
+			<a class="navbar-brand" href="{% url 'home' %}">Sistema Leite</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			  <span class="navbar-toggler-icon"></span>
 			</button>
@@ -44,27 +44,50 @@
 				<li class="nav-item active">
 				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
-			  <div>
-			  	<a href="{% url 'procurar-transacao-leite' %}">
-					<button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-						Gerenciar Transações
-					</button>
-				</a>
-				</div>
-				</ul>
+			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
 				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>
 			  </form>
 			</div>
 		  </nav>
-		<div class="row w-100" style="margin-top: 13%">
-		<div class="col align-self-center">
-		<div class="container insert-form" style="background-color: whitesmoke;" >
+		<div class="container">
 			
-			<form action="{% url 'download-produtores' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+
+			{% block footer %}
+			<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+
+			{{ form.media }}
+
+			<script>
+			(function($) {
+				$('#add-form').click(function() {
+					var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+					var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+					newTable.find(':input').each(function() {
+						for (attr of ['name', 'id'])
+							$(this).attr(
+								attr,
+								$(this).attr(attr).replace('__prefix__', index)
+							)
+					})
+					newTable.insertBefore($(this))
+					$('#id_inline_test_models-TOTAL_FORMS').val(
+						parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
+					)
+					newTable.slideDown()
+				})
+			})($)
+			</script>
+			{% endblock %}
+			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
+			<form action="{% url 'save-transacao' %}" method="post" style="margin-top: 20vh;">
 				{% csrf_token %}
-				
+				<div class="form-group ">
+					<label for="exampleFormControlSelect1">DAP | Produtor</label>
+					{{form.beneficiario}}
+					</div>
+
 				<div class="form-group">
 				  <label for="exampleFormControlSelect1">Cooperativa</label>
 				  <select name=cooperativa class="form-control" id="exampleFormControlSelect1" required>
@@ -73,26 +96,46 @@
 					{% endfor %}
 				  </select>
 				</div>
-			
-				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Inicio</label>
-					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
-				</div>
 
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Fim</label>
-					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
-				</div>
+					<label for="exampleFormControlSelect1">Litros</label>
+					<input name=litros type=number step=0.1 value=1.0 min=1.0 /><br />
+				  </div>
 
-				<div class="container-login100-form-btn">
-				<button class="login100-form-btn">
-					Baixar Relatório
-				</button>
+				  <div class="form-group">
+					<label for="exampleFormControlSelect1">Data</label>
+					<input name=data type=date value="{{today}}" min="2020-09-01" max="{{today}}" /> <br />
+				  </div>
+
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Tipo de Leite</label>
+					<select name=tipo class="form-control" id="exampleFormControlSelect3">
+					  <option>VACA</option>
+					  <option>CABRA</option>
+					</select>
+				  </div>
+				  <div class="container-login100-form-btn">
+					<button class="login100-form-btn">
+						Inserir
+					</button>
 				</div>
 			  </form>
+			  <b class="txt3">
+				{% if request.session.insert_leite_error %}
+				<p style="color: red; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_error }}</p>
+				{% endif %}
+				{% if request.session.insert_leite_success %}
+				<p style="color: green; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_success }}</p>
+				{% endif %}
+			</b>
+			</div>
+			  <div>
 			</div>
 		</div>
 	</div>
+	
+
+	<div id="dropDownSelect1"></div>
 	
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/jquery/jquery-3.2.1.min.js" %} "></script>

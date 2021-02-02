@@ -34,7 +34,7 @@
 	
 	<div class="limiter back" style="min-height: 100%;">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<a class="navbar-brand" href="#">Sistema Leite</a>
+			<a class="navbar-brand" href="{% url 'home' %}">Sistema Leite</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			  <span class="navbar-toggler-icon"></span>
 			</button>
@@ -44,14 +44,7 @@
 				<li class="nav-item active">
 				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
-			  <div>
-			  	<a href="{% url 'procurar-transacaofinal-leite' %}">
-					<button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-						Gerenciar Transações
-					</button>
-				</a>
-				</div>
-			</ul>
+			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
 				<button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Sair</button>
@@ -62,7 +55,7 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form action="{% url 'download-consumidores' %}" id="Teste" data-pontos-url="{% url 'ajax_load_pontos' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form  id="Teste" action="{% url 'insert-ponto-ocorrencia' %}" enctype="multipart/form-data" data-pontos-url="{% url 'ajax_load_pontos' %}" data-transacoes-url="{% url 'ajax_load_transacoes_ponto' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 
 				<div class="form-group">
@@ -75,39 +68,38 @@
 					  {% endfor %}
 					</select>
 				  </div>
-				
-				<div class="form-group">
-				  <label for="exampleFormControlSelect1">Ponto</label>
-				  <select name=ponto class="form-control" id="pontoSelect" required>
-					{% include 'relatorios/load-pontos.html' %}
-				  </select>
-				</div>
-			  
+				  
+				  <div class="form-group">
+					<label for="exampleFormControlSelect1">Ponto</label>
+					<select name="ponto" class="form-control" id="pontoSelect" required>
+					  {% include 'relatorios/ponto/load-pontos.html' %}
+					</select>
+				  </div>			  
 			
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Inicio</label>
-					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
+					<label for="exampleFormControlSelect1">Data</label>
+					<input name="data"  id="data" type=date value="{{today}}" min="{{first_day_month}}" max="{{today}}" /> <br />
 				</div>
 
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Fim</label>
-					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
+					<label for="exampleFormControlTextarea1">Descrição</label>
+					<textarea name="descricao" maxLength=150 class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
 				</div>
 
-				<div class="container-login100-form-btn">
-				<button class="login100-form-btn" name="action" value="PONTO">
-					Baixar Relatório
-				</button>
-
-				{% if municipio_all %}
-				<div class="container-login100-form-btn" style="padding-top: 3%; ">
-				<button class="login100-form-btn" name="action" value="PONTOS">
-					Baixar Relatório (Todos os Pontos)
-				</button>
+				<div class="form-group">
+					<label for="img">Selecione uma imagem:</label>
+					<input type="file" id="foto" name="foto" accept="image/*">
 				</div>
-				{% endif %}			 
+
+				<div>
+					<div class="container-login100-form-btn">
+						<button type="submit" class="login100-form-btn" id="enviar">
+							Enviar
+						</button>
+					</div>
 				</div>
 			  </form>
+			  
 			</div>
 		</div>
 	</div>
@@ -127,7 +119,10 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 	<script>
+
 		$("#cod_ibge").change(function () {
 		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
 		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
@@ -149,6 +144,12 @@
 				document.getElementById('pontoSelect').value = 0
 			}
 		}
+
+		$("#enviar").click(function () {
+			window.alert("Ocorrência enviada!");
+		});
+
+	
 	  </script>
 </body>
 </html>

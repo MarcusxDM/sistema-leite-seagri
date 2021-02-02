@@ -30,11 +30,11 @@
 	<link rel="stylesheet" type="text/css" href="{% static "relatorios/css/custom.css" %} ">
 <!--===============================================================================================-->
 </head>
-<body style="height: calc(100vh + 65px);">
+<body>
 	
-	<div class="limiter  back" style="min-height: 100%;">
+	<div class="limiter back" style="min-height: 100%;">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<a class="navbar-brand" href="#">Sistema Leite</a>
+			<a class="navbar-brand" href="{% url 'home' %}">Sistema Leite</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			  <span class="navbar-toggler-icon"></span>
 			</button>
@@ -51,94 +51,59 @@
 			  </form>
 			</div>
 		  </nav>
-		<div class="container ">
-			<div class="container-fluid insert-form" style="margin-top: -35px;    min-height: 64vh;">
-			<form action="{% url 'save-transacao-entidade' %}" method="post" style="margin-top: 20vh;">
+		<div class="row w-100" style="margin-top: 13%">
+		<div class="col align-self-center">
+		<div class="container insert-form" style="background-color: whitesmoke;" >
+			
+			<form action="{% url 'download-entidades' %}" id="Teste" data-entidades-url="{% url 'ajax_load_entidades' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
-				  <label for="exampleFormControlSelect1">Entidade</label>
-				  <select name=entidade class="form-control" id="exampleFormControlSelect1" required>
-					{% for entidade in entidade_list %}
-					<option value={{entidade.id}}>{{entidade.nome}} | {{entidade.cod_ibge.municipio}}</option>
-					{% endfor %}
-				  </select>
 
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Litros</label>
-					<input name=litros type=number step=1 value=0 min=1 max=9999 /><br />
-				  </div>
-				  
-				  <table class="table">
-					<tbody>
-					  <tr>
-						<td>
-							<div class="form-group">
-								<label for="exampleFormControlSelect1">0 a 6 anos</label>
-								<input name=ben_0_6 type=number step=1 value=0 min=0 max=999 /><br />
-							  </div>
-
-							<div class="form-group">
-								<label for="exampleFormControlSelect1">7 a 14 anos</label>
-								<input name=ben_7_14 type=number step=1 value=0 min=0 max=999 /><br />
-							  </div>
-							  
-							  <div class="form-group">
-								<label for="exampleFormControlSelect1">15 a 23 anos</label>
-								<input name=ben_15_23 type=number step=1 value=0 min=0 max=999 /><br />
-							</div>
-
-							<div class="form-group">
-								<label for="exampleFormControlSelect1">24 a 65 anos</label>
-								<input name=ben_24_65 type=number step=1 value=0 min=0 max=999 /><br />
-							  </div>
-						</td>
-
-						<td>
-							<div class="form-group">
-								<label for="exampleFormControlSelect1">66 ou mais anos</label>
-								<input name=ben_66_mais type=number step=1 value=0 min=0 max=999 /><br />
-							  </div>
-
-							  <div class="form-group">
-								<label for="exampleFormControlSelect1">Gênero Masculino</label>
-								<input name=ben_m type=number step=1 value=0 min=0 max=999 /><br />
-							  </div>
-
-							<div class="form-group">
-								<label for="exampleFormControlSelect1">Gênero Feminino</label>
-								<input name=ben_f type=number step=1 value=0 min=0 max=999 /><br />
-							</div>
-						</td>
-					</tbody>
-				  </table>
+					<label for="exampleFormControlSelect1">Município</label>
+					<select name=cod_ibge class="form-control" id="cod_ibge" onchange="func2()" required>
+					  <option value=>Escolha aqui</option>
 				
-				  <div class="form-group">
-					<label for="exampleFormControlSelect1">Data</label>
-					<input name=data type=date value="{{today}}" min="2020-09-01" max="{{today}}" /> <br />
+					  {% for municipio in municipio_list %}
+					  <option value={{municipio.cod_ibge}}>{{municipio.municipio}}</option>
+					  {% endfor %}
+					</select>
 				  </div>
+				
+				<div class="form-group">
+				  <label for="exampleFormControlSelect1">Entidade</label>
+				  <select name=entidade class="form-control" id="entidadeSelect" required>
+					{% include 'relatorios/entidade/load-entidades.html' %}
+				  </select>
+				</div>
+			  
+			
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data Inicio</label>
+					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
 
-				  <div class="container-login100-form-btn">
-					<button class="login100-form-btn">
-						Inserir
-					</button>
+				<div class="form-group">
+					<label for="exampleFormControlSelect1">Data Fim</label>
+					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
+				</div>
+
+				<div class="container-login100-form-btn">
+				<button class="login100-form-btn" name="action" value="ENTIDADE">
+					Baixar Relatório
+				</button>
+
+				{% if municipio_all %}
+				<div class="container-login100-form-btn" style="padding-top: 3%; ">
+				<button class="login100-form-btn" name="action" value="ENTIDADES">
+					Baixar Relatório (Todos as Entidades)
+				</button>
+				</div>
+				{% endif %}			 
 				</div>
 			  </form>
-			  <b class="txt3">
-				{% if request.session.insert_leite_final_error %}
-				<p style="color: red; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_final_error }}</p>
-				{% endif %}
-				{% if request.session.insert_leite_final_success %}
-				<p style="color: green; margin-top: 5%; margin-bottom: 5%;">{{ request.session.insert_leite_final_success }}</p>
-				{% endif %}
-			</b>
-			</div>
-			  <div>
 			</div>
 		</div>
 	</div>
-	
-
-	<div id="dropDownSelect1"></div>
-	
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/vendor/jquery/jquery-3.2.1.min.js" %} "></script>
 <!--===============================================================================================-->
@@ -155,6 +120,28 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
+	<script>
+		$("#cod_ibge").change(function () {
+		  var url = $("#Teste").attr("data-entidades-url");  // get the url of the `load_cities` view
+		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
+	
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'cod_ibge': cod_ibge       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#entidadeSelect").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
 
+		function func2(){
+			if(document.getElementById('cod_ibge').value == 0) {
+				document.getElementById('entidadeSelect').value = 0
+			}
+		}
+	  </script>
 </body>
 </html>

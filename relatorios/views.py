@@ -62,7 +62,7 @@ def load_pontos(request):
     else:
         pontos = Ponto.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
     # print(pontos)
-    return render(request, 'relatorios/load-pontos.html', {'ponto_list': pontos})
+    return render(request, 'relatorios/ponto/load-pontos.html', {'ponto_list': pontos})
 
 def load_entidades(request):
     cod_ibge = request.GET.get('cod_ibge')
@@ -73,7 +73,7 @@ def load_entidades(request):
     else:
         entidades = Entidade.objects.filter(cod_ibge__cod_ibge=cod_ibge, membro=user).order_by('nome')
     # print(entidades, 1)
-    return render(request, 'relatorios/load-entidades.html', {'entidade_list': entidades})
+    return render(request, 'relatorios/entidade/load-entidades.html', {'entidade_list': entidades})
 
 def semana_list(date_time):
     first_day_month     = date_time.replace(day=1)
@@ -317,7 +317,7 @@ def insert_transactions_coop_menu(request):
             form = TransacaoProdutor()
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/insert-menu-coop.html', {'user'      : user,
+            return render(request, 'relatorios/coop/insert-menu-coop.html', {'user'      : user,
                                                                         'coop_list' : coop_list, 
                                                                         'form'      : form, 
                                                                         'today'     : today, 
@@ -338,7 +338,7 @@ def insert_transactions_ponto_menu(request):
             form = TransacaoBeneficiarioFinal()
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/insert-menu-ponto.html', {'user'      : user,
+            return render(request, 'relatorios/ponto/insert-menu-ponto.html', {'user'      : user,
                                                                         'ponto_list' : ponto_list, 
                                                                         'form'      : form, 
                                                                         'today'     : today, 
@@ -358,7 +358,7 @@ def insert_transactions_entidade_menu(request):
                 entidade_list = list(Entidade.objects.filter(membro=user).order_by('nome'))
             today = datetime.now().date().strftime('%Y-%m-%d')
             today30 = (datetime.now().date() - timedelta(days=90)).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/insert-menu-entidade.html', {'user'      : user,
+            return render(request, 'relatorios/entidade/insert-menu-entidade.html', {'user'      : user,
                                                                             'entidade_list' : entidade_list, 
                                                                             'today'     : today, 
                                                                             'today30'   : today30})
@@ -406,7 +406,7 @@ def view_transactions_coop_menu(request):
             else:
                 coop_list = list(Cooperativa.objects.filter(membro=user))
             today = datetime.now().date().strftime('%Y-%m-%d')
-            return render(request, 'relatorios/view-menu-coop.html', {'coop_list' : coop_list, 
+            return render(request, 'relatorios/coop/view-menu-coop.html', {'coop_list' : coop_list, 
                                                                         'today'     : today})
         else:
             return redirect(reverse('index'))
@@ -428,7 +428,7 @@ def view_transactions_ponto_menu(request):
             ponto_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
             first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/view-menu-ponto.html', {'ponto_list' : ponto_list, 
+            return render(request, 'relatorios/ponto/view-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                         'today'     : today,
                                                                         'municipio_list' : municipio_list,
                                                                         'municipio_all' : municipio_all})
@@ -450,7 +450,7 @@ def view_transactions_entidade_menu(request):
                 municipio_all = False
             entidade_list = []
             today = datetime.now().date().strftime('%Y-%m-%d')
-            return render(request, 'relatorios/view-menu-entidade.html', {'entidade_list' : entidade_list, 
+            return render(request, 'relatorios/entidade/view-menu-entidade.html', {'entidade_list' : entidade_list, 
                                                                         'today'     : today,
                                                                         'municipio_list' : municipio_list,
                                                                         'municipio_all' : municipio_all})
@@ -785,7 +785,7 @@ def last_beneficiarios(request):
     history_ben = set(ben_ids) - set(ben_ids_this_week)
     ben_query = BeneficiarioFinal.objects.filter(nis__in=history_ben)
     
-    return render(request, 'relatorios/last-beneficiarios.html', {'beneficiarios_list': ben_query})
+    return render(request, 'relatorios/ponto/last-beneficiarios.html', {'beneficiarios_list': ben_query})
 
 def load_transacoes_ponto(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
@@ -799,7 +799,7 @@ def load_transacoes_ponto(request):
     except EmptyPage:
         transacoes = paginator.page(paginator.num_pages)
 
-    return render(request, 'relatorios/load-transacoes-ponto.html', { 'transacoes': transacoes })
+    return render(request, 'relatorios/ponto/load-transacoes-ponto.html', { 'transacoes': transacoes })
 
 def load_transacoes_coop(request):
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
@@ -813,7 +813,7 @@ def load_transacoes_coop(request):
     except EmptyPage:
         transacoes = paginator.page(paginator.num_pages)
 
-    return render(request, 'relatorios/load-transacoes-coop.html', { 'transacoes': transacoes })
+    return render(request, 'relatorios/coop/load-transacoes-coop.html', { 'transacoes': transacoes })
 
 def manage_transactions_ponto_menu(request):
     # try:
@@ -831,7 +831,7 @@ def manage_transactions_ponto_menu(request):
         today_str = today.strftime('%Y-%m-%d')
         month_prev = subtractMonth(today, 3)
         first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
-        return render(request, 'relatorios/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
+        return render(request, 'relatorios/ponto/manage-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                     'today'     : today_str,
                                                                     'first_day_month' : first_day_month,
                                                                     'municipio_list' : municipio_list,
@@ -853,7 +853,7 @@ def manage_transactions_coop_menu(request):
         today_str = today.strftime('%Y-%m-%d')
         month_prev = subtractMonth(today, 3)
         first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
-        return render(request, 'relatorios/manage-menu-coop.html', {'coop_list' : coop_list, 
+        return render(request, 'relatorios/coop/manage-menu-coop.html', {'coop_list' : coop_list, 
                                                                     'today'     : today_str,
                                                                     'first_day_month' : first_day_month})
     else:
@@ -865,13 +865,13 @@ def delete_transacao_ponto(request):
     if request.method == "POST":
         transacao = TransacaoFinal.objects.get(pk=request.POST['transacao'])
         transacao.delete()
-    return render(request, 'relatorios/load-transacoes-ponto.html')
+    return render(request, 'relatorios/ponto/load-transacoes-ponto.html')
 
 def delete_transacao_coop(request):
     if request.method == "POST":
         transacao = Transacao.objects.get(pk=request.POST['transacao'])
         transacao.delete()
-    return render(request, 'relatorios/load-transacoes-coop.html')
+    return render(request, 'relatorios/coop/load-transacoes-coop.html')
 
 def menu_ponto_ocorrencia(request):
     # try:
@@ -889,7 +889,7 @@ def menu_ponto_ocorrencia(request):
         today_str = today.strftime('%Y-%m-%d')
         month_prev = subtractMonth(today, 3)
         first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
-        return render(request, 'relatorios/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
+        return render(request, 'relatorios/ponto/ocorrencia-menu-ponto.html', {'ponto_list' : ponto_list, 
                                                                     'today'     : today_str,
                                                                     'first_day_month' : first_day_month,
                                                                     'municipio_list' : municipio_list,
@@ -901,7 +901,7 @@ def menu_ponto_ocorrencia(request):
 
 def menu_seagri_ocorrencia(request):
     if (request.session['seagri_bool'] or request.session['admin']):
-        return render(request, 'relatorios/ocorrencia-menu-seagri.html', {})
+        return render(request, 'relatorios/seagri/ocorrencia-menu-seagri.html', {})
     else:
         return redirect(reverse('index'))
     
@@ -938,7 +938,7 @@ def load_ocorrencias_ponto(request):
         ocorrencias = paginator.page(1)
     except EmptyPage:
         ocorrencias = paginator.page(paginator.num_pages)
-    return render(request, 'relatorios/load-ocorrencias-ponto.html', { 'ocorrencias': ocorrencias })
+    return render(request, 'relatorios/ponto/load-ocorrencias-ponto.html', { 'ocorrencias': ocorrencias })
 
 def view_ocorrencia_ponto(request):
     if request.method == "POST":
@@ -946,19 +946,19 @@ def view_ocorrencia_ponto(request):
         if not ocorrencia.viewed:
             ocorrencia.viewed = True
             ocorrencia.save()
-    return render(request, 'relatorios/modal-ocorrencia-seagri.html', { 'ocorrencia_selected': ocorrencia })
+    return render(request, 'relatorios/seagri/modal-ocorrencia-seagri.html', { 'ocorrencia_selected': ocorrencia })
 
 def count_ocorrencia_new(request):
     if request.method == "GET":
         ocorrencias_new = OcorrenciaPonto.objects.filter(viewed=0).count()
         # print(ocorrencias_new)
-    return render(request, 'relatorios/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
+    return render(request, 'relatorios/seagri/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
 
 def insert_transacao_qr(request):
     if request.method == "GET":
         user = Usuario.objects.get(id=request.session['user_id'])
         ponto_list = list(Ponto.objects.filter(membro=user))
-    return render(request, 'relatorios/insert-qr-ponto.html', {'ponto_list' : ponto_list})
+    return render(request, 'relatorios/ponto/insert-qr-ponto.html', {'ponto_list' : ponto_list})
 
 def view_beneficiario(request):
     if request.method == "POST":
@@ -979,7 +979,7 @@ def view_beneficiario(request):
         except:
             beneficiario = BeneficiarioFinal()
             mensagem_erro = "BENEFICIÁRIO NÃO ENCONTRADO."
-    return render(request, 'relatorios/modal-insert-qr-ponto.html', { 'beneficiario_selected'  : beneficiario,
+    return render(request, 'relatorios/ponto/modal-insert-qr-ponto.html', { 'beneficiario_selected'  : beneficiario,
                                                                         'valido'               : valido,
                                                                         'data'                 : date_transacao,
                                                                         'ponto_selected'      : request.POST['ponto'],
@@ -998,7 +998,7 @@ def save_transacao_ponto_qr(request):
             message = "Transação feita com sucesso!"
         except:
             message = "NÃO foi possível SALVAR a TRANSAÇÃO!"
-        return render(request, 'relatorios/modal-insert-qr-ponto.html', { 'message': message })
+        return render(request, 'relatorios/ponto/modal-insert-qr-ponto.html', { 'message': message })
             
     else:
         return redirect(reverse('index'))
