@@ -600,7 +600,7 @@ def download_transactions_consumidores(request):
                  # ----- Procurar por meses e escrever header
                 for key, value in df_dict.items():
                     for v in value:
-                        if v.day > 15:
+                        if v.day >= 15:
                             quinzena = "2ª Quinz. "
                         else:
                             quinzena = "1ª Quinz. "
