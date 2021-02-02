@@ -577,15 +577,21 @@ def download_transactions_consumidores(request):
                 df['data'] = pd.to_datetime(df['data'])
                 df.set_index('data', inplace=True)
                 df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
-                sf = df.groupby([pd.Grouper(freq='SMS', closed='right'), 'beneficiario_id', 'month'])['litros'].sum()
+                df['quinzena'] = np.where(df.index.day > 15, 2, 1)
+                print(df)
+                sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'month'])['litros'].sum()
+                
                 sff = df.groupby(['beneficiario_id', 'month'])['litros'].sum()
                 df = sf.to_frame()
                 dff = sff.to_frame()
-                # print(df)
-                # print(dff)
+                
+                print(df)
+                
                 df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
                 dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['month'], fill_value=0)
-
+                # print(df)
+                
+                # print(df)
                 df_dict = df.to_dict('index')
                 dff_dict = dff.to_dict('index')
 
