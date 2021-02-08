@@ -579,56 +579,49 @@ def download_transactions_consumidores(request):
                 df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
                 df['quinzena'] = np.where(df.index.day > 15, 2, 1)
                 print(df)
-                sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'month'])['litros'].sum()
+                sf = df.groupby(['beneficiario_id', 'month'])['litros'].sum()
                 
-                sff = df.groupby(['beneficiario_id', 'month'])['litros'].sum()
+                sff = df.groupby(['beneficiario_id', 'month', 'quinzena'])['litros'].sum()
                 df = sf.to_frame()
                 dff = sff.to_frame()
                 
-                print(df)
-                
-                df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
-                dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['month'], fill_value=0)
+                # df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
+                df_month = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['month'], fill_value=0)
+                dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['month', 'quinzena'], fill_value=0)
+                print(df_month)
                 # print(df)
                 
                 # print(df)
-                df_dict = df.to_dict('index')
+                # df_dict = df.to_dict('index')
                 dff_dict = dff.to_dict('index')
+                df_month_dict = df_month.to_dict('index') 
 
+                # print(dff_dict)
                 month_col = []
-                sum_col = []
+                month_col_total = []
                  # ----- Procurar por meses e escrever header
-                for key, value in df_dict.items():
+
+                for key, value in dff_dict.items():
                     for v in value:
-                        if v.day >= 15:
-                            quinzena = "2ª Quinz. "
-                        else:
-                            quinzena = "1ª Quinz. "
-                        if (quinzena +  str(v.month) + "/" + str(v.year)) not in month_col:
-                            month_col.append(quinzena + str(v.month) + "/" + str(v.year))
-                    for i in dff_dict[key].items():
-                        if ("TOTAL " + i[0]) not in month_col:
-                            month_col.append("TOTAL " + i[0])
+                        if v[0]+" "+str(v[1])+"ª Quinzena" not in month_col:
+                            month_col.append(v[0]+" "+str(v[1])+"ª Quinzena")
+                        if v[0]+" TOTAL" not in month_col_total:
+                            month_col_total.append(v[0]+" TOTAL")
+                month_col.sort()
+                month_col_total.sort()
+                print(month_col)
                     
                 header.extend(month_col)
+                header.extend(month_col_total)
                 writer.writerow(header)
 
                 # ----- Escrever consumidores e valores
-                for key, value in df_dict.items():
+                for key, value in dff_dict.items():
                     month_val = []
                     consumidor = BeneficiarioFinal.objects.get(pk=key)
                     for v in value:
                         month_val.append(value[v])
-                    for i in dff_dict[key].items():
-                        month_val.append(i[1])
-
-                # ----- Escrever consumidores e valores
-                for key, value in df_dict.items():
-                    month_val = []
-                    consumidor = BeneficiarioFinal.objects.get(pk=key)
-                    for v in value:
-                        month_val.append(value[v])
-                    for i in dff_dict[key].items():
+                    for i in df_month_dict[key].items():
                         month_val.append(i[1])
 
                     if not consumidor.cpf:
@@ -963,9 +956,11 @@ def count_ocorrencia_new(request):
     return render(request, 'relatorios/seagri/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
 
 def insert_transacao_qr(request):
-    if request.method == "GET":
+    if request.method == "GET" and request.session['admin']:
         user = Usuario.objects.get(id=request.session['user_id'])
         ponto_list = list(Ponto.objects.filter(membro=user))
+    else:
+        return redirect('home')
     return render(request, 'relatorios/ponto/insert-qr-ponto.html', {'ponto_list' : ponto_list})
 
 def view_beneficiario(request):
