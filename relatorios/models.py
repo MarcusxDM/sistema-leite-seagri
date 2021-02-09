@@ -68,7 +68,6 @@ class Beneficiario(models.Model):
     nome          = models.CharField(max_length=150)
     UF            = models.CharField(max_length=2)  
     municipio     = models.CharField(max_length=50)
-    pbf           = models.BooleanField(default=False)
     data_emissao  = models.DateField()
     data_validade = models.DateField()
 
@@ -88,6 +87,7 @@ class BeneficiarioFinal(models.Model):
     identidade          = models.CharField(max_length=20, null=True)
     nome_mae            = models.CharField(max_length=150, null=True)
     faixa_renda         = models.IntegerField()
+    pbf                 = models.BooleanField(default=False)
     data_att            = models.DateField(null=True)
 
     def __str__(self):
