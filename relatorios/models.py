@@ -4,6 +4,7 @@ from dal import autocomplete
 from django import forms
 import os
 from uuid import uuid4
+from datetime import datetime 
 
 
 def path_and_rename(instance, filename):
@@ -88,7 +89,7 @@ class BeneficiarioFinal(models.Model):
     nome_mae            = models.CharField(max_length=150, null=True)
     faixa_renda         = models.IntegerField()
     pbf                 = models.BooleanField(default=False)
-    data_att            = models.DateField(null=True)
+    data_att            = models.DateField(null=True, default=datetime.now, blank=True)
 
     def __str__(self):
             return self.nis+" | "+self.nome

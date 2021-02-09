@@ -7,14 +7,20 @@ class UsuarioAdmin(admin.ModelAdmin):
     search_fields = (['nome'])
 
 class CooperativaAdmin(admin.ModelAdmin):
+    list_display = (['cod_ibge', 'nome'])
+    list_display_links = (['nome'])
     search_fields = (['nome', 'cod_ibge__municipio'])
     filter_horizontal = (['membro'])
 
 class PontoAdmin(admin.ModelAdmin):
+    list_display = (['cod_ibge', 'nome'])
+    list_display_links = (['nome'])
     search_fields = (['nome', 'cod_ibge__municipio'])
     filter_horizontal = (['membro'])
 
 class EntidadeAdmin(admin.ModelAdmin):
+    list_display = (['cod_ibge', 'nome'])
+    list_display_links = (['nome'])
     search_fields = (['nome', 'cod_ibge__municipio'])
     filter_horizontal = (['membro'])
 
@@ -30,6 +36,8 @@ class TransacaoEntidadeAdmin(admin.ModelAdmin):
     list_filter = ([('data', DateRangeFilter)])
 
 class BeneficiarioFinalAdmin(admin.ModelAdmin):
+    list_display = (['nis', 'nome', 'data_att'])
+    list_display_links = (['nis', 'nome'])
     search_fields = (['nome', 'nis', 'cod_ibge_munic_nasc'])
     list_filter = ([('data_att', DateRangeFilter)])
 
