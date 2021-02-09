@@ -6,11 +6,17 @@ from rangefilter.filter import DateRangeFilter
 class UsuarioAdmin(admin.ModelAdmin):
     search_fields = (['nome'])
 
+class CooperativaAdmin(admin.ModelAdmin):
+    search_fields = (['nome', 'cod_ibge__municipio'])
+    filter_horizontal = (['membro'])
+
 class PontoAdmin(admin.ModelAdmin):
     search_fields = (['nome', 'cod_ibge__municipio'])
+    filter_horizontal = (['membro'])
 
 class EntidadeAdmin(admin.ModelAdmin):
     search_fields = (['nome', 'cod_ibge__municipio'])
+    filter_horizontal = (['membro'])
 
 class TransacaoFinalAdmin(admin.ModelAdmin):
     search_fields = (['beneficiario__nome', 'ponto__nome', 'ponto__cod_ibge__municipio'])
@@ -31,7 +37,7 @@ class BeneficiarioAdmin(admin.ModelAdmin):
     search_fields = (['nome', 'dap', 'UF', 'municipio'])
 
 admin.site.register(Usuario, UsuarioAdmin)
-admin.site.register(Cooperativa)
+admin.site.register(Cooperativa, CooperativaAdmin)
 admin.site.register(Ponto, PontoAdmin)
 admin.site.register(Transacao, TransacaoAdmin)
 admin.site.register(TransacaoFinal, TransacaoFinalAdmin)
