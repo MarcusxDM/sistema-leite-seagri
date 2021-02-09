@@ -68,6 +68,7 @@ class Beneficiario(models.Model):
     nome          = models.CharField(max_length=150)
     UF            = models.CharField(max_length=2)  
     municipio     = models.CharField(max_length=50)
+    pbf           = models.BooleanField(default=False)
     data_emissao  = models.DateField()
     data_validade = models.DateField()
 
