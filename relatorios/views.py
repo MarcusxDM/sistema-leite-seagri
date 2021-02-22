@@ -12,6 +12,9 @@ import numpy as np
 from unicodedata import normalize
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+def check_consumidor(beneficiario):
+    return (beneficiario.faixa_renda<=2 or beneficiario.pbf)
+
 def subtractMonth(date, months):
     date_day = date.day
     for i in range(months):
@@ -964,16 +967,20 @@ def view_beneficiario(request):
         date_transacao = datetime.now().date()
         try:
             beneficiario = BeneficiarioFinal.objects.get(nis=request.POST['nis'])
-            if validate_semana(request, date_transacao, beneficiario):
-                if (validate_limit_ben(request, date_transacao, beneficiario)):
-                    valido = True
-                    mensagem_erro = ""
-                else: 
+            if check_consumidor(beneficiario):
+                if validate_semana(request, date_transacao, beneficiario):
+                    if (validate_limit_ben(request, date_transacao, beneficiario)):
+                        valido = True
+                        mensagem_erro = ""
+                    else: 
+                        valido = False
+                        mensagem_erro = "Limite do PONTO atingido."
+                else:
                     valido = False
-                    mensagem_erro = "Limite do PONTO atingido."
+                    mensagem_erro = "Limite SEMANAL do BENEFICIÁRIO atingido."
             else:
-                mensagem_erro = "Limite SEMANAL do BENEFICIÁRIO atingido."
                 valido = False
+                mensagem_erro = "Consumidor NÃO tem benefício."
         except:
             beneficiario = BeneficiarioFinal()
             mensagem_erro = "BENEFICIÁRIO NÃO ENCONTRADO."
