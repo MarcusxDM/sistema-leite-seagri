@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 from unicodedata import normalize
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.mail import send_mail
 
 def check_consumidor(beneficiario):
     return (beneficiario.faixa_renda<=2 or beneficiario.pbf)
@@ -904,7 +905,33 @@ def menu_seagri_ocorrencia(request):
     else:
         return redirect(reverse('index'))
     
-    
+def send_email_ponto_ocorrencia(ocorrencia):
+    usuarios = Usuario.objects.filter(seagri_bool=True)
+    for usuario in usuarios:
+        try:
+            send_mail(
+            'SISTEMA DO LEITE - NOVA OCORRÊNCIA (Ponto) ',
+            'Usuário: '+ ocorrencia.user.nome +'\n'+
+            'Email: ' + ocorrencia.user.email +'\n'+
+            'Telefone: ' + ocorrencia.user.telefone +'\n'+
+            'Data: ' + ocorrencia.data +'\n'+
+            'Ponto: ' + ocorrencia.ponto.nome + ' - ' + ocorrencia.ponto.cod_ibge.municipio +'\n'+
+            +'\n\n'+
+            'Ocorrência:' 
+            +'\n\n'+
+            ocorrencia.descricao
+            +'\n\n'+
+            'Acesse http://programadoleite.agricultura.al.gov.br/ocorrencia-menu-seagri/ para mais informações'
+            ,
+            email_para_envio,
+            [usuario.email],
+            fail_silently=False,
+            )
+            print("######### ENVIADO para "+usuario.email+" #########\n")
+        except:
+            print("######### ERRO "+usuario.email+" #########\n")
+
+
 def insert_ponto_ocorrencia(request):
     if request.method == 'POST':
         ocorrencia            = OcorrenciaPonto()
