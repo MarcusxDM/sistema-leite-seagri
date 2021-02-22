@@ -44,7 +44,7 @@ class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
         # qs = BeneficiarioFinal.objects.filter()
 
         # if self.q:
-        qs = BeneficiarioFinal.objects.filter(nis=self.q, faixa_renda__lte=2)
+        qs = BeneficiarioFinal.objects.filter(nis=self.q)
 
         return qs
 

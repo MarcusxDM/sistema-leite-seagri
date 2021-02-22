@@ -1,6 +1,7 @@
 from django import forms
 from .models import Transacao, TransacaoFinal, Beneficiario, BeneficiarioFinal, Leite, TransacaoEntidade
 from dal import autocomplete
+from django.db.models import Q
 
 class TransacaoProdutor(forms.Form):
     tipo = forms.CharField(
@@ -21,7 +22,7 @@ class TransacaoBeneficiarioFinal(forms.Form):
     litros       = forms.FloatField()
     #cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = forms.DateField()
-    beneficiario = forms.ModelChoiceField(queryset=BeneficiarioFinal.objects.all(), widget=autocomplete.ModelSelect2(url='beneficiario-final-autocomplete', attrs={'style' : 'width: 100%'}))
+    beneficiario = forms.ModelChoiceField(queryset=BeneficiarioFinal.objects.filter(Q(faixa_renda__lte=2) | Q(pbf=True)), widget=autocomplete.ModelSelect2(url='beneficiario-final-autocomplete', attrs={'style' : 'width: 100%'}))
 
 class TransacaoFinalForm(forms.ModelForm):
     class Meta:
