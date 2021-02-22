@@ -33,6 +33,7 @@ class TransacaoAdmin(admin.ModelAdmin):
     list_filter = ([('data', DateRangeFilter)])
 
 class TransacaoEntidadeAdmin(admin.ModelAdmin):
+    search_fields = (['entidade__nome', 'entidade__cod_ibge__municipio'])
     list_filter = ([('data', DateRangeFilter)])
 
 class BeneficiarioFinalAdmin(admin.ModelAdmin):
