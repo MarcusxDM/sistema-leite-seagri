@@ -907,29 +907,25 @@ def menu_seagri_ocorrencia(request):
     
 def send_email_ponto_ocorrencia(ocorrencia):
     usuarios = Usuario.objects.filter(seagri_bool=True)
-    for usuario in usuarios:
-        try:
-            send_mail(
-            'SISTEMA DO LEITE - NOVA OCORRÊNCIA (Ponto) ',
-            'Usuário: '+ ocorrencia.user.nome +'\n'+
-            'Email: ' + ocorrencia.user.email +'\n'+
-            'Telefone: ' + ocorrencia.user.telefone +'\n'+
-            'Data: ' + ocorrencia.data +'\n'+
-            'Ponto: ' + ocorrencia.ponto.nome + ' - ' + ocorrencia.ponto.cod_ibge.municipio +'\n'+
-            +'\n\n'+
-            'Ocorrência:' 
-            +'\n\n'+
-            ocorrencia.descricao
-            +'\n\n'+
-            'Acesse http://programadoleite.agricultura.al.gov.br/ocorrencia-menu-seagri/ para mais informações'
-            ,
-            email_para_envio,
-            [usuario.email],
-            fail_silently=False,
-            )
-            print("######### ENVIADO para "+usuario.email+" #########\n")
-        except:
-            print("######### ERRO "+usuario.email+" #########\n")
+    send_mail(
+    'SISTEMA DO LEITE - NOVA OCORRÊNCIA (Ponto) ',
+    'Usuário: '+ ocorrencia.user.nome +'\n'+
+    'Email: ' + ocorrencia.user.email +'\n'+
+    'Telefone: ' + ocorrencia.user.telefone +'\n'+
+    'Data: ' + ocorrencia.data +'\n'+
+    'Ponto: ' + ocorrencia.ponto.nome + ' - ' + ocorrencia.ponto.cod_ibge.municipio +'\n'
+    +'\n\n'+
+    'Ocorrência:' 
+    +'\n\n'+
+    ocorrencia.descricao
+    +'\n\n'+'http://programadoleite.agricultura.al.gov.br'+ocorrencia.foto.url
+    # +'\n\n'+
+    # 'Acesse http://programadoleite.agricultura.al.gov.br/ocorrencia-menu-seagri/ para mais informações'
+    ,
+    'programadoleitealagoas@gmail.com',
+    [usuario.email for usuario in usuarios],
+    fail_silently=False,
+    )
 
 
 def insert_ponto_ocorrencia(request):
@@ -942,6 +938,7 @@ def insert_ponto_ocorrencia(request):
         ocorrencia.foto       = request.FILES['foto']
         try:
             ocorrencia.save()
+            send_email_ponto_ocorrencia(ocorrencia)
         except:
             pass
     return redirect('ocorrencia-menu-ponto')
