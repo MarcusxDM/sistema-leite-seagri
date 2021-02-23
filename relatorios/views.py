@@ -12,7 +12,6 @@ import numpy as np
 from unicodedata import normalize
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import send_mail
-import qrcode
 
 def check_consumidor(beneficiario):
     return (beneficiario.faixa_renda<=2 or beneficiario.pbf)
@@ -1032,18 +1031,3 @@ def save_transacao_ponto_qr(request):
             
     else:
         return redirect(reverse('index'))
-
-def generate_qr_menu(request):
-    if request.method == "GET" and Usuario.objects.get(pk=request.session['user_id']).seagri_bool:
-        form = TransacaoBeneficiarioFinal()
-        return render(request, 'relatorios/seagri/generate-qr-consumidor.html', {'form' : form})
-    else:
-        return redirect('index')
-
-def generate_qr_consumidor(request):
-    if request.method == "POST":
-        img = qrcode.make(request.POST['beneficiario'])
-        response = HttpResponse(content_type='image/png')
-        img.save(response, "PNG")
-        response['Content-Disposition'] = 'attachment; filename="'+request.POST['beneficiario']+'.png"'
-    return response   
