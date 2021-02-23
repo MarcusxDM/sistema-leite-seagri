@@ -52,6 +52,10 @@
     height: 240px;
 }
 
+.select2-container {
+    min-width: 19em !important;
+}
+
 @media (max-width: 576px) {
     .body-fit{
         height: calc(100vh + 75px) !important;
