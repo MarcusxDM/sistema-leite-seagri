@@ -15,9 +15,18 @@ from django.core.mail import send_mail
 import qrcode
 
 def check_consumidor(beneficiario):
+    '''
+    Recebe objeto BeneficiarioFinal e retorna a validação boleana
+    de aptidão para receber o leite
+    '''
     return (beneficiario.faixa_renda<=2 or beneficiario.pbf)
 
 def subtractMonth(date, months):
+    '''
+    Recebe objeto tipo date: data a ser subtraída;
+    e objeto tipo int: quantidade de meses a ser subtraído;
+    e retorna a data resultado
+    '''
     date_day = date.day
     for i in range(months):
         date = date.replace(day=1) - timedelta(days=1)
@@ -26,39 +35,53 @@ def subtractMonth(date, months):
 
 
 def remover_acentos(txt):
+    '''
+    Recebe um objeto string
+    Retorna o objeto string sem acentos
+    '''
     return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
 
 def getCodIBGE(uf, municipio):
     return Localizacao.objects.get(uf=uf, municipio=remover_acentos(municipio))
 
 class BenefiarioAutocomplete(autocomplete.Select2QuerySetView):
+    '''
+    Classe usada no autocomplete de pesquisa, na inserção de leite do produtor
+    '''
     def get_queryset(self):
-        # validar data_validade__gt=date.today()
-
-        # qs = Beneficiario.objects.filter()
-
-        # if self.q:
+        '''
+        Query de filtro para localizar produtor através de sua DAP
+        '''
         qs = Beneficiario.objects.filter(dap=self.q)
-
         return qs
 
 class BenefiarioFinalAutocomplete(autocomplete.Select2QuerySetView):
+    '''
+    Classe usada no autocomplete de pesquisa, na inserção de leite do consumidor
+    '''
     def get_queryset(self):
-        # validar data_validade__gt=date.today()
-
-        # qs = BeneficiarioFinal.objects.filter()
-
-        # if self.q:
+        '''
+        Query de filtro para localizar produtor através de seu NIS
+        '''
         qs = BeneficiarioFinal.objects.filter(nis=self.q)
-
         return qs
 
 def week_start_end(date):
+    '''
+    Recebe objeto date
+    Retorna lista com objeto date referente ao começo e ao fim da semana
+    '''
     start_week = date - timedelta(date.weekday())
     end_week = start_week + timedelta(6)
     return [start_week, end_week]
 
 def load_pontos(request):
+    '''
+    Recebe GET com o código ibge do município
+    Retorna lista com objetos Ponto, que tem o usuário da sessão como membro.
+    Caso usuário tenha permissão admin ou seagri, todos os pontos do código IBGE
+    selecionado, são carregados
+    '''
     cod_ibge = request.GET.get('cod_ibge')
     
     user = Usuario.objects.get(id=request.session['user_id'])
@@ -70,6 +93,12 @@ def load_pontos(request):
     return render(request, 'relatorios/ponto/load-pontos.html', {'ponto_list': pontos})
 
 def load_entidades(request):
+    '''
+    Recebe GET com o código ibge do município
+    Retorna lista com objetos Ponto, que tem o usuário da sessão como membro.
+    Caso usuário tenha permissão admin ou seagri, todos as entidades do código IBGE
+    selecionado, são carregados
+    '''
     cod_ibge = request.GET.get('cod_ibge')
     
     user = Usuario.objects.get(id=request.session['user_id'])
@@ -81,6 +110,10 @@ def load_entidades(request):
     return render(request, 'relatorios/entidade/load-entidades.html', {'entidade_list': entidades})
 
 def semana_list(date_time):
+    '''
+    Recebe objeto date
+    Retorna lista com o primeiro e último dia da semana
+    '''
     first_day_month     = date_time.replace(day=1)
     last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
     half_day_month      = first_day_month + timedelta(days=14)
@@ -92,6 +125,10 @@ def semana_list(date_time):
         return([afterhalf_day_month, last_day_month])
 
 def quinzena_list(date_time):
+    '''
+    Recebe objeto date
+    Retorna lista com o primeiro e último dia da quinzena
+    '''
     first_day_month     = date_time.replace(day=1)
     last_day_month      = first_day_month.replace(month=first_day_month.month+1) - timedelta(days=1)
     half_day_month      = first_day_month + timedelta(days=14)
@@ -103,6 +140,10 @@ def quinzena_list(date_time):
         return([afterhalf_day_month, last_day_month])
 
 def semestre_list(date_time):
+    '''
+    Recebe objeto date
+    Retorna lista com o primeiro e último dia do semestre
+    '''
     if date_time >= datetime(date_time.year, 1, 1).date() and date_time < datetime(date_time.year, 7, 1).date():
         first_day_semestre = datetime(date_time.year, 1, 1).date()
         last_day_semestre  = (first_day_semestre.replace(month=7) - timedelta(days=1))
@@ -112,6 +153,11 @@ def semestre_list(date_time):
     return[first_day_semestre, last_day_semestre]
 
 def validate_limit_ben(request, date_transacao, beneficiario):
+    '''
+    Recebe POST com id do ponto, objeto date e objeto BeneficiarioFinal(Consumidor)
+    Retorna o boleano: limite de beneficiários do ponto foi atingido ou BeneficiarioFinal 
+    já recebeu leite na semana 'week_start_end'
+    '''
     month      = date_transacao.month
     ponto      = Ponto.objects.get(pk=request.POST['ponto'])
     transacoes = TransacaoFinal.objects.filter(data__range=week_start_end(date_transacao), ponto__id=request.POST['ponto']).values('beneficiario').distinct()
@@ -120,6 +166,12 @@ def validate_limit_ben(request, date_transacao, beneficiario):
 
 
 def validate_semana(request, date_transacao, beneficiario_final):
+    '''
+    Recebe POST com quantidade de litros, objeto date e objeto BeneficiarioFinal.
+    verifica caso consumidor não tenha atingido o limite de leite recebido: True
+    caso tenha atingido: False
+    e modifica as mensagens na session explicando o resultado.
+    '''
     limit_semanal = 4
 
     n_dia = calendar.weekday(date_transacao.year, date_transacao.month, date_transacao.day)
@@ -154,6 +206,12 @@ def validate_semana(request, date_transacao, beneficiario_final):
         return False
 
 def validate_quinzena(request, date_transacao, produtor):
+    '''
+    Recebe POST com quantidade de litros, objeto date e objeto Beneficiario.
+    verifica caso produtor não tenha atingido o limite de leite recebido: True
+    caso tenha atingido: False
+    e modifica as mensagens na session explicando o resultado.
+    '''
     if request.POST['tipo'] == "VACA":        
                 limit_quinzenal = 285
     else:
@@ -182,6 +240,12 @@ def validate_quinzena(request, date_transacao, produtor):
         return False
 
 def validate_semestre(request, date_transacao, produtor):
+    '''
+    Recebe POST com quantidade de litros, objeto date e objeto Beneficiario.
+    verifica caso produtor não tenha atingido o limite de leite recebido: True
+    caso tenha atingido: False
+    e modifica as mensagens na session explicando o resultado.
+    '''
     if request.POST['tipo'] == "VACA":
         limit_semestral = 3515
     else:
@@ -210,6 +274,11 @@ def validate_semestre(request, date_transacao, produtor):
         return False
 
 def transacao_succes(request):
+    '''
+    Recebe POST com quantidade de litros, tipo do leite, data, pk de Beneficiario(Produtor), id de Cooperativa, id de Usuário.
+    Cria transação e tenta salvar
+    Redireciona para a página de inserção de transação e modifica mensagens de erro/sucesso na session
+    '''
     transacao = Transacao()
     transacao.beneficiario = Beneficiario.objects.get(pk=request.POST['beneficiario'])
     transacao.litros       = abs(float(request.POST['litros']))
@@ -230,6 +299,11 @@ def transacao_succes(request):
         return redirect(reverse('inserir-transacao-leite'))
 
 def transacao_final_succes(request):
+    '''
+    Recebe POST com quantidade de litros, data, pk de BeneficiarioFinal(Consumidor), id de Ponto, id de Usuário.
+    Cria transação e tenta salvar
+    Redireciona para a página de inserção de transação e modifica mensagens de erro/sucesso na session
+    '''
     transacao              = TransacaoFinal()
     transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
     transacao.litros       = abs(float(request.POST['litros']))
@@ -249,6 +323,11 @@ def transacao_final_succes(request):
         return redirect(reverse('inserir-transacaofinal-leite'))
 
 def save_transacao_entidade(request):
+    '''
+    Recebe POST com quantidade de litros, caracterização de publico beneficiado da entidade, id de Entidade, id de Usuário.
+    Cria transação e tenta salvar
+    Redireciona para a página de inserção de transação e modifica mensagens de erro/sucesso na session
+    '''
     if request.method == 'POST':
         transacao             = TransacaoEntidade()
         transacao.litros      = abs(float(request.POST['litros']))
@@ -274,10 +353,18 @@ def save_transacao_entidade(request):
     return redirect(reverse('inserir-transacao-entidade-leite'))
 
 def index(request):
+    '''
+    Página de index
+    '''
     request.session.flush()
     return render(request, 'relatorios/index.html', {})
 
 def login(request):
+    '''
+    Recebe POST com Username e Senha
+    efetua o login
+    Retorna para o index caso falhe, ou redireciona para o Home caso tenha sucesso
+    '''
     if request.method == 'POST':
         try:
             user = Usuario.objects.get(email=request.POST['username'])
@@ -300,6 +387,9 @@ def login(request):
         return redirect(reverse('index'))
 
 def home(request):
+    '''
+    Página Home
+    '''
     try:
         request.session['user_id']
         return render(request, 'relatorios/home.html')
@@ -307,11 +397,19 @@ def home(request):
         return redirect(reverse('index'))
 
 def logout(request):
+    '''
+    Faz logout, limpa Session
+    '''
     request.session.flush()
     return redirect(reverse('index'))
         
 
 def insert_transactions_coop_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    calcula a data mínima de inserção
+    Retorna Usuário, lista de Cooperativas, formulario de inserção, dia de hoje e data minima.
+    '''
     try:
         if(request.session['coop_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
@@ -333,6 +431,11 @@ def insert_transactions_coop_menu(request):
         return redirect(reverse('index'))
 
 def insert_transactions_ponto_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    calcula a data mínima de inserção
+    Retorna Usuário, lista de Pontos, formulario de inserção, dia de hoje e data minima.
+    '''
     try:
         if(request.session['ponto_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
@@ -354,6 +457,11 @@ def insert_transactions_ponto_menu(request):
         return redirect(reverse('index'))
 
 def insert_transactions_entidade_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    calcula a data mínima de inserção
+    Retorna Usuário, lista de Entidades, dia de hoje e data minima.
+    '''
     try:
         if(request.session['entidade_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
@@ -373,6 +481,13 @@ def insert_transactions_entidade_menu(request):
         return redirect(reverse('index'))
 
 def save_transacao(request):
+    '''
+    Recebe POST com informações do formulário de inserção de leite (Produtor -> Cooperativa)
+    verifica se a transação se enquadra nos requisitos
+    caso verdadeiro: transacao_succes(request)
+    caso falso: retorna para página de inserção
+    Atualiza mensagens de sucesso/erro na session
+    '''
     if request.method == "POST":
         request.session['insert_leite_error'] = ""
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
@@ -387,6 +502,13 @@ def save_transacao(request):
     return redirect(reverse('inserir-transacao-leite'))
 
 def save_transacao_ponto(request):
+    '''
+    Recebe POST com informações do formulário de inserção de leite (Consumidor -> Ponto)
+    verifica se a transação se enquadra nos requisitos
+    caso verdadeiro: transacao_succes(request)
+    caso falso: retorna para página de inserção
+    Atualiza mensagens de sucesso/erro na session
+    '''
     if request.method == "POST":
         request.session['insert_leite_final_error'] = ""
         date_transacao = datetime.strptime(request.POST['data'], '%Y-%m-%d').date()
@@ -403,6 +525,11 @@ def save_transacao_ponto(request):
     return redirect(reverse('inserir-transacaofinal-leite'))
 
 def view_transactions_coop_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de download de Relatórios de Cooperativas
+    Retorna Usuário, lista de Entidades, dia de hoje
+    '''
     try:
         if(request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
@@ -420,30 +547,40 @@ def view_transactions_coop_menu(request):
 
 
 def view_transactions_ponto_menu(request):
-    #try:
-        if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
-            user = Usuario.objects.get(id=request.session['user_id'])
-            if user.admin or user.seagri_bool:
-                municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
-                municipio_all = True
-            else:
-                ponto_list = list(Ponto.objects.filter(membro=user))
-                municipio_list = set([p.cod_ibge for p in ponto_list])
-                municipio_all = False
-            ponto_list = []
-            today = datetime.now().date().strftime('%Y-%m-%d')
-            first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
-            return render(request, 'relatorios/ponto/view-menu-ponto.html', {'ponto_list' : ponto_list, 
-                                                                        'today'     : today,
-                                                                        'municipio_list' : municipio_list,
-                                                                        'municipio_all' : municipio_all})
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de download de Relatórios de Pontos
+    Retorna Usuário, lista de Entidades, dia de hoje, lista de municipios
+    '''
+    # try:
+    if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin or user.seagri_bool:
+            municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+            municipio_all = True
         else:
-            return redirect(reverse('index'))
-    #except:
+            ponto_list = list(Ponto.objects.filter(membro=user))
+            municipio_list = set([p.cod_ibge for p in ponto_list])
+            municipio_all = False
+        ponto_list = []
+        today = datetime.now().date().strftime('%Y-%m-%d')
+        first_day_month = datetime.now().date().replace(day=1).strftime('%Y-%m-%d')
+        return render(request, 'relatorios/ponto/view-menu-ponto.html', {'ponto_list' : ponto_list, 
+                                                                    'today'     : today,
+                                                                    'municipio_list' : municipio_list,
+                                                                    'municipio_all' : municipio_all})
+    else:
         return redirect(reverse('index'))
+    # except:
+        # return redirect(reverse('index'))
 
 def view_transactions_entidade_menu(request):
-    #try:
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de download de Relatórios de Entidades
+    Retorna Usuário, lista de Entidades, dia de hoje
+    '''
+    try:
         if (request.session['entidade_bool'] or request.session['seagri_bool'] or request.session['admin']):
             user = Usuario.objects.get(id=request.session['user_id'])
             if user.admin or user.seagri_bool:
@@ -461,7 +598,7 @@ def view_transactions_entidade_menu(request):
                                                                         'municipio_all' : municipio_all})
         else:
             return redirect(reverse('index'))
-    #except:
+    except:
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
