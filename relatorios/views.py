@@ -13,6 +13,7 @@ from unicodedata import normalize
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import send_mail
 import qrcode
+import seagri_leite.settings as settings
 
 def check_consumidor(beneficiario):
     '''
@@ -604,7 +605,7 @@ def view_transactions_entidade_menu(request):
 def download_transactions_produtores(request):
     '''
     Recebe POST de data de inicio e fim de período de relatório, id da Cooperativa
-    é criado 2 objetos DataFrame(Pandas)
+    é criado 2 objetos DataFrame(Pandas): df agrupa por meses e tipo, dff por meses, quinzenas e tipo
     '''
     header = ['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'C. P. F.', 'Nº DA DAP',
               'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA']
@@ -634,29 +635,26 @@ def download_transactions_produtores(request):
             df.set_index('data', inplace=True)
             df['month'] = df.index.strftime("%Y-%m")
             df['quinzena'] = np.where(df.index.day > 15, 2, 1)
-            # print(df)
+
             sf = df.groupby(['beneficiario_id', 'tipo', 'month'])['litros'].sum()
             
             sff = df.groupby(['beneficiario_id', 'tipo', 'month', 'quinzena'])['litros'].sum()
             df = sf.to_frame()
             dff = sff.to_frame()
             dff.sort_values(['tipo', 'month', 'quinzena'])
-            # df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
+
             df_month = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo', 'month'], fill_value=0)
             dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['tipo', 'month', 'quinzena'], fill_value=0)
             
-            print(df_month)
-            print(dff)
-            
-            # print(df)
-            # df_dict = df.to_dict('index')
             dff_dict = dff.to_dict('index')
             df_month_dict = df_month.to_dict('index') 
 
-            # print(dff_dict)
             month_col = []
             month_col_total = []
 
+            # ----- Procurar por meses e escrever header
+            #  Loop pelo dicionário verificando se já foi adicionado o mês quinzena
+            #  nas respectivas listas
             for key, value in dff_dict.items():
                 for v in value:
                     print(v)
@@ -664,15 +662,16 @@ def download_transactions_produtores(request):
                         month_col.append(v[0]+" "+str(v[1])+" "+str(v[2])+"ª Quinzena")
                     if v[0]+" "+str(v[1])+" TOTAL" not in month_col_total:
                         month_col_total.append(v[0]+" "+str(v[1])+" TOTAL")
-            month_col.sort()
+
+            month_col.sort() # Em ordem alfabetica para ocupar as colunas correspondentes aos valores
             month_col_total.sort()
-            print(month_col)
                 
             header.extend(month_col)
             header.extend(month_col_total)
             writer.writerow(header)
             
             # ----- Escrever produtores e valores
+            #  Loop pelo dicionário adicionando valores a lista
             for key, value in dff_dict.items():
                 month_val = []
                 produtor = Beneficiario.objects.get(pk=key)
@@ -698,8 +697,8 @@ def download_transactions_produtores(request):
 
 def download_transactions_consumidores(request):
     '''
-    Recebe POST de data de inicio e fim de período de relatório, id da Cooperativa
-    é criado 2 objetos DataFrame(Pandas)
+    Recebe POST de data de inicio e fim de período de relatório, id de Ponto
+    é criado 2 objetos DataFrame(Pandas): df agrupa por meses, dff por meses e quinzenas
     '''
     if request.method == "POST":
         header = ['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
@@ -719,7 +718,7 @@ def download_transactions_consumidores(request):
         #Header
         
 
-        if request.POST['action'] == "PONTO":
+        if request.POST['action'] == "PONTO":   # POST recebido no valor do botão do formulário, equivalente ao download de apenas 1 ponto (selecionado)
             # Ponto
             ponto = Ponto.objects.get(id=request.POST['ponto'])
 
@@ -727,55 +726,51 @@ def download_transactions_consumidores(request):
             query_set = TransacaoFinal.objects.filter(ponto=request.POST['ponto'], data__gte=date_inicio, data__lte=date_fim)
             if query_set:
                 df = pd.DataFrame.from_records(query_set.values())
-                # print(df)
                 df['data'] = pd.to_datetime(df['data'])
                 df.set_index('data', inplace=True)
                 df['month'] = df.index.strftime("%Y-%m")
                 df['quinzena'] = np.where(df.index.day > 15, 2, 1)
-                # print(df)
+
                 sf = df.groupby(['beneficiario_id', 'month'])['litros'].sum()
                 
                 sff = df.groupby(['beneficiario_id', 'month', 'quinzena'])['litros'].sum()
                 df = sf.to_frame()
                 dff = sff.to_frame()
                 
-                # df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
                 df_month = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['month'], fill_value=0)
                 dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['month', 'quinzena'], fill_value=0)
-                # print(df_month)
-                # print(df)
                 
-                # print(df)
-                # df_dict = df.to_dict('index')
                 dff_dict = dff.to_dict('index')
                 df_month_dict = df_month.to_dict('index') 
 
-                # print(dff_dict)
-                month_col = []
-                month_col_total = []
-                 # ----- Procurar por meses e escrever header
+                month_col = [] # Lista de meses e quinzenas
+                month_col_total = [] # Lista de totais de meses
 
+                # ----- Procurar por meses e escrever header
+                #  Loop pelo dicionário verificando se já foi adicionado o mês quinzena
+                #  nas respectivas listas
                 for key, value in dff_dict.items():
                     for v in value:
                         if v[0]+" "+str(v[1])+"ª Quinzena" not in month_col:
                             month_col.append(v[0]+" "+str(v[1])+"ª Quinzena")
                         if v[0]+" TOTAL" not in month_col_total:
                             month_col_total.append(v[0]+" TOTAL")
-                month_col.sort()
+
+                month_col.sort() # Em ordem alfabetica para ocupar as colunas correspondentes aos valores
                 month_col_total.sort()
-                print(month_col)
                     
                 header.extend(month_col)
                 header.extend(month_col_total)
                 writer.writerow(header)
 
                 # ----- Escrever consumidores e valores
+                #  Loop pelo dicionário adicionando valores a lista
                 for key, value in dff_dict.items():
-                    month_val = []
+                    month_val = [] # Lista de valores dos meses
                     consumidor = BeneficiarioFinal.objects.get(pk=key)
                     for v in value:
                         month_val.append(value[v])
-                    for i in df_month_dict[key].items():
+                    for i in df_month_dict[key].items(): # Valor Total do mês
                         month_val.append(i[1])
 
                     if not consumidor.cpf:
@@ -792,7 +787,7 @@ def download_transactions_consumidores(request):
             else:
                 return response
         else:
-            # Pontos
+            # Pontos # POST recebido no valor do botão do formulário, equivalente ao download de todos os pontos (É necessário selecionar um ponto qualquer no formulário)
             query_set = TransacaoFinal.objects.filter(data__gte=date_inicio, data__lte=date_fim)
             # print(query_set)
             if query_set:
@@ -815,10 +810,12 @@ def download_transactions_consumidores(request):
                 dff_dict = dff.to_dict('index')
                 df_month_dict = df_month.to_dict('index') 
 
-                # print(dff_dict)
                 month_col = []
                 month_col_total = []
+
                 # ----- Procurar por meses e escrever header
+                #  Loop pelo dicionário verificando se já foi adicionado o mês quinzena
+                #  nas respectivas listas
                 for key, value in dff_dict.items():
                     for v in value:
                         if v[0]+" "+str(v[1])+"ª Quinzena" not in month_col:
@@ -827,13 +824,13 @@ def download_transactions_consumidores(request):
                             month_col_total.append(v[0]+" TOTAL")
                 month_col.sort()
                 month_col_total.sort()
-                print(month_col)
                     
                 header.extend(month_col)
                 header.extend(month_col_total)
                 writer.writerow(header)
 
                 # ----- Escrever consumidores e valores
+                #  Loop pelo dicionário adicionando valores a lista
                 for key, value in dff_dict.items():
                     month_val = []
                     consumidor = BeneficiarioFinal.objects.get(pk=key[0])
@@ -856,6 +853,10 @@ def download_transactions_consumidores(request):
     return redirect(reverse('visualizar-transacaofinal-leite'))
 
 def download_transactions_entidades(request):
+    '''
+    Recebe POST de data de inicio e fim de período de relatório, id da Entidade
+    é criado 2 objetos DataFrame(Pandas): df agrupa por entidade
+    '''
     if request.method == "POST":
         date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
         date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
@@ -875,7 +876,7 @@ def download_transactions_entidades(request):
                     'COOPERATIVA',	'0 - 6 anos',	'7 - 14 anos',	'15 - 23 anos',	'24 - 65 anos',	'Acima de 65 anos',
                     'M', 'F', 'QUANTIDADE DE LITROS'])
 
-        if request.POST['action'] == "ENTIDADE":
+        if request.POST['action'] == "ENTIDADE": # POST recebido no valor do botão do formulário, equivalente ao download de apenas 1 Entidade (selecionada)
             # Entidade
             entidade = Entidade.objects.get(id=request.POST['entidade'])
 
@@ -901,7 +902,8 @@ def download_transactions_entidades(request):
                 return response
             else:
                 return response
-        else:
+
+        else:# POST recebido no valor do botão do formulário, equivalente ao download de todas as Entidades (É necessário selecionar uma entidade qualquer no formulário)
 
             query_set = TransacaoEntidade.objects.filter(data__gte=date_inicio, data__lte=date_fim)
             if query_set:
@@ -926,6 +928,10 @@ def download_transactions_entidades(request):
     return redirect(reverse('visualizar-transacao-entidade-leite'))
 
 def last_beneficiarios(request):
+    '''
+    Recebe id de objeto Ponto
+    Retorna uma lista de objetos BeneficiarioFinal que tiveram transações na semana passada e ainda não tiveram transações na semana atual
+    '''
     ponto_id = request.GET.get('ponto')
     ben_ids = TransacaoFinal.objects.filter(data__range=week_start_end(datetime.now() - timedelta(7)), ponto__id=ponto_id).values_list('beneficiario').distinct()
     ben_ids_this_week = TransacaoFinal.objects.filter(data__range=week_start_end(datetime.now()), ponto__id=ponto_id).values_list('beneficiario').distinct()
@@ -938,6 +944,10 @@ def last_beneficiarios(request):
     return render(request, 'relatorios/ponto/last-beneficiarios.html', {'beneficiarios_list': ben_query})
 
 def load_transacoes_ponto(request):
+    '''
+    Recebe GET date e id de objeto Ponto
+    Retorna uma lista de objetos TransacaoFinal na data recebida
+    '''
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
     transacao_list = TransacaoFinal.objects.select_related('beneficiario').filter(ponto_id=request.GET['ponto'], data=date_search).order_by('beneficiario__nome')
     page = request.GET.get('page', 1)
@@ -952,6 +962,10 @@ def load_transacoes_ponto(request):
     return render(request, 'relatorios/ponto/load-transacoes-ponto.html', { 'transacoes': transacoes })
 
 def load_transacoes_coop(request):
+    '''
+    Recebe GET date e id de objeto Cooperativa
+    Retorna uma lista de objetos Transacao na data recebida
+    '''
     date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
     transacao_list = Transacao.objects.select_related('beneficiario').filter(cooperativa_id=request.GET['coop'], data=date_search).order_by('beneficiario__nome')
     page = request.GET.get('page', 1)
@@ -966,6 +980,11 @@ def load_transacoes_coop(request):
     return render(request, 'relatorios/coop/load-transacoes-coop.html', { 'transacoes': transacoes })
 
 def manage_transactions_ponto_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de Gerenciamento de TransacãoFinal (Ponto)
+    Retorna Usuário, lista de Pontos, dia de hoje, lista de municipios, dia do começo do mês
+    '''
     # try:
     if (request.session['ponto_bool'] or request.session['seagri_bool'] or request.session['admin']):
         user = Usuario.objects.get(id=request.session['user_id'])
@@ -992,6 +1011,11 @@ def manage_transactions_ponto_menu(request):
     #     return redirect(reverse('index'))
 
 def manage_transactions_coop_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de Gerenciamento de TransacãoFinal (Ponto)
+    Retorna Usuário, lista de Cooperativas, dia de hoje, dia do começo do mês
+    '''
     # try:
     if (request.session['coop_bool'] or request.session['seagri_bool'] or request.session['admin']):
         user = Usuario.objects.get(id=request.session['user_id'])
@@ -1012,18 +1036,29 @@ def manage_transactions_coop_menu(request):
     #     return redirect(reverse('index'))
 
 def delete_transacao_ponto(request):
+    '''
+    Recebe POST com id de objeto TransacaoFinal (Ponto) e o deleta
+    '''
     if request.method == "POST":
         transacao = TransacaoFinal.objects.get(pk=request.POST['transacao'])
         transacao.delete()
     return render(request, 'relatorios/ponto/load-transacoes-ponto.html')
 
 def delete_transacao_coop(request):
+    '''
+    Recebe POST com id de objeto Transacao (Cooperativa) e o deleta
+    '''
     if request.method == "POST":
         transacao = Transacao.objects.get(pk=request.POST['transacao'])
         transacao.delete()
     return render(request, 'relatorios/coop/load-transacoes-coop.html')
 
 def menu_ponto_ocorrencia(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de Criação de Ocorrência (Ponto)
+    Retorna Usuário, lista de Cooperativas, dia de hoje, dia do começo do mês
+    '''
     # try:
     if (request.session['ponto_bool']):
         user = Usuario.objects.get(id=request.session['user_id'])
@@ -1050,12 +1085,19 @@ def menu_ponto_ocorrencia(request):
     #     return redirect(reverse('index'))
 
 def menu_seagri_ocorrencia(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de Visualização de Ocorrências (Seagri)
+    '''
     if (request.session['seagri_bool'] or request.session['admin']):
         return render(request, 'relatorios/seagri/ocorrencia-menu-seagri.html', {})
     else:
         return redirect(reverse('index'))
     
 def send_email_ponto_ocorrencia(ocorrencia):
+    '''
+    Recebe objeto Ocorrencia (Ponto) e envia seus detalhes por e-mail a todos os usuários SEAGRI
+    '''
     usuarios = Usuario.objects.filter(seagri_bool=True)
     send_mail(
     'SISTEMA DO LEITE - NOVA OCORRÊNCIA (Ponto) ',
@@ -1068,17 +1110,17 @@ def send_email_ponto_ocorrencia(ocorrencia):
     'Ocorrência:' 
     +'\n\n'+
     ocorrencia.descricao
-    +'\n\n'+'http://programadoleite.agricultura.al.gov.br'+ocorrencia.foto.url
-    # +'\n\n'+
-    # 'Acesse http://programadoleite.agricultura.al.gov.br/ocorrencia-menu-seagri/ para mais informações'
+    +'\n\n'+settings.SITE+ocorrencia.foto.url
     ,
-    'programadoleitealagoas@gmail.com',
+    settings.EMAIL_HOST_USER,
     [usuario.email for usuario in usuarios],
-    fail_silently=False,
-    )
+    fail_silently=False)
 
 
 def insert_ponto_ocorrencia(request):
+    '''
+    Recebe POST com atributos do objeto Ocorrencia, cria o objeto, salva e o envia por email
+    '''
     if request.method == 'POST':
         ocorrencia            = OcorrenciaPonto()
         ocorrencia.data       = request.POST['data']
@@ -1094,6 +1136,9 @@ def insert_ponto_ocorrencia(request):
     return redirect('ocorrencia-menu-ponto')
 
 def button_ocorrencia(request):
+    '''
+    Redireciona os tipos de usuario para seu devido menu de ocorrencias 
+    '''
     if request.method == 'GET':
         if(request.session['seagri_bool']):
             return redirect('ocorrencia-menu-seagri')
@@ -1102,6 +1147,10 @@ def button_ocorrencia(request):
     return redirect('home')
 
 def load_ocorrencias_ponto(request):
+    '''
+    Recebe GET
+    Retorna lista de ocorrencias de Ponto 
+    '''
     ocorrencias = OcorrenciaPonto.objects.filter(viewed=request.GET['viewed']).order_by('-data')
     page = request.GET.get('page', 1)
     paginator = Paginator(ocorrencias, 10)
@@ -1114,6 +1163,11 @@ def load_ocorrencias_ponto(request):
     return render(request, 'relatorios/ponto/load-ocorrencias-ponto.html', { 'ocorrencias': ocorrencias })
 
 def view_ocorrencia_ponto(request):
+    '''
+    Recebe POST com id de objeto OcorrenciaPonto
+    marca ocorrencia como visualizada
+    Retorna Ocorrencia
+    '''
     if request.method == "POST":
         ocorrencia = OcorrenciaPonto.objects.get(pk=request.POST['ocorrencia'])
         if not ocorrencia.viewed:
@@ -1122,12 +1176,21 @@ def view_ocorrencia_ponto(request):
     return render(request, 'relatorios/seagri/modal-ocorrencia-seagri.html', { 'ocorrencia_selected': ocorrencia })
 
 def count_ocorrencia_new(request):
+    '''
+    Recebe GET
+    Retorna contagem de ocorrencias não visualizadas
+    '''
     if request.method == "GET":
         ocorrencias_new = OcorrenciaPonto.objects.filter(viewed=0).count()
         # print(ocorrencias_new)
     return render(request, 'relatorios/seagri/count-ocorrencias-new.html', { 'ocorrencias_new': str(ocorrencias_new) })
 
 def insert_transacao_qr(request):
+    '''
+    Recebe GET
+    Retorna lista de Pontos pertencentes ao usuário da sessão
+    Renderiza página de Inserção de TransaçãoFinal por QR CODE
+    '''
     if request.method == "GET" and request.session['admin']:
         user = Usuario.objects.get(id=request.session['user_id'])
         ponto_list = list(Ponto.objects.filter(membro=user))
@@ -1136,6 +1199,19 @@ def insert_transacao_qr(request):
     return render(request, 'relatorios/ponto/insert-qr-ponto.html', {'ponto_list' : ponto_list})
 
 def view_beneficiario(request):
+    '''
+    Recebe POST com NIS de objeto BeneficiarioFinal (Consumidor) e id de objeto Ponto
+    faz todas as checagens de aptdão para transação
+    
+    Retorna boleano sendo 
+    TRUE: apto
+    FALSE: não apto;
+    Mensagem de erro
+    objeto BeneficiárioFinal
+    data da transação
+
+    Renderiza modal de Confirmação de Inserção de TransaçãoFinal por QR CODE
+    '''
     if request.method == "POST":
         valido = False
         date_transacao = datetime.now().date()
@@ -1165,6 +1241,13 @@ def view_beneficiario(request):
                                                                         'mensagem_erro'       : mensagem_erro })
 
 def save_transacao_ponto_qr(request):
+    '''
+    Recebe POST com atributos de objeto TransacaoFinal (Consumidor -> Ponto)
+    salva objeto
+
+    Retorna mensagem de erro/sucesso
+    Renderiza modal de Confirmação de Inserção de TransaçãoFinal por QR CODE
+    '''
     if request.method == "POST":
         transacao              = TransacaoFinal()
         transacao.beneficiario = BeneficiarioFinal.objects.get(pk=request.POST['beneficiario'])
@@ -1183,6 +1266,13 @@ def save_transacao_ponto_qr(request):
         return redirect(reverse('index'))
 
 def generate_qr_menu(request):
+    '''
+    Recebe GET
+    checa se usuário da sessão é SEAGRI
+
+    Retorna formulário de pesquisa de BeneficiarioFinal
+    Renderiza página de Geração de QR CODE (Consumidor)
+    '''
     if request.method == "GET" and Usuario.objects.get(pk=request.session['user_id']).seagri_bool:
         form = TransacaoBeneficiarioFinal()
         return render(request, 'relatorios/seagri/generate-qr-consumidor.html', {'form' : form})
@@ -1190,6 +1280,12 @@ def generate_qr_menu(request):
         return redirect('index')
 
 def generate_qr_consumidor(request):
+    '''
+    Recebe POST com id de objeto BeneficiarioFinal
+    gera arquivo png do QR CODE
+
+    Retorna arquivo response (Download)
+    '''
     if request.method == "POST":
         img = qrcode.make(request.POST['beneficiario'])
         response = HttpResponse(content_type='image/png')
