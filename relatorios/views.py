@@ -602,6 +602,10 @@ def view_transactions_entidade_menu(request):
         return redirect(reverse('index'))
 
 def download_transactions_produtores(request):
+    '''
+    Recebe POST de data de inicio e fim de período de relatório, id da Cooperativa
+    é criado 2 objetos DataFrame(Pandas)
+    '''
     header = ['UF', 'CÓD. IBGE COM 7 DIGITOS', 'MUNICÍPIO', 'NOME DO PRODUTOR', 'C. P. F.', 'Nº DA DAP',
               'TIPO DE DAP',	'ENQUADRAMENTO NO GRUPO DO PRONAF', 'NOME DA ORGANIZAÇÃO PRODUTORA']
     if request.method == "POST":
@@ -628,49 +632,53 @@ def download_transactions_produtores(request):
             df = pd.DataFrame.from_records(query_set.values())
             df['data'] = pd.to_datetime(df['data'])
             df.set_index('data', inplace=True)
-            df['month'] = df.index.month.astype('str') + "/" + df.index.year.astype('str')
-            sf = df.groupby([pd.Grouper(freq='SMS'), 'beneficiario_id', 'tipo', 'month'])['litros'].sum()
-            sff = df.groupby(['beneficiario_id', 'tipo', 'month'])['litros'].sum()
+            df['month'] = df.index.strftime("%Y-%m")
+            df['quinzena'] = np.where(df.index.day > 15, 2, 1)
+            # print(df)
+            sf = df.groupby(['beneficiario_id', 'tipo', 'month'])['litros'].sum()
+            
+            sff = df.groupby(['beneficiario_id', 'tipo', 'month', 'quinzena'])['litros'].sum()
             df = sf.to_frame()
             dff = sff.to_frame()
-            # print(dff)
-            #.reset_index()
+            dff.sort_values(['tipo', 'month', 'quinzena'])
+            # df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['data'], fill_value=0)
+            df_month = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo', 'month'], fill_value=0)
+            dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['tipo', 'month', 'quinzena'], fill_value=0)
             
-
-            df = pd.pivot_table(df, values='litros', index=['beneficiario_id'], columns=['tipo', 'data'], fill_value=0)
-            dff = pd.pivot_table(dff, values='litros', index=['beneficiario_id'], columns=['tipo', 'month'], fill_value=0)
+            print(df_month)
+            print(dff)
             
-            df_dict = df.to_dict('index')
+            # print(df)
+            # df_dict = df.to_dict('index')
             dff_dict = dff.to_dict('index')
+            df_month_dict = df_month.to_dict('index') 
 
+            # print(dff_dict)
             month_col = []
-            sum_col = []
-            first_row = True
-            # print(df_dict.items())
+            month_col_total = []
 
-            # ----- Procurar por meses e escrever header
-            for key, value in df_dict.items():
+            for key, value in dff_dict.items():
                 for v in value:
-                    if v[1].day >= 15:
-                        quinzena = "2ª Quinz. "
-                    else:
-                        quinzena = "1ª Quinz. "
-                    if (v[0] + " - " + quinzena +  str(v[1].month) + "/" + str(v[1].year)) not in month_col:
-                        month_col.append(v[0] + " - " + quinzena + str(v[1].month) + "/" + str(v[1].year))
-                for i in dff_dict[key].items():
-                    if ("TOTAL " + i[0][0] + ' - ' + i[0][1]) not in month_col:
-                        month_col.append("TOTAL " + i[0][0] + ' - ' + i[0][1])
-                    
+                    print(v)
+                    if v[0]+" "+str(v[1])+" "+str(v[2])+"ª Quinzena" not in month_col:
+                        month_col.append(v[0]+" "+str(v[1])+" "+str(v[2])+"ª Quinzena")
+                    if v[0]+" "+str(v[1])+" TOTAL" not in month_col_total:
+                        month_col_total.append(v[0]+" "+str(v[1])+" TOTAL")
+            month_col.sort()
+            month_col_total.sort()
+            print(month_col)
+                
             header.extend(month_col)
+            header.extend(month_col_total)
             writer.writerow(header)
             
             # ----- Escrever produtores e valores
-            for key, value in df_dict.items():
+            for key, value in dff_dict.items():
                 month_val = []
                 produtor = Beneficiario.objects.get(pk=key)
                 for v in value:
                     month_val.append(value[v])
-                for i in dff_dict[key].items():
+                for i in df_month_dict[key].items():
                     month_val.append(i[1])
                 prod_local = getCodIBGE(produtor.UF, produtor.municipio)
 
@@ -689,6 +697,10 @@ def download_transactions_produtores(request):
     return redirect(reverse('visualizar-transacao-leite'))
 
 def download_transactions_consumidores(request):
+    '''
+    Recebe POST de data de inicio e fim de período de relatório, id da Cooperativa
+    é criado 2 objetos DataFrame(Pandas)
+    '''
     if request.method == "POST":
         header = ['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
                          'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição', 'COOPERATIVA']
