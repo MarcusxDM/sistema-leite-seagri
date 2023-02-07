@@ -55,6 +55,38 @@ def usersCoopAdd(csv_path):
             user.save()
             print("####### SAVED #######\n")
 
+def updateCadUnico(csv_path):
+    with open(csv_path, 'r', encoding='utf-8') as csvfile:
+        r = csv.reader(csvfile, delimiter=';')
+        next(r, None)
+        for row in r:
+            if (row[5] == 'AL'):
+                print("\CONSUMIDOR:\n")
+                print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
+
+                consumidor, created = relatorios.models.BeneficiarioFinal.objects.update_or_create(
+                                                        nis=row,
+                                                        default=
+                                                        { 
+                                                            'cpf'                 : row,
+                                                            'nome'                : row,
+                                                            'nis'                 : row,
+                                                            'data_nascimento'     : row,
+                                                            'cod_ibge_munic_nasc' : row,
+                                                            'identidade'          : row,
+                                                            'nome_mae'            : row,
+                                                            'faixa_renda'         : row,
+                                                            'pbf'                 : row,
+                                                            'data_att'            : 'now' or row,
+                                                            # 'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
+                                                            # 'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
+                                                        },
+                                                    )
+                if created:
+                    print("################## CREATED ##################")
+                else:
+                    print("################## UPDATED ##################")
+
 def updateDap(csv_path):
     with open(csv_path, 'r', encoding='utf-8') as csvfile:
         r = csv.reader(csvfile, delimiter=';')
