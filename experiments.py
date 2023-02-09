@@ -57,29 +57,35 @@ def usersCoopAdd(csv_path):
 
 def updateCadUnico(csv_path):
     with open(csv_path, 'r', encoding='utf-8') as csvfile:
-        r = csv.reader(csvfile, delimiter=';')
-        next(r, None)
+        r = csv.DictReader(csvfile, delimiter=';')
         for row in r:
-            if (row[5] == 'AL'):
-                print("\CONSUMIDOR:\n")
-                print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
+            if (int(row['d.cd_ibge']) >= 2700000 and int(row['d.cd_ibge']) <= 2799999):
+                print("\nCONSUMIDOR:\n")
+                print('cpf:', row['p.num_cpf_pessoa'],
+                        'nome: ', row['p.nom_pessoa'],
+                        'nis: ', row['p.num_nis_pessoa_atual'],
+                        'data_nascimento: ', row['p.dta_nasc_pessoa'],
+                        'cod_ibge_munic_nasc: ', row['p.cod_ibge_munic_nasc_pessoa'],
+                        'identidade: ', row['p.num_identidade_pessoa'],
+                        'nome_mae: ', row['p.nom_completo_mae_pessoa'],
+                        'faixa_renda: ', row['d.fx_rfpc'],
+                        'pbf: ', row['d.marc_pab'],
+                        'data_att: ', row['d.dat_atual_fam'])
 
                 consumidor, created = relatorios.models.BeneficiarioFinal.objects.update_or_create(
-                                                        nis=row,
-                                                        default=
+                                                        nis=row['p.num_nis_pessoa_atual'],
+                                                        defaults=
                                                         { 
-                                                            'cpf'                 : row,
-                                                            'nome'                : row,
-                                                            'nis'                 : row,
-                                                            'data_nascimento'     : row,
-                                                            'cod_ibge_munic_nasc' : row,
-                                                            'identidade'          : row,
-                                                            'nome_mae'            : row,
-                                                            'faixa_renda'         : row,
-                                                            'pbf'                 : row,
-                                                            'data_att'            : 'now' or row,
-                                                            # 'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
-                                                            # 'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
+                                                            'cpf'                 : row['p.num_cpf_pessoa'],
+                                                            'nome'                : row['p.nom_pessoa'],
+                                                            'nis'                 : row['p.num_nis_pessoa_atual'],
+                                                            'data_nascimento'     : row['p.dta_nasc_pessoa'],
+                                                            'cod_ibge_munic_nasc' : row['p.cod_ibge_munic_nasc_pessoa'],
+                                                            'identidade'          : row['p.num_identidade_pessoa'],
+                                                            'nome_mae'            : row['p.nom_completo_mae_pessoa'],
+                                                            'faixa_renda'         : row['d.fx_rfpc'],
+                                                            'pbf'                 : row['p.marc_pab'],
+                                                            'data_att'            : row['d.dat_atual_fam']
                                                         },
                                                     )
                 if created:
@@ -228,4 +234,5 @@ def update_dap_txt(filepath):
 
 
 if __name__ == "__main__":
-    update_dap_txt('C:/Users/marcus.pestana/Documents/GitHub/bi-seagri-sementes/Fontes/DAPs/arquivo1.txt')
+    # update_dap_txt('C:/Users/marcus.pestana/Documents/GitHub/bi-seagri-sementes/Fontes/DAPs/arquivo1.txt')
+    updateCadUnico('C:/Users/marcus/Documents/Fontes de Dados/CadUnico/tab_cad_12112022_27_20221207.csv')
