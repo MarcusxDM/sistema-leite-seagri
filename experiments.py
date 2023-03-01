@@ -155,6 +155,9 @@ def get_struct_unpacker(fieldspecs, istart, iwidth):
     return struct_unpacker
 
 def update_dap_txt(filepath):
+    """
+    Erros no encoding (nao foi possivel identificar o encoding)
+    """
     fieldspecs_pessoas = [
         # Name, Start, Width, Type
         ["id", 1, 2, int],
@@ -242,7 +245,29 @@ def update_dap_txt(filepath):
     df = pd.DataFrame.from_records(data)
     print(df)
 
+def recadastramento_ativar_ben():
+    '''
+    Faz query de Beneficiarios e Beneficiarios Finais que tiveram transacoes nos ultimos
+    30 dias e atualiza seu campo ativo para True
+    '''
+    nis_list = relatorios.models.TransacaoFinal.objects.filter(data__gte=datetime.today()-timedelta(days=30, weeks=52)) \
+                                                        .distinct('beneficiario').order_by('beneficiario__nis').values_list('beneficiario', flat=True)
+    
+    ben_final_query = relatorios.models.BeneficiarioFinal.objects.filter(pk__in=nis_list).update(ativo = True)
+    print(ben_final_query, 'Beneficiarios Finais ativados')
+
+    dap_list = relatorios.models.Transacao.objects.filter(data__gte=datetime.today()-timedelta(days=30, weeks=208)) \
+                                                        .distinct('beneficiario').order_by('beneficiario__dap').values_list('beneficiario', flat=True)
+    
+    ben_query = relatorios.models.Beneficiario.objects.filter(pk__in=dap_list).update(ativo = True)
+    print(ben_query, 'Beneficiarios ativados')
+
+        
+
+
 if __name__ == "__main__":
     # update_dap_txt('C:/Users/marcus/Documents/Fontes de Dados/DAPs/arquivo1.txt')
     # updateCadUnico('C:/Users/marcus/Documents/Fontes de Dados/CadUnico/tab_cad_12112022_27_20221207.csv')
-    updateDap('C:/Users/marcus/Desktop/daps_27-02-2023.csv')
+    # updateDap('C:/Users/marcus/Desktop/daps_27-02-2023.csv')
+
+    recadastramento_ativar_ben()
