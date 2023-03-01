@@ -701,8 +701,8 @@ def download_transactions_consumidores(request):
     é criado 2 objetos DataFrame(Pandas): df agrupa por meses, dff por meses e quinzenas
     '''
     if request.method == "POST":
-        header = ['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficíario', 'Data de Nascimento','Nome da Mãe',
-                         'C. P. F  BENEFICIÁRIO', 'NIS', 'Ponto de Distribuição', 'COOPERATIVA']
+        header = ['UF', 'CÓD. IBGE com 7 digitos', 'MUNICÍPIO', 'Nome do Beneficiário', 'Data de Nascimento','Nome da Mãe',
+                         'C. P. F  BENEFICIÁRIO', 'NIS', 'Telefone do Beneficiário', 'Ponto de Distribuição', 'COOPERATIVA']
         date_inicio = datetime.strptime(request.POST['data-inicio'], '%Y-%m-%d').date()
         date_fim    = datetime.strptime(request.POST['data-fim'], '%Y-%m-%d').date()
 
@@ -775,8 +775,12 @@ def download_transactions_consumidores(request):
 
                     if not consumidor.cpf:
                         consumidor.cpf = '00000000000'
+                    
+                    if not consumidor.telefone:
+                        consumidor.telefone = '00000000000'
+                        
                     consumidor_row = [ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
-                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis, consumidor.telefone,
                                 ponto.nome, ponto.coop.sigla]
                     consumidor_row.extend(month_val)
                     output.append(consumidor_row)
@@ -842,8 +846,12 @@ def download_transactions_consumidores(request):
 
                     if not consumidor.cpf:
                         consumidor.cpf = '00000000000'
+                    
+                    if not consumidor.telefone:
+                        consumidor.telefone = '00000000000'
+
                     consumidor_row = [ponto.cod_ibge.uf, ponto.cod_ibge.cod_ibge, ponto.cod_ibge.municipio, consumidor.nome, consumidor.data_nascimento, consumidor.nome_mae,
-                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis,
+                                (consumidor.cpf[0:3]+'.'+consumidor.cpf[3:6]+'.'+consumidor.cpf[6:9]+'-'+consumidor.cpf[9:]), consumidor.nis, consumidor.telefone,
                                 ponto.nome, ponto.coop.sigla]
                     consumidor_row.extend(month_val)
                     output.append(consumidor_row)

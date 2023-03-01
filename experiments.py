@@ -9,6 +9,7 @@ import qrcode
 import struct
 from operator import itemgetter
 from pathlib import Path
+import pandas as pd
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'seagri_leite.settings'
 
@@ -95,12 +96,12 @@ def updateCadUnico(csv_path):
 
 def updateDap(csv_path):
     with open(csv_path, 'r', encoding='utf-8') as csvfile:
-        r = csv.reader(csvfile, delimiter=';')
+        r = csv.reader(csvfile, delimiter='\t')
         next(r, None)
         for row in r:
             if (row[5] == 'AL'):
                 print("\nPRODUTOR:\n")
-                print(row[0], row[1], row[2], row[3], row[5], row[6], row[7], row[8])
+                print(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
 
                 produtor, created = relatorios.models.Beneficiario.objects.update_or_create(
                                                             dap=row[0],
@@ -108,8 +109,9 @@ def updateDap(csv_path):
                                                                 'enquadramento': row[1],
                                                                 'categoria'    : row[2],
                                                                 'nome'         : row[3],
+                                                                'municipio'    : row[4],
                                                                 'UF'           : row[5],
-                                                                'municipio'    : row[6],
+                                                                'cpf'    : row[6],
                                                                 'data_emissao' : datetime.strptime(row[7], '%d/%m/%Y').date(),
                                                                 'data_validade': datetime.strptime(row[8], '%d/%m/%Y').date() 
                                                                 },
@@ -216,23 +218,31 @@ def update_dap_txt(filepath):
     data = []
 
     for line in Path(filepath).open():
+        count_errors = 0
         if line[0:2] == '20':
-            print(line.encode())
+            # print(line.encode())
             raw_fields = struct_unpacker(line.encode())  # split line into field values
             line_data = {}
             for i in field_indices:
                 fieldspec = fieldspecs[i]
                 fieldname = fieldspec[iname]
                 cast = fieldspec[itype]
-                print(fieldname, ": ", raw_fields[i])
-                value = cast(raw_fields[i].decode().strip())
+                # print(fieldname, ": ", raw_fields[i])
+                try:
+                    value = cast(raw_fields[i].decode().strip())
+                except Exception as e:
+                    print("ERROR: ", e)
+                    print(line.encode())
+                    print(fieldname, ": ", raw_fields[i])
+                    count_errors =+ 1
                 line_data[fieldname] = value
             data.append(line_data)
-            print(line_data)
-
-    # print(data)
-
+            # print(line_data)
+    print('qtd erros: ', count_errors)
+    df = pd.DataFrame.from_records(data)
+    print(df)
 
 if __name__ == "__main__":
-    # update_dap_txt('C:/Users/marcus.pestana/Documents/GitHub/bi-seagri-sementes/Fontes/DAPs/arquivo1.txt')
-    updateCadUnico('C:/Users/marcus/Documents/Fontes de Dados/CadUnico/tab_cad_12112022_27_20221207.csv')
+    # update_dap_txt('C:/Users/marcus/Documents/Fontes de Dados/DAPs/arquivo1.txt')
+    # updateCadUnico('C:/Users/marcus/Documents/Fontes de Dados/CadUnico/tab_cad_12112022_27_20221207.csv')
+    updateDap('C:/Users/marcus/Desktop/daps_27-02-2023.csv')

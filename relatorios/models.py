@@ -71,6 +71,7 @@ class Beneficiario(models.Model):
     municipio     = models.CharField(max_length=50)
     data_emissao  = models.DateField()
     data_validade = models.DateField()
+    ativo         = models.BooleanField(default=False)
 
     def __str__(self):
             return self.dap+" | "+self.nome
@@ -90,6 +91,8 @@ class BeneficiarioFinal(models.Model):
     faixa_renda         = models.IntegerField()
     pbf                 = models.BooleanField(default=False)
     data_att            = models.DateField(null=True, default=datetime.now, blank=True)
+    ativo               = models.BooleanField(default=False)
+    telefone            = models.CharField(max_length=11, null=True, blank=True)
 
     def __str__(self):
             return self.nis+" | "+self.nome
