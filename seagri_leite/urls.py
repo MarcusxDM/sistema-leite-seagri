@@ -55,7 +55,11 @@ urlpatterns = [
     path('visualizar-transacao-entidade-leite/', views.view_transactions_entidade_menu, name='visualizar-transacao-entidade-leite'),
     path('save-transacao-entidade/', views.save_transacao_entidade, name='save-transacao-entidade'),
     path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades'),
-    
+    path('procurar-transacaoentidade-leite/', views.manage_transactions_entidade_menu, name='procurar-transacaoentidade-leite'),
+    path('ajax/load-transacoes-entidade/', views.load_transacoes_entidade, name='ajax_load_transacoes_entidade'),
+    path('ajax/delete-transacao-entidade/', views.delete_transacao_entidade, name='ajax_delete_transacao_entidade'),
+    path('ajax/load-entidades/', views.load_entidades, name='ajax_load_entidades'),
+
     # Ocorrencias
     path('ocorrencia/', views.button_ocorrencia, name='button-ocorrencia'),
     path('ocorrencia-menu-ponto/', views.menu_ponto_ocorrencia, name='ocorrencia-menu-ponto'),

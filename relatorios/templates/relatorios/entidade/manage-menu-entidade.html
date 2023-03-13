@@ -44,13 +44,6 @@
 				<li class="nav-item active">
 				  <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
 				</li>
-				<div>
-					<a href="{% url 'procurar-transacaoentidade-leite' %}">
-					  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-						  Gerenciar Transações
-					  </button>
-				  </a>
-				  </div>
 			  </ul>
 			  <form action="{% url 'logout' %}" method="post"class="form-inline my-2 my-lg-0">
 				{% csrf_token %}
@@ -62,12 +55,12 @@
 		<div class="col align-self-center">
 		<div class="container insert-form" style="background-color: whitesmoke;" >
 			
-			<form action="{% url 'download-entidades' %}" id="Teste" data-entidades-url="{% url 'ajax_load_entidades' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
+			<form  id="Teste" data-pontos-url="{% url 'ajax_load_entidades' %}" data-transacoes-url="{% url 'ajax_load_transacoes_entidade' %}" method="post" style="padding-top: 5%; padding-bottom: 5%;">
 				{% csrf_token %}
 
 				<div class="form-group">
 					<label for="exampleFormControlSelect1">Município</label>
-					<select name=cod_ibge class="form-control" id="cod_ibge" onchange="func2()" required>
+					<select name=ponto class="form-control" id="cod_ibge" onchange="func2()" required>
 					  <option value=>Escolha aqui</option>
 				
 					  {% for municipio in municipio_list %}
@@ -75,39 +68,33 @@
 					  {% endfor %}
 					</select>
 				  </div>
-				
-				<div class="form-group">
-				  <label for="exampleFormControlSelect1">Entidade</label>
-				  <select name=entidade class="form-control" id="entidadeSelect" required>
-					{% include 'relatorios/entidade/load-entidades.html' %}
-				  </select>
-				</div>
-			  
+				  
+				  <div class="form-group">
+					<label for="exampleFormControlSelect1">Entidade</label>
+					<select name=ponto class="form-control" id="pontoSelect" required>
+					  {% include 'relatorios/entidade/load-entidades.html' %}
+					</select>
+				  </div>			  
 			
 				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Inicio</label>
-					<input name=data-inicio type=date value="{{today}}" max="{{today}}" /> <br />
+					<label for="exampleFormControlSelect1">Data</label>
+					<input name="data-search"  id="data-search" type=date value="{{today}}" min="{{first_day_month}}" max="{{today}}" /> <br />
 				</div>
 
-				<div class="form-group">
-					<label for="exampleFormControlSelect1">Data Fim</label>
-					<input name=data-fim type=date value="{{today}}" max="{{today}}" /> <br />
-				</div>
 
-				<div class="container-login100-form-btn">
-				<button class="login100-form-btn" name="action" value="ENTIDADE">
-					Baixar Relatório
-				</button>
-
-				{% if municipio_all %}
-				<div class="container-login100-form-btn" style="padding-top: 3%; ">
-				<button class="login100-form-btn" name="action" value="ENTIDADES">
-					Baixar Relatório (Todos as Entidades)
-				</button>
+				<div id="transacoes-table">
+					<!-- load-transacoes-pontos by ajax-->
 				</div>
-				{% endif %}			 
-				</div>
+				
+				  
 			  </form>
+			  <div>
+				<div class="container-login100-form-btn">
+					<button class="login100-form-btn" id="search">
+						Procurar
+					</button>
+					</div>
+			  </div>
 			</div>
 		</div>
 	</div>
@@ -127,9 +114,13 @@
 	<script src="{% static "relatorios/vendor/countdowntime/countdowntime.js" %} "></script>
 <!--===============================================================================================-->
 	<script src="{% static "relatorios/js/main.js" %} "></script>
+<!--===============================================================================================-->
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 	<script>
+		const csrftoken = Cookies.get('csrftoken');
+
 		$("#cod_ibge").change(function () {
-		  var url = $("#Teste").attr("data-entidades-url");  // get the url of the `load_cities` view
+		  var url = $("#Teste").attr("data-pontos-url");  // get the url of the `load_cities` view
 		  var cod_ibge = $(this).val();  // get the selected country ID from the HTML input
 	
 		  $.ajax({                       // initialize an AJAX request
@@ -138,7 +129,7 @@
 			  'cod_ibge': cod_ibge       // add the country id to the GET parameters
 			},
 			success: function (data) {   // `data` is the return of the `load_cities` view function
-			  $("#entidadeSelect").html(data);  // replace the contents of the city input with the data that came from the server
+			  $("#pontoSelect").html(data);  // replace the contents of the city input with the data that came from the server
 			}
 		  });
 	
@@ -146,8 +137,65 @@
 
 		function func2(){
 			if(document.getElementById('cod_ibge').value == 0) {
-				document.getElementById('entidadeSelect').value = 0
+				document.getElementById('pontoSelect').value = 0
 			}
+		}
+
+		$("#search").click(function () {
+		  var url = $("#Teste").attr("data-transacoes-url");  // get the url of the `load_cities` view
+		  var ponto = $("#pontoSelect").val();  // get the selected country ID from the HTML input
+		  var data_search = $("#data-search").val();
+		  $.ajax({                       // initialize an AJAX request
+			url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+			data: {
+			  'ponto': ponto,
+			  'data-search': data_search       // add the country id to the GET parameters
+			},
+			success: function (data) {   // `data` is the return of the `load_cities` view function
+			  $("#transacoes-table").html(data);  // replace the contents of the city input with the data that came from the server
+			}
+		  });
+	
+		});
+
+		function go_page(e) {
+			var url = $("#Teste").attr("data-transacoes-url");
+			var ponto = $("#pontoSelect").val();
+		  	var page = $(e).attr("page");
+			var data_search = $("#data-search").val();
+			
+		  	$.ajax({                       // initialize an AJAX request
+				url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+				data: {
+					'ponto' : ponto,
+					'page': page,
+					'data-search': data_search			        
+				},
+				success: function (data) {   // `data` is the return of the `load_cities` view function
+				$("#transacoes-table").html(data);  // replace the contents of the city input with the data that came from the server
+				}
+		  });
+		}
+
+		function delete_transacao(e) {
+			var url = $(e).attr("delete-url");
+			var transacao = $(e).attr("transacao-id");
+			var page = $("#active-page").innerText;
+			
+		  	$.ajax({
+				  url: url,
+				  type: 'post',
+				  data: {
+						'transacao' : transacao		        
+			      },
+				  headers: {
+					'X-CSRFToken': csrftoken
+				  },
+				success: function(){
+					go_page($("#active-page"))
+					alert("Transação deletada com sucesso.") 
+				}
+		  	});
 		}
 	  </script>
 </body>

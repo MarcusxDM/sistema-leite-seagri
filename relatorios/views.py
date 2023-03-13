@@ -987,6 +987,24 @@ def load_transacoes_coop(request):
 
     return render(request, 'relatorios/coop/load-transacoes-coop.html', { 'transacoes': transacoes })
 
+def load_transacoes_entidade(request):
+    '''
+    Recebe GET date e id de objeto Ponto equivalente a Entidade
+    Retorna uma lista de objetos TransacaoEntidade na data recebida
+    '''
+    date_search = datetime.strptime(request.GET['data-search'], '%Y-%m-%d').date()
+    transacao_list = TransacaoEntidade.objects.filter(entidade_id=request.GET['ponto'], data=date_search).order_by('-id')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(transacao_list, 10)
+    try:
+        transacoes = paginator.page(page)
+    except PageNotAnInteger:
+        transacoes = paginator.page(1)
+    except EmptyPage:
+        transacoes = paginator.page(paginator.num_pages)
+
+    return render(request, 'relatorios/entidade/load-transacoes-entidade.html', { 'transacoes': transacoes })
+
 def manage_transactions_ponto_menu(request):
     '''
     Verifica o tipo de Usuário da session
@@ -1043,6 +1061,37 @@ def manage_transactions_coop_menu(request):
     # except:
     #     return redirect(reverse('index'))
 
+def manage_transactions_entidade_menu(request):
+    '''
+    Verifica o tipo de Usuário da session
+    Renderiza página de Gerenciamento de TransacãoFinalEntidade (Ponto)
+    Retorna Usuário, lista de Entidades, dia de hoje, lista de municipios, dia do começo do mês
+    '''
+    # try:
+    if (request.session['entidade_bool'] or request.session['seagri_bool'] or request.session['admin']):
+        user = Usuario.objects.get(id=request.session['user_id'])
+        if user.admin or user.seagri_bool:
+            municipio_list = list(Localizacao.objects.filter(cod_ibge__startswith='27'))
+            municipio_all = True
+        else:
+            ponto_list = list(Entidade.objects.filter(membro=user))
+            municipio_list = set([p.cod_ibge for p in ponto_list])
+            municipio_all = False
+        ponto_list = []
+        today = datetime.now().date()
+        today_str = today.strftime('%Y-%m-%d')
+        month_prev = subtractMonth(today, 3)
+        first_day_month = month_prev.replace(day=1).strftime('%Y-%m-%d')
+        return render(request, 'relatorios/entidade/manage-menu-entidade.html', {'ponto_list' : ponto_list, 
+                                                                    'today'     : today_str,
+                                                                    'first_day_month' : first_day_month,
+                                                                    'municipio_list' : municipio_list,
+                                                                    'municipio_all' : municipio_all})
+    else:
+        return redirect(reverse('index'))
+    # except:
+    #     return redirect(reverse('index'))
+
 def delete_transacao_ponto(request):
     '''
     Recebe POST com id de objeto TransacaoFinal (Ponto) e o deleta
@@ -1060,6 +1109,15 @@ def delete_transacao_coop(request):
         transacao = Transacao.objects.get(pk=request.POST['transacao'])
         transacao.delete()
     return render(request, 'relatorios/coop/load-transacoes-coop.html')
+
+def delete_transacao_entidade(request):
+    '''
+    Recebe POST com id de objeto TransacaoFinal (Ponto) e o deleta
+    '''
+    if request.method == "POST":
+        transacao = TransacaoEntidade.objects.get(pk=request.POST['transacao'])
+        transacao.delete()
+    return render(request, 'relatorios/entidade/load-transacoes-entidade.html')
 
 def menu_ponto_ocorrencia(request):
     '''
