@@ -23,6 +23,7 @@ class TransacaoBeneficiarioFinal(forms.Form):
     #cooperativa  = models.ForeignKey(Cooperativa, on_delete=models.CASCADE)
     data         = forms.DateField()
     beneficiario = forms.ModelChoiceField(queryset=BeneficiarioFinal.objects.filter(Q(faixa_renda__lte=2) | Q(pbf=True)), widget=autocomplete.ModelSelect2(url='beneficiario-final-autocomplete', attrs={'style' : 'width: 100%'}))
+    # (Q(faixa_renda__lte=2) | Q(pbf=True)) & Q(ativo=True))*
 
 class TransacaoFinalForm(forms.ModelForm):
     class Meta:

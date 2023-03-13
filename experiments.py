@@ -268,6 +268,5 @@ def recadastramento_ativar_ben():
 if __name__ == "__main__":
     # update_dap_txt('C:/Users/marcus/Documents/Fontes de Dados/DAPs/arquivo1.txt')
     # updateCadUnico('C:/Users/marcus/Documents/Fontes de Dados/CadUnico/tab_cad_12112022_27_20221207.csv')
-    # updateDap('C:/Users/marcus/Desktop/daps_27-02-2023.csv')
-
-    recadastramento_ativar_ben()
+    updateDap('C:/Users/marcus/Desktop/daps_27-02-2023.csv')
+    # recadastramento_ativar_ben()
