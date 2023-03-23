@@ -25,11 +25,11 @@ class EntidadeAdmin(admin.ModelAdmin):
     filter_horizontal = (['membro'])
 
 class TransacaoFinalAdmin(admin.ModelAdmin):
-    search_fields = (['beneficiario__nome', 'ponto__nome', 'ponto__cod_ibge__municipio'])
+    search_fields = (['beneficiario__nis', 'beneficiario__nome', 'ponto__nome', 'ponto__cod_ibge__municipio'])
     list_filter = ([('data', DateRangeFilter)])
 
 class TransacaoAdmin(admin.ModelAdmin):
-    search_fields = (['beneficiario__nome', 'cooperativa__nome', 'beneficiario__municipio', 'cooperativa__sigla'])
+    search_fields = (['beneficiario__dap', 'beneficiario__nome', 'cooperativa__nome', 'beneficiario__municipio', 'cooperativa__sigla'])
     list_filter = ([('data', DateRangeFilter)])
 
 class TransacaoEntidadeAdmin(admin.ModelAdmin):
